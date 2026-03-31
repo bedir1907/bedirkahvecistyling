@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { use, useEffect, useState } from "react"
+import { use, useEffect, useMemo, useState } from "react"
 
 type OrderItem = {
   id: number
@@ -40,16 +40,24 @@ type Props = {
 
 function getStatusLabel(status: string) {
   switch (status) {
+    case "PAID":
+      return "Ödeme Alındı"
+    case "APPROVED":
+      return "Sipariş Onaylandı"
     case "PENDING":
       return "Beklemede"
-    case "PAID":
-      return "Ödendi"
+    case "FAILED":
+      return "Ödeme Başarısız"
+    case "FAILED_PAYMENT":
+      return "Ödeme Alınamadı"
     case "SHIPPED":
-      return "Kargoda"
+      return "Kargoya Verildi"
     case "DELIVERED":
       return "Teslim Edildi"
     case "CANCELLED":
-      return "İptal"
+      return "İptal Edildi"
+    case "REFUNDED":
+      return "İade Edildi"
     default:
       return status
   }
@@ -57,18 +65,57 @@ function getStatusLabel(status: string) {
 
 function getStatusClass(status: string) {
   switch (status) {
+    case "PAID":
+      return "bg-green-100 text-green-700"
+    case "APPROVED":
+      return "bg-indigo-100 text-indigo-700"
     case "PENDING":
       return "bg-yellow-100 text-yellow-700"
-    case "PAID":
-      return "bg-blue-100 text-blue-700"
-    case "SHIPPED":
-      return "bg-purple-100 text-purple-700"
-    case "DELIVERED":
-      return "bg-green-100 text-green-700"
-    case "CANCELLED":
+    case "FAILED":
+    case "FAILED_PAYMENT":
       return "bg-red-100 text-red-700"
+    case "SHIPPED":
+      return "bg-blue-100 text-blue-700"
+    case "DELIVERED":
+      return "bg-emerald-100 text-emerald-700"
+    case "CANCELLED":
+      return "bg-gray-100 text-gray-600"
+    case "REFUNDED":
+      return "bg-purple-100 text-purple-700"
     default:
       return "bg-gray-100 text-gray-700"
+  }
+}
+
+function getAvailableStatuses(currentStatus: string) {
+  switch (currentStatus) {
+    case "PENDING":
+      return ["PENDING", "CANCELLED"]
+
+    case "PAID":
+      return ["APPROVED", "CANCELLED"]
+
+    case "APPROVED":
+      return ["SHIPPED", "CANCELLED"]
+
+    case "SHIPPED":
+      return ["DELIVERED"]
+
+    case "DELIVERED":
+      return ["DELIVERED"]
+
+    case "CANCELLED":
+      return ["CANCELLED"]
+
+    case "REFUNDED":
+      return ["REFUNDED"]
+
+    case "FAILED":
+    case "FAILED_PAYMENT":
+      return [currentStatus]
+
+    default:
+      return [currentStatus]
   }
 }
 
@@ -79,6 +126,7 @@ export default function AdminOrderDetailPage({ params }: Props) {
   const [status, setStatus] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [refunding, setRefunding] = useState(false)
 
   useEffect(() => {
     async function fetchOrder() {
@@ -134,6 +182,57 @@ export default function AdminOrderDetailPage({ params }: Props) {
     }
   }
 
+  async function refundOrder() {
+    if (!order) return
+
+    const confirmed = window.confirm(
+      "Bu siparişin ödemesini iade etmek istediğine emin misin?"
+    )
+    if (!confirmed) return
+
+    try {
+      setRefunding(true)
+
+      const res = await fetch(`/api/admin/orders/${order.id}/refund`, {
+        method: "POST",
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "İade yapılamadı")
+      }
+
+      const refreshRes = await fetch(`/api/admin/orders/${order.id}`)
+      const refreshedOrder = await refreshRes.json()
+
+      if (!refreshRes.ok) {
+        throw new Error(refreshedOrder.error || "Sipariş yenilenemedi")
+      }
+
+      setOrder(refreshedOrder)
+      setStatus(refreshedOrder.status)
+
+      alert("İade başarılı")
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "İade yapılamadı")
+    } finally {
+      setRefunding(false)
+    }
+  }
+
+  const availableStatuses = useMemo(() => {
+    return order ? getAvailableStatuses(order.status) : []
+  }, [order])
+useEffect(() => {
+  if (!order) return
+
+  const nextStatuses = getAvailableStatuses(order.status)
+
+  if (!nextStatuses.includes(status)) {
+    setStatus(nextStatuses[0] || "")
+  }
+}, [order, status])
   if (loading) {
     return (
       <main>
@@ -153,6 +252,15 @@ export default function AdminOrderDetailPage({ params }: Props) {
       </main>
     )
   }
+
+  const isCancelled = order.status === "CANCELLED"
+  const isRefunded = order.status === "REFUNDED"
+  const isFailed =
+    order.status === "FAILED" || order.status === "FAILED_PAYMENT"
+  const isSameStatus = status === order.status
+  const canRefund = ["PAID", "APPROVED", "SHIPPED", "DELIVERED"].includes(
+    order.status
+  )
 
   return (
     <main>
@@ -175,13 +283,19 @@ export default function AdminOrderDetailPage({ params }: Props) {
 
           <div className="flex items-center gap-3">
             <span
-              className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(order.status)}`}
+              className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(
+                order.status
+              )}`}
             >
               {getStatusLabel(order.status)}
             </span>
 
             {order.stockRestored && order.status === "CANCELLED" ? (
               <span className="text-sm text-gray-500">Stok iade edildi</span>
+            ) : null}
+
+            {order.status === "REFUNDED" ? (
+              <span className="text-sm text-gray-500">Ödeme iade edildi</span>
             ) : null}
           </div>
         </div>
@@ -265,29 +379,80 @@ export default function AdminOrderDetailPage({ params }: Props) {
 
             <div className="space-y-5">
               <div>
-                <div className="text-sm text-gray-500 mb-2">Durum</div>
+                <div className="text-sm text-gray-500 mb-2">Sonraki İşlem</div>
 
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full border rounded-xl px-4 py-3"
+                  disabled={isCancelled || isRefunded || isFailed}
+                  className={`w-full border rounded-xl px-4 py-3 ${
+                    isCancelled || isRefunded || isFailed
+                      ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                      : ""
+                  }`}
                 >
-                  <option value="PENDING">Beklemede</option>
-                  <option value="PAID">Ödendi</option>
-                  <option value="SHIPPED">Kargoda</option>
-                  <option value="DELIVERED">Teslim Edildi</option>
-                  <option value="CANCELLED">İptal</option>
+                  {availableStatuses.map((item) => (
+                    <option key={item} value={item}>
+                      {getStatusLabel(item)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <button
                 type="button"
                 onClick={updateStatus}
-                disabled={saving}
-                className="w-full bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 disabled:opacity-50"
+                disabled={
+  saving ||
+  isCancelled ||
+  isRefunded ||
+  isFailed ||
+  !status
+}
+                className="w-full bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? "Kaydediliyor..." : "Durumu Güncelle"}
+                {isCancelled
+                  ? "Sipariş İptal Edildi"
+                  : isRefunded
+                    ? "Sipariş İade Edildi"
+                    : isFailed
+                      ? "Ödeme Alınamadı"
+                      : saving
+                        ? "Kaydediliyor..."
+                        : !status
+                           ? "İşlem Seçiniz"
+                           : "Durumu Güncelle"}
               </button>
+
+              {canRefund && (
+                <button
+                  type="button"
+                  onClick={refundOrder}
+                  disabled={refunding}
+                  className="w-full border border-purple-600 text-purple-700 px-5 py-3 rounded-xl hover:bg-purple-600 hover:text-white transition disabled:opacity-50"
+                >
+                  {refunding ? "İade Ediliyor..." : "Ödemeyi İade Et"}
+                </button>
+              )}
+
+              {isCancelled && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  Bu sipariş iptal edildiği için tekrar değiştirilemez.
+                </div>
+              )}
+
+              {isRefunded && (
+                <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm text-purple-700">
+                  Bu siparişin ödemesi iade edildi. Sipariş durumu tekrar
+                  değiştirilemez.
+                </div>
+              )}
+
+              {isFailed && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  Bu siparişte ödeme tamamlanmadı. Operasyon süreci başlatılamaz.
+                </div>
+              )}
 
               <div className="border-t pt-5 space-y-3 text-sm">
                 <div className="flex items-center justify-between">

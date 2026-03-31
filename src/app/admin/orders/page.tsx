@@ -22,6 +22,7 @@ type Order = {
   district: string
   totalPrice: number
   status: string
+  displayStatus?: string
   stockRestored: boolean
   createdAt: string
   items: OrderItem[]
@@ -29,16 +30,24 @@ type Order = {
 
 function getStatusLabel(status: string) {
   switch (status) {
+    case "PAID":
+      return "Sipariş Oluşturuldu"
+    case "APPROVED":
+      return "Sipariş Onaylandı"
     case "PENDING":
       return "Beklemede"
-    case "PAID":
-      return "Ödendi"
+    case "FAILED":
+      return "Ödeme Başarısız"
+    case "FAILED_PAYMENT":
+      return "Ödeme Alınamadı"
     case "SHIPPED":
-      return "Kargoda"
+      return "Kargoya Verildi"
     case "DELIVERED":
       return "Teslim Edildi"
     case "CANCELLED":
-      return "İptal"
+      return "İptal Edildi"
+    case "REFUNDED":
+      return "İade Edildi"
     default:
       return status
   }
@@ -46,16 +55,23 @@ function getStatusLabel(status: string) {
 
 function getStatusClass(status: string) {
   switch (status) {
+    case "PAID":
+      return "bg-green-100 text-green-700"
+    case "APPROVED":
+      return "bg-indigo-100 text-indigo-700"
     case "PENDING":
       return "bg-yellow-100 text-yellow-700"
-    case "PAID":
-      return "bg-blue-100 text-blue-700"
-    case "SHIPPED":
-      return "bg-purple-100 text-purple-700"
-    case "DELIVERED":
-      return "bg-green-100 text-green-700"
-    case "CANCELLED":
+    case "FAILED":
+    case "FAILED_PAYMENT":
       return "bg-red-100 text-red-700"
+    case "SHIPPED":
+      return "bg-blue-100 text-blue-700"
+    case "DELIVERED":
+      return "bg-emerald-100 text-emerald-700"
+    case "CANCELLED":
+      return "bg-gray-100 text-gray-600"
+    case "REFUNDED":
+      return "bg-purple-100 text-purple-700"
     default:
       return "bg-gray-100 text-gray-700"
   }
@@ -91,6 +107,7 @@ export default function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const q = search.toLowerCase()
+      const currentStatus = order.displayStatus || order.status
 
       const matchesSearch =
         order.orderNumber.toLowerCase().includes(q) ||
@@ -98,7 +115,7 @@ export default function AdminOrdersPage() {
         order.email.toLowerCase().includes(q) ||
         order.phone.toLowerCase().includes(q)
 
-      const matchesStatus = statusFilter ? order.status === statusFilter : true
+      const matchesStatus = statusFilter ? currentStatus === statusFilter : true
 
       return matchesSearch && matchesStatus
     })
@@ -132,11 +149,15 @@ export default function AdminOrdersPage() {
               className="border rounded-xl px-4 py-3"
             >
               <option value="">Tüm Durumlar</option>
+              <option value="PAID">Sipariş Oluşturuldu</option>
+              <option value="APPROVED">Sipariş Onaylandı</option>
               <option value="PENDING">Beklemede</option>
-              <option value="PAID">Ödendi</option>
-              <option value="SHIPPED">Kargoda</option>
+              <option value="FAILED">Ödeme Başarısız</option>
+              <option value="FAILED_PAYMENT">Ödeme Alınamadı</option>
+              <option value="SHIPPED">Kargoya Verildi</option>
               <option value="DELIVERED">Teslim Edildi</option>
-              <option value="CANCELLED">İptal</option>
+              <option value="CANCELLED">İptal Edildi</option>
+              <option value="REFUNDED">İade Edildi</option>
             </select>
           </div>
         </div>
@@ -170,55 +191,70 @@ export default function AdminOrdersPage() {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b last:border-b-0 align-middle">
-                    <td className="p-4 font-medium">{order.orderNumber}</td>
+                filteredOrders.map((order) => {
+                  const currentStatus = order.displayStatus || order.status
 
-                    <td className="p-4">
-                      <div className="font-medium">{order.name}</div>
-                      <div className="text-sm text-gray-500">{order.email}</div>
-                    </td>
+                  return (
+                    <tr
+                      key={order.id}
+                      className="border-b last:border-b-0 align-middle"
+                    >
+                      <td className="p-4 font-medium">{order.orderNumber}</td>
 
-                    <td className="p-4">{order.phone}</td>
+                      <td className="p-4">
+                        <div className="font-medium">{order.name}</div>
+                        <div className="text-sm text-gray-500">{order.email}</div>
+                      </td>
 
-                    <td className="p-4">
-                      <div className="text-sm text-gray-700">
-                        {order.items.length} ürün
-                      </div>
-                    </td>
+                      <td className="p-4">{order.phone}</td>
 
-                    <td className="p-4 font-medium">₺{order.totalPrice}</td>
+                      <td className="p-4">
+                        <div className="text-sm text-gray-700">
+                          {order.items.length} ürün
+                        </div>
+                      </td>
 
-                    <td className="p-4">
-                      <div className="flex flex-col items-start gap-2">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(order.status)}`}
-                        >
-                          {getStatusLabel(order.status)}
-                        </span>
+                      <td className="p-4 font-medium">₺{order.totalPrice}</td>
 
-                        {order.stockRestored && order.status === "CANCELLED" ? (
-                          <span className="text-xs text-gray-500">
-                            Stok iade edildi
+                      <td className="p-4">
+                        <div className="flex flex-col items-start gap-2">
+                          <span
+                            className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(
+                              currentStatus
+                            )}`}
+                          >
+                            {getStatusLabel(currentStatus)}
                           </span>
-                        ) : null}
-                      </div>
-                    </td>
 
-                    <td className="p-4 text-sm text-gray-600">
-                      {new Date(order.createdAt).toLocaleString("tr-TR")}
-                    </td>
+                          {order.stockRestored && order.status === "CANCELLED" ? (
+                            <span className="text-xs text-gray-500">
+                              Stok iade edildi
+                            </span>
+                          ) : null}
 
-                    <td className="p-4">
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        className="border border-black px-4 py-2 rounded-xl hover:bg-black hover:text-white transition"
-                      >
-                        Detay
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+                          {order.status === "REFUNDED" ? (
+                            <span className="text-xs text-gray-500">
+                              Ödeme iade edildi
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+
+                      <td className="p-4 text-sm text-gray-600">
+                        {new Date(order.createdAt).toLocaleString("tr-TR")}
+                      </td>
+
+                      <td className="p-4">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="border border-black px-4 py-2 rounded-xl hover:bg-black hover:text-white transition"
+                        >
+                          Detay
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>

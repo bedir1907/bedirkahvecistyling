@@ -32,3 +32,72 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.announcement-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.announcement-container::before,
+.announcement-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 72px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.announcement-container::before {
+  left: 0;
+  background: linear-gradient(to right, black, transparent);
+}
+
+.announcement-container::after {
+  right: 0;
+  background: linear-gradient(to left, black, transparent);
+}
+
+.announcement-marquee {
+  display: flex;
+  width: max-content;
+  animation-name: announcement-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.announcement-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.announcement-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0.55rem 4.5rem;
+  font-size: 0.875rem;
+}
+
+.announcement-separator {
+  opacity: 0.45;
+}
+
+.announcement-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes announcement-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react"
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import AnnouncementBar from "@/components/store/AnnouncementBar"
-import StoreNavbar from "@/components/store/StoreNavbar"
+//import StoreNavbar from "@/components/store/StoreNavbar"
 import StoreFooter from "@/components/store/StoreFooter"
 
 type Product = {
@@ -99,7 +99,7 @@ export default function CategoryPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-white text-black">
       <AnnouncementBar />
-      <StoreNavbar />
+      
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">

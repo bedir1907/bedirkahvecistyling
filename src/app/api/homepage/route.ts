@@ -10,14 +10,52 @@ export async function GET() {
       orderBy: {
         id: "asc",
       },
+      select: {
+        announcementEnabled: true,
+        announcementText: true,
+        announcementLink: true,
+        announcementLinkLabel: true,
+
+        heroEyebrow: true,
+        heroTitle: true,
+        heroSubtitle: true,
+        heroButtonText: true,
+        heroButtonLink: true,
+
+        heroCard1Enabled: true,
+        heroCard1Title: true,
+        heroCard1Image: true,
+        heroCard1Link: true,
+
+        heroCard2Enabled: true,
+        heroCard2Title: true,
+        heroCard2Image: true,
+        heroCard2Link: true,
+
+        featuredCategoriesEnabled: true,
+        featuredCategoriesTitle: true,
+        featuredProductsEnabled: true,
+        featuredProductsTitle: true,
+        newProductsEnabled: true,
+        newProductsTitle: true,
+        discountedProductsEnabled: true,
+        discountedProductsTitle: true,
+      },
     })
+
+    if (!settings) {
+      return NextResponse.json(
+        { error: "Homepage ayarları bulunamadı" },
+        { status: 404 }
+      )
+    }
 
     return NextResponse.json(settings)
   } catch (error) {
-    console.error("Homepage settings hatası:", error)
+    console.error("Homepage public get hatası:", error)
 
     return NextResponse.json(
-      { error: "Homepage verisi getirilemedi" },
+      { error: "Homepage ayarları alınamadı" },
       { status: 500 }
     )
   }

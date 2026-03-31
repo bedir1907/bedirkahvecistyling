@@ -10,33 +10,33 @@ export async function GET() {
           not: null,
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
       include: {
         images: {
-          orderBy: [
-            { isCover: "desc" },
-            { sortOrder: "asc" },
-          ],
+          orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
           take: 2,
         },
       },
     })
 
     const discounted = products
-      .filter((p) => p.oldPrice && p.oldPrice > p.price)
-      .map((p) => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        oldPrice: p.oldPrice,
-        image: p.images?.[0]?.url || p.image,
-        hoverImage: p.images?.[1]?.url || null,
+      .filter((product) => product.oldPrice !== null && product.oldPrice > product.price)
+      .map((product) => ({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        oldPrice: product.oldPrice,
+        image: product.images?.[0]?.url || product.image,
+        hoverImage: product.images?.[1]?.url || null,
+        colorName: product.color || "",
+        category: product.category,
+        href: `/product/${product.id}`,
       }))
 
     return NextResponse.json(discounted)
   } catch (error) {
+    console.error("İndirimli ürünler alınamadı:", error)
+
     return NextResponse.json(
       { error: "İndirimli ürünler alınamadı" },
       { status: 500 }

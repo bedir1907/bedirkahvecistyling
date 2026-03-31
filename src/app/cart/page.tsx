@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import AnnouncementBar from "@/components/store/AnnouncementBar"
-import StoreNavbar from "@/components/store/StoreNavbar"
+/*import StoreNavbar from "@/components/store/StoreNavbar"*/
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
 
@@ -22,7 +22,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       <AnnouncementBar />
-      <StoreNavbar />
+       
 
       <section className="max-w-7xl mx-auto px-4 py-14">
         <div className="mb-10">

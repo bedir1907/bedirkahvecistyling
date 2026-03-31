@@ -99,6 +99,12 @@ export default function AdminSidebar({ user }: Props) {
             >
               Kategoriler
             </Link>
+            <Link
+  href="/admin/announcement"
+  className={getLinkClass("/admin/announcement")}
+>
+  Duyuru Barı
+</Link>
           </>
         )}
       </nav>

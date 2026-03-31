@@ -1,15 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
+
 type LinkOption = {
   label: string
   value: string
   group: string
 }
+
 export default function AdminHomepagePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-const [linkOptions, setLinkOptions] = useState<LinkOption[]>([])
+  const [linkOptions, setLinkOptions] = useState<LinkOption[]>([])
+
   const [form, setForm] = useState({
     heroEyebrow: "",
     heroTitle: "",
@@ -27,29 +30,32 @@ const [linkOptions, setLinkOptions] = useState<LinkOption[]>([])
     heroCard2Image: "",
     heroCard2Link: "",
 
-    
+    announcementEnabled: false,
+    announcementText: "",
+    announcementLink: "",
+    announcementLinkLabel: "",
   })
 
   useEffect(() => {
     async function fetchSettings() {
       try {
         const [settingsRes, optionsRes] = await Promise.all([
-  fetch("/api/admin/homepage"),
-  fetch("/api/admin/link-options"),
-])
+          fetch("/api/admin/homepage"),
+          fetch("/api/admin/link-options"),
+        ])
 
-const data = await settingsRes.json()
-const optionsData = await optionsRes.json()
+        const data = await settingsRes.json()
+        const optionsData = await optionsRes.json()
 
-if (!settingsRes.ok) {
-  throw new Error(data.error || "Ayarlar alınamadı")
-}
+        if (!settingsRes.ok) {
+          throw new Error(data.error || "Ayarlar alınamadı")
+        }
 
-if (!optionsRes.ok) {
-  throw new Error(optionsData.error || "Link seçenekleri alınamadı")
-}
+        if (!optionsRes.ok) {
+          throw new Error(optionsData.error || "Link seçenekleri alınamadı")
+        }
 
-setLinkOptions(optionsData)
+        setLinkOptions(optionsData)
 
         if (data) {
           setForm({
@@ -69,7 +75,10 @@ setLinkOptions(optionsData)
             heroCard2Image: data.heroCard2Image || "",
             heroCard2Link: data.heroCard2Link || "",
 
-            
+            announcementEnabled: Boolean(data.announcementEnabled),
+            announcementText: data.announcementText || "",
+            announcementLink: data.announcementLink || "",
+            announcementLinkLabel: data.announcementLinkLabel || "",
           })
         }
       } catch (error) {
@@ -84,7 +93,7 @@ setLinkOptions(optionsData)
   }, [])
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name, value, type } = e.target
 
@@ -189,18 +198,18 @@ setLinkOptions(optionsData)
               <div>
                 <label className="block mb-2 font-medium">Buton Linki</label>
                 <select
-  name="heroButtonLink"
-  value={form.heroButtonLink}
-  onChange={handleChange}
-  className="w-full border rounded px-4 py-3"
->
-  <option value="">Link seç</option>
-  {linkOptions.map((option) => (
-  <option key={`hero-btn-${option.value}`} value={option.value}>
-    {option.group} - {option.label}
-  </option>
-))}
-</select>
+                  name="heroButtonLink"
+                  value={form.heroButtonLink}
+                  onChange={handleChange}
+                  className="w-full border rounded px-4 py-3"
+                >
+                  <option value="">Link seç</option>
+                  {linkOptions.map((option) => (
+                    <option key={`hero-btn-${option.value}`} value={option.value}>
+                      {option.group} - {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -241,18 +250,18 @@ setLinkOptions(optionsData)
             <div>
               <label className="block mb-2 font-medium">Kart Linki</label>
               <select
-  name="heroCard1Link"
-  value={form.heroCard1Link}
-  onChange={handleChange}
-  className="w-full border rounded px-4 py-3"
->
-  <option value="">Link seç</option>
-  {linkOptions.map((option) => (
-  <option key={`hero-card1-${option.value}`} value={option.value}>
-    {option.group} - {option.label}
-  </option>
-))}
-</select>
+                name="heroCard1Link"
+                value={form.heroCard1Link}
+                onChange={handleChange}
+                className="w-full border rounded px-4 py-3"
+              >
+                <option value="">Link seç</option>
+                {linkOptions.map((option) => (
+                  <option key={`hero-card1-${option.value}`} value={option.value}>
+                    {option.group} - {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -292,22 +301,76 @@ setLinkOptions(optionsData)
             <div>
               <label className="block mb-2 font-medium">Kart Linki</label>
               <select
-  name="heroCard2Link"
-  value={form.heroCard2Link}
-            onChange={handleChange}
-  className="w-full border rounded px-4 py-3"
->
-  <option value="">Link seç</option>
-  {linkOptions.map((option) => (
-  <option key={`hero-card2-${option.value}`} value={option.value}>
-    {option.group} - {option.label}
-  </option>
-))}
-</select>
+                name="heroCard2Link"
+                value={form.heroCard2Link}
+                onChange={handleChange}
+                className="w-full border rounded px-4 py-3"
+              >
+                <option value="">Link seç</option>
+                {linkOptions.map((option) => (
+                  <option key={`hero-card2-${option.value}`} value={option.value}>
+                    {option.group} - {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          
+          <div className="space-y-5 border-t pt-6">
+            <h2 className="text-xl font-semibold">Duyuru Barı</h2>
+
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="announcementEnabled"
+                checked={form.announcementEnabled}
+                onChange={handleChange}
+              />
+              <span>Duyuru barını aktif et</span>
+            </label>
+
+            <div>
+              <label className="block mb-2 font-medium">Duyuru Metni</label>
+              <input
+                name="announcementText"
+                value={form.announcementText}
+                onChange={handleChange}
+                className="w-full border rounded px-4 py-3"
+                placeholder="Örn: 16:30'a kadar verilen siparişler aynı gün kargoda"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-2 font-medium">Link</label>
+                <select
+                  name="announcementLink"
+                  value={form.announcementLink}
+                  onChange={handleChange}
+                  className="w-full border rounded px-4 py-3"
+                >
+                  <option value="">Link seç</option>
+                  {linkOptions.map((option) => (
+                    <option key={`ann-${option.value}`} value={option.value}>
+                      {option.group} - {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-2 font-medium">Link Yazısı</label>
+                <input
+                  name="announcementLinkLabel"
+                  value={form.announcementLinkLabel}
+                  onChange={handleChange}
+                  className="w-full border rounded px-4 py-3"
+                  placeholder="Örn: Detayları Gör"
+                />
+              </div>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={saving}

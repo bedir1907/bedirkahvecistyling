@@ -2,6 +2,10 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 
+function normalizeString(value: unknown) {
+  return String(value || "").trim()
+}
+
 export async function GET() {
   try {
     const currentUser = await getAdminUserFromCookie()
@@ -39,6 +43,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
+    console.log("Homepage PATCH body:", body)
 
     const categories = await prisma.category.findMany({
       where: {
@@ -51,20 +56,24 @@ export async function PATCH(request: Request) {
 
     const allowedLinks = new Set<string>([
       "/",
-      "/category/new-season",
-      "/category/indirimdekiler",
       ...categories.map((category) => `/category/${category.slug}`),
     ])
 
+    const announcementLink = normalizeString(body.announcementLink)
+    const heroButtonLink = normalizeString(body.heroButtonLink)
+    const heroCard1Link = normalizeString(body.heroCard1Link)
+    const heroCard2Link = normalizeString(body.heroCard2Link)
+
     const linksToValidate = [
-      body.announcementLink,
-      body.heroButtonLink,
-      body.heroCard1Link,
-      body.heroCard2Link,
+      announcementLink,
+      heroButtonLink,
+      heroCard1Link,
+      heroCard2Link,
     ].filter(Boolean)
 
     for (const link of linksToValidate) {
       if (!allowedLinks.has(link)) {
+        console.error("Geçersiz link yakalandı:", link)
         return NextResponse.json(
           { error: `Geçersiz link: ${link}` },
           { status: 400 }
@@ -83,41 +92,44 @@ export async function PATCH(request: Request) {
 
     const data = {
       announcementEnabled: Boolean(body.announcementEnabled),
-      announcementText: body.announcementText || null,
-      announcementLink: body.announcementLink || null,
-      announcementLinkLabel: body.announcementLinkLabel || null,
+      announcementText: normalizeString(body.announcementText) || null,
+      announcementLink: announcementLink || null,
+      announcementLinkLabel: normalizeString(body.announcementLinkLabel) || null,
 
-      heroEyebrow: body.heroEyebrow || "Yeni Sezon",
-      heroTitle: body.heroTitle || "",
-      heroSubtitle: body.heroSubtitle || "",
-      heroButtonText: body.heroButtonText || "",
-      heroButtonLink: body.heroButtonLink || "",
+      heroEyebrow: normalizeString(body.heroEyebrow) || "Yeni Sezon",
+      heroTitle: normalizeString(body.heroTitle),
+      heroSubtitle: normalizeString(body.heroSubtitle),
+      heroButtonText: normalizeString(body.heroButtonText),
+      heroButtonLink: heroButtonLink,
 
       heroCard1Enabled: Boolean(body.heroCard1Enabled),
-      heroCard1Title: body.heroCard1Title || null,
-      heroCard1Image: body.heroCard1Image || null,
-      heroCard1Link: body.heroCard1Link || null,
+      heroCard1Title: normalizeString(body.heroCard1Title) || null,
+      heroCard1Image: normalizeString(body.heroCard1Image) || null,
+      heroCard1Link: heroCard1Link || null,
 
       heroCard2Enabled: Boolean(body.heroCard2Enabled),
-      heroCard2Title: body.heroCard2Title || null,
-      heroCard2Image: body.heroCard2Image || null,
-      heroCard2Link: body.heroCard2Link || null,
+      heroCard2Title: normalizeString(body.heroCard2Title) || null,
+      heroCard2Image: normalizeString(body.heroCard2Image) || null,
+      heroCard2Link: heroCard2Link || null,
 
-      featuredCategoriesEnabled: Boolean(body.featuredCategoriesEnabled),
+      featuredCategoriesEnabled: body.featuredCategoriesEnabled ?? true,
       featuredCategoriesTitle:
-        body.featuredCategoriesTitle || "Öne Çıkan Kategoriler",
+        normalizeString(body.featuredCategoriesTitle) || "Öne Çıkan Kategoriler",
 
-      featuredProductsEnabled: Boolean(body.featuredProductsEnabled),
+      featuredProductsEnabled: body.featuredProductsEnabled ?? true,
       featuredProductsTitle:
-        body.featuredProductsTitle || "Haftanın Ürünleri",
+        normalizeString(body.featuredProductsTitle) || "Haftanın Ürünleri",
 
-      newProductsEnabled: Boolean(body.newProductsEnabled),
-      newProductsTitle: body.newProductsTitle || "En Yeniler",
+      newProductsEnabled: body.newProductsEnabled ?? true,
+      newProductsTitle:
+        normalizeString(body.newProductsTitle) || "En Yeniler",
 
-      discountedProductsEnabled: Boolean(body.discountedProductsEnabled),
+      discountedProductsEnabled: body.discountedProductsEnabled ?? true,
       discountedProductsTitle:
-        body.discountedProductsTitle || "İndirimdekiler",
+        normalizeString(body.discountedProductsTitle) || "İndirimdekiler",
     }
+
+    console.log("Homepage PATCH data:", data)
 
     if (!existing) {
       const created = await prisma.homepageSettings.create({
@@ -127,6 +139,7 @@ export async function PATCH(request: Request) {
         },
       })
 
+      console.log("Homepage settings created:", created.id)
       return NextResponse.json(created)
     }
 
@@ -137,13 +150,19 @@ export async function PATCH(request: Request) {
       data,
     })
 
+    console.log("Homepage settings updated:", updated.id)
     return NextResponse.json(updated)
   } catch (error) {
     console.error("Homepage admin patch hatası:", error)
 
     return NextResponse.json(
-      { error: "Homepage ayarları güncellenemedi" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Homepage ayarları güncellenemedi",
+      },
       { status: 500 }
     )
   }
-}
+}   

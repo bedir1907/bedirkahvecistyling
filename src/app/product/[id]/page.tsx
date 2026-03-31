@@ -5,7 +5,7 @@ import Link from "next/link"
 import { use, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import AnnouncementBar from "@/components/store/AnnouncementBar"
-import StoreNavbar from "@/components/store/StoreNavbar"
+//import StoreNavbar from "@/components/store/StoreNavbar"
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
 
@@ -321,7 +321,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
     return (
       <main className="min-h-screen bg-white text-black">
         <AnnouncementBar />
-        <StoreNavbar />
+        
         <section className="max-w-7xl mx-auto px-4 py-16">
           <p className="text-gray-500">Yükleniyor...</p>
         </section>
@@ -334,7 +334,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
     return (
       <main className="min-h-screen bg-white text-black">
         <AnnouncementBar />
-        <StoreNavbar />
+        
         <section className="max-w-7xl mx-auto px-4 py-16">
           <p className="text-gray-500">Ürün bulunamadı.</p>
         </section>
@@ -346,7 +346,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
   return (
     <main className="min-h-screen bg-white text-black">
       <AnnouncementBar />
-      <StoreNavbar />
+      
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="text-sm text-gray-500 mb-8 flex flex-wrap items-center gap-2">

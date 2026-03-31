@@ -193,17 +193,38 @@ model HomepageSettings {
   updatedAt DateTime @updatedAt
 }
 model CustomerUser {
-  id        Int    @id @default(autoincrement())
-  name      String
-  email     String @unique
+  id           Int               @id @default(autoincrement())
+  name         String
+  email        String            @unique
   passwordHash String?
+  phone        String?
 
-  phone     String?
-  
-  orders    Order[]
+  orders       Order[]
+  addresses    CustomerAddress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CustomerAddress {
+  id         Int          @id @default(autoincrement())
+  customerId Int
+  customer   CustomerUser @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  title      String
+  fullName   String
+  phone      String
+  city       String
+  district   String
+  address    String
+  note       String?
+
+  isDefault  Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
 }
 
 model Order {
@@ -222,11 +243,20 @@ model Order {
   district String
   address String
   note    String?
+  paymentId             String?
+
 
   totalPrice Int
 
-  status String @default("PENDING") // PENDING / PAID / SHIPPED / CANCELLED
-
+  status String @default("PENDING") // PENDING / PAID / FAILED / SHIPPED / CANCELLED / REFUNDED
+  paymentProvider       String?
+paymentConversationId String?
+paymentToken          String?
+paymentPageUrl        String?
+paidAt                DateTime?
+paymentTransactionId  String?
+refundedAt            DateTime?
+refundAmount          Int?
   items OrderItem[]
 
   createdAt DateTime @default(now())
@@ -234,6 +264,12 @@ model Order {
   stockRestored Boolean @default(false)
 }
 
+model AnnouncementBar {
+  id        Int     @id @default(autoincrement())
+  text      String
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+}
 model OrderItem {
   id Int @id @default(autoincrement())
 

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import UserPermissionsForm from "@/components/admin/UserPermissionsForm"
+import DeleteAdminUserButton from "@/components/admin/DeleteAdminUserButton"
 
 function getRoleLabel(role: string) {
   switch (role) {
@@ -37,7 +38,7 @@ export default async function AdminUsersPage() {
     return <div>Erişim yok</div>
   }
 
-  if (currentUser.role === "SALES") {
+  if (currentUser.role !== "CREATOR") {
     return <div>Erişim yok</div>
   }
 
@@ -72,14 +73,12 @@ export default async function AdminUsersPage() {
             </p>
           </div>
 
-          {currentUser.role === "CREATOR" && (
-            <Link
-              href="/admin/users/new"
-              className="bg-black text-white px-5 py-3 rounded-xl hover:opacity-90"
-            >
-              Yeni Kullanıcı Ekle
-            </Link>
-          )}
+          <Link
+            href="/admin/users/new"
+            className="bg-black text-white px-5 py-3 rounded-xl hover:opacity-90"
+          >
+            Yeni Kullanıcı Ekle
+          </Link>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
@@ -91,6 +90,7 @@ export default async function AdminUsersPage() {
                 <th className="p-4">Email</th>
                 <th className="p-4">Rol</th>
                 <th className="p-4">Durum</th>
+                <th className="p-4">İşlem</th>
               </tr>
             </thead>
 
@@ -119,21 +119,26 @@ export default async function AdminUsersPage() {
                         {user.isActive ? "Aktif" : "Pasif"}
                       </span>
                     </td>
+                    <td className="p-4">
+                      {user.role !== "CREATOR" ? (
+                        <DeleteAdminUserButton userId={user.id} />
+                      ) : (
+                        <span className="text-sm text-gray-400">Silinemez</span>
+                      )}
+                    </td>
                   </tr>
 
-                  {currentUser.role === "CREATOR" && (
-                    <tr className="border-b bg-gray-50">
-                      <td colSpan={5} className="p-4">
-                        <UserPermissionsForm user={user} />
-                      </td>
-                    </tr>
-                  )}
+                  <tr className="border-b bg-gray-50">
+                    <td colSpan={6} className="p-4">
+                      <UserPermissionsForm user={user} />
+                    </td>
+                  </tr>
                 </Fragment>
               ))}
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                  <td colSpan={6} className="p-8 text-center text-gray-500">
                     Henüz kullanıcı yok
                   </td>
                 </tr>

@@ -13,7 +13,7 @@ export async function sendOrderEmail({
   orderNumber: string
   total: number
 }) {
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: "E-Ticaret <onboarding@resend.dev>",
     to,
     subject: "Siparişiniz alındı 🎉",
@@ -26,4 +26,8 @@ export async function sendOrderEmail({
       <p>En kısa sürede kargoya verilecektir.</p>
     `,
   })
+
+  console.log("Resend sonucu:", result)
+
+  return result
 }
