@@ -80,10 +80,10 @@ export default function ProductCard({
 
       <div className="mt-3 md:mt-4 space-y-1.5 md:space-y-2">
         {category ? (
-          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-gray-400">
-            {category}
-          </p>
-        ) : null}
+  <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-2.5 py-1 text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-700">
+    {category}
+  </p>
+) : null}
 
         <h3 className="text-[14px] sm:text-[15px] md:text-[17px] font-medium leading-[1.35] tracking-tight transition group-hover:text-gray-600 line-clamp-2 min-h-[38px] md:min-h-[46px]">
           {safeName}
