@@ -128,7 +128,7 @@ export default async function ProductSection({
                 price={product.price}
                 oldPrice={product.oldPrice}
                 image={product.images?.[0]?.url || product.image}
-                hoverImage={product.images?.[1]?.url || null}
+                //hoverImage={product.images?.[1]?.url || null}
                 href={`/product/${product.id}`}
                 colorName={product.color || ""}
                 category={product.category}

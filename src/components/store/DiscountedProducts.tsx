@@ -125,7 +125,7 @@ export default function DiscountedProducts({ title = "İndirimdekiler" }: Props)
                 price={product.price}
                 oldPrice={product.oldPrice}
                 image={product.image}
-                hoverImage={product.hoverImage}
+                
                 colorName={product.colorName}
                 category={product.category}
                 href={product.href}
