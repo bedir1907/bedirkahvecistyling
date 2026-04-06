@@ -20,7 +20,7 @@ export default async function AddressesPage() {
   })
 
   return (
-    <AccountShell current="addresses">
+    <AccountShell current="addresses" emailVerified={customer.emailVerified}>
       <div className="max-w-2xl pb-2">
         <p className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
           Adresler

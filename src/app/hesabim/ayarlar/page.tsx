@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <AccountShell current="settings">
+    <AccountShell current="settings" emailVerified={customer.emailVerified}>
       <div className="max-w-2xl pb-2">
         <p className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
           Hesap

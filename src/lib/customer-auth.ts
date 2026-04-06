@@ -127,6 +127,7 @@ export async function getCustomerUserFromCookie() {
       name: true,
       email: true,
       phone: true,
+      emailVerified: true,
       createdAt: true,
       updatedAt: true,
     },

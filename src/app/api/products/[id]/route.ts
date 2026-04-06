@@ -61,6 +61,15 @@ export async function GET(_: Request, context: Context) {
       )
     }
 
+    const categoryRecord = await prisma.category.findFirst({
+      where: {
+        name: product.category,
+      },
+      select: {
+        slug: true,
+      },
+    })
+
     const siblingProducts = product.groupCode
       ? await prisma.product.findMany({
           where: {
@@ -85,6 +94,7 @@ export async function GET(_: Request, context: Context) {
 
     return NextResponse.json({
       ...product,
+      categorySlug: categoryRecord?.slug || null,
       siblingProducts,
     })
   } catch (error) {

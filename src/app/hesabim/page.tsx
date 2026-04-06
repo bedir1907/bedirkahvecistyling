@@ -4,6 +4,7 @@ import { Package, MapPin, UserCircle, ChevronRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
 import AccountShell from "@/components/account/AccountShell"
+import VerifyEmailBanner from "./verify-email-banner"
 
 export default async function AccountPage() {
   const customer = await getCustomerUserFromCookie()
@@ -19,7 +20,7 @@ export default async function AccountPage() {
   })
 
   return (
-    <AccountShell current="account">
+   <AccountShell current="account" emailVerified={customer.emailVerified}>
       <div className="max-w-2xl pb-2">
         <p className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
           Hesap Bilgileri

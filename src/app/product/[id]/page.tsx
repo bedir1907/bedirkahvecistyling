@@ -53,6 +53,7 @@ type Product = {
   images: ProductImage[]
   productVariants: ProductVariant[]
   siblingProducts: SiblingProduct[]
+  categorySlug: string | null
 }
 
 type Props = {
@@ -129,17 +130,19 @@ export default function ProductDetailPage({ params }: Props) {
   const { id } = use(params)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const from = searchParams.get("from")
   const addToCart = useCartStore((state) => state.addToCart)
-const cart = useCartStore((state) => state.cart)
+  const cart = useCartStore((state) => state.cart)
 
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [selectedImage, setSelectedImage] = useState<string>("")
   const [addedToCart, setAddedToCart] = useState(false)
- useEffect(() => {
-  setAddedToCart(false)
-}, [id, selectedSize, selectedImage])
+
+  useEffect(() => {
+    setAddedToCart(false)
+  }, [id, selectedSize, selectedImage])
 
   useEffect(() => {
     async function fetchProduct() {
@@ -166,9 +169,13 @@ const cart = useCartStore((state) => state.cart)
   }, [id])
 
   function updateUrl(size?: string) {
-    const params = new URLSearchParams()
+    const params = new URLSearchParams(searchParams.toString())
 
-    if (size) params.set("size", size)
+    if (size) {
+      params.set("size", size)
+    } else {
+      params.delete("size")
+    }
 
     const query = params.toString()
     router.replace(query ? `/product/${id}?${query}` : `/product/${id}`)
@@ -262,22 +269,23 @@ const cart = useCartStore((state) => state.cart)
     if (!product) return false
     return product.productVariants.some((variant) => variant.stock > 0)
   }, [product])
+
   const cartQuantityForSelectedVariant = useMemo(() => {
-  if (!product || !selectedVariant) return 0
+    if (!product || !selectedVariant) return 0
 
-  const existing = cart.find(
-    (item) =>
-      item.productId === product.id &&
-      item.variantId === selectedVariant.id
-  )
+    const existing = cart.find(
+      (item) =>
+        item.productId === product.id &&
+        item.variantId === selectedVariant.id
+    )
 
-  return existing ? existing.quantity : 0
-}, [cart, product, selectedVariant])
+    return existing ? existing.quantity : 0
+  }, [cart, product, selectedVariant])
 
-const isSelectedVariantMaxInCart = useMemo(() => {
-  if (!selectedVariant) return false
-  return cartQuantityForSelectedVariant >= selectedVariant.stock
-}, [cartQuantityForSelectedVariant, selectedVariant])
+  const isSelectedVariantMaxInCart = useMemo(() => {
+    if (!selectedVariant) return false
+    return cartQuantityForSelectedVariant >= selectedVariant.stock
+  }, [cartQuantityForSelectedVariant, selectedVariant])
 
   const discountRate = useMemo(() => {
     if (!product?.oldPrice || product.oldPrice <= product.price) return null
@@ -295,33 +303,33 @@ const isSelectedVariantMaxInCart = useMemo(() => {
   }
 
   function handleAddToCart() {
-  if (!product || !selectedVariant || selectedVariant.stock <= 0) return
-  if (cartQuantityForSelectedVariant >= selectedVariant.stock) return
+    if (!product || !selectedVariant || selectedVariant.stock <= 0) return
+    if (cartQuantityForSelectedVariant >= selectedVariant.stock) return
 
-  addToCart({
-    productId: product.id,
-    variantId: selectedVariant.id,
-    name: product.name,
-    color: product.color || "",
-    size: selectedVariant.size,
-    price: product.price,
-    image: selectedImage || product.image || FALLBACK_IMAGE,
-    quantity: 1,
-    stock: selectedVariant.stock,
-  })
+    addToCart({
+      productId: product.id,
+      variantId: selectedVariant.id,
+      name: product.name,
+      color: product.color || "",
+      size: selectedVariant.size,
+      price: product.price,
+      image: selectedImage || product.image || FALLBACK_IMAGE,
+      quantity: 1,
+      stock: selectedVariant.stock,
+    })
 
-  setAddedToCart(true)
+    setAddedToCart(true)
 
-  window.setTimeout(() => {
-    setAddedToCart(false)
-  }, 1400)
-}
+    window.setTimeout(() => {
+      setAddedToCart(false)
+    }, 1400)
+  }
 
   if (loading) {
     return (
       <main className="min-h-screen bg-white text-black">
         <AnnouncementBar />
-        
+
         <section className="max-w-7xl mx-auto px-4 py-16">
           <p className="text-gray-500">Yükleniyor...</p>
         </section>
@@ -334,7 +342,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
     return (
       <main className="min-h-screen bg-white text-black">
         <AnnouncementBar />
-        
+
         <section className="max-w-7xl mx-auto px-4 py-16">
           <p className="text-gray-500">Ürün bulunamadı.</p>
         </section>
@@ -346,16 +354,62 @@ const isSelectedVariantMaxInCart = useMemo(() => {
   return (
     <main className="min-h-screen bg-white text-black">
       <AnnouncementBar />
-      
 
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="text-sm text-gray-500 mb-8 flex flex-wrap items-center gap-2">
           <Link href="/" className="hover:text-black transition">
             Anasayfa
           </Link>
+
           <span>/</span>
-          <span>{product.category}</span>
-          <span>/</span>
+
+          {from === "new-season" ? (
+            <>
+              <Link
+                href="/category/new-season"
+                className="hover:text-black transition"
+              >
+                Yeni Sezon
+              </Link>
+              <span>/</span>
+            </>
+          ) : from === "indirimdekiler" ? (
+            <>
+              <Link
+                href="/category/indirimdekiler"
+                className="hover:text-black transition"
+              >
+                İndirimdekiler
+              </Link>
+              <span>/</span>
+            </>
+          ) : from ? (
+  <>
+    <Link
+      href={`/category/${from}`}
+      className="hover:text-black transition"
+    >
+      {product.category}
+    </Link>
+    <span>/</span>
+  </>
+) : product.categorySlug ? (
+  <>
+    <Link
+      href={`/category/${product.categorySlug}`}
+      className="hover:text-black transition"
+    >
+      {product.category}
+    </Link>
+    <span>/</span>
+  </>
+) : (
+  <>
+    <span>{product.category}</span>
+    <span>/</span>
+  </>
+)}
+
           <span className="text-black">{product.name}</span>
         </div>
 
@@ -452,7 +506,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
 
                   <div className="flex flex-wrap gap-3">
                     <Link
-                      href={`/product/${product.id}`}
+                      href={from ? `/product/${product.id}?from=${from}` : `/product/${product.id}`}
                       className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-black bg-black text-white transition"
                     >
                       <span className="relative w-12 h-12 rounded-xl overflow-hidden border bg-gray-100 shrink-0">
@@ -473,7 +527,7 @@ const isSelectedVariantMaxInCart = useMemo(() => {
                     {product.siblingProducts.map((item) => (
                       <Link
                         key={item.id}
-                        href={`/product/${item.id}`}
+                        href={from ? `/product/${item.id}?from=${from}` : `/product/${item.id}`}
                         className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-gray-200 hover:border-black transition"
                       >
                         <span className="relative w-12 h-12 rounded-xl overflow-hidden border bg-gray-100 shrink-0">
@@ -554,10 +608,10 @@ const isSelectedVariantMaxInCart = useMemo(() => {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={
-  !selectedVariant ||
-  selectedVariant.stock <= 0 ||
-  isSelectedVariantMaxInCart
-}
+                  !selectedVariant ||
+                  selectedVariant.stock <= 0 ||
+                  isSelectedVariantMaxInCart
+                }
                 className={`w-full rounded-2xl px-6 py-4 text-base font-medium transition ${
                   addedToCart
                     ? "bg-green-600 text-white"
@@ -569,20 +623,22 @@ const isSelectedVariantMaxInCart = useMemo(() => {
                 }`}
               >
                 {addedToCart
-  ? "Sepete Eklendi ✓"
-  : !selectedSize
-    ? "Beden Seç"
-    : !selectedVariant || selectedVariant.stock <= 0
-      ? "Bu Beden Tükendi"
-      : isSelectedVariantMaxInCart
-        ? "Sepette Maksimum Adet"
-        : "Sepete Ekle"}
+                  ? "Sepete Eklendi ✓"
+                  : !selectedSize
+                    ? "Beden Seç"
+                    : !selectedVariant || selectedVariant.stock <= 0
+                      ? "Bu Beden Tükendi"
+                      : isSelectedVariantMaxInCart
+                        ? "Sepette Maksimum Adet"
+                        : "Sepete Ekle"}
               </button>
-{selectedVariant && isSelectedVariantMaxInCart && (
-    <p className="text-sm text-orange-600">
-      Bu beden için sepette stok kadar ürün var.
-    </p>
-  )}
+
+              {selectedVariant && isSelectedVariantMaxInCart && (
+                <p className="text-sm text-orange-600">
+                  Bu beden için sepette stok kadar ürün var.
+                </p>
+              )}
+
               {!hasAnyStock && (
                 <p className="text-sm text-red-600">
                   Bu ürünün tüm bedenleri tükenmiş.

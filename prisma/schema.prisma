@@ -193,14 +193,21 @@ model HomepageSettings {
   updatedAt DateTime @updatedAt
 }
 model CustomerUser {
-  id           Int               @id @default(autoincrement())
-  name         String
-  email        String            @unique
-  passwordHash String?
-  phone        String?
+  id                         Int      @id @default(autoincrement())
+  name                       String
+  email                      String   @unique
+  passwordHash               String?
+  phone                      String?
 
-  orders       Order[]
-  addresses    CustomerAddress[]
+  emailVerified              Boolean  @default(false)
+  emailVerificationToken     String?  @unique
+  emailVerificationExpiresAt DateTime?
+
+  passwordResetToken         String?  @unique
+  passwordResetExpiresAt     DateTime?
+
+  orders                     Order[]
+  addresses                  CustomerAddress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -243,6 +250,14 @@ model Order {
   district String
   address String
   note    String?
+    billingSameAsShipping Boolean @default(true)
+
+  billingName     String?
+  billingPhone    String?
+  billingCity     String?
+  billingDistrict String?
+  billingAddress  String?
+  billingNote     String?
   paymentId             String?
 
 
@@ -286,4 +301,12 @@ model OrderItem {
   quantity Int
 
   createdAt DateTime @default(now())
+}
+model SitePage {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -151,6 +151,7 @@ export default function CategoryPage({ params }: Props) {
                 oldPrice={product.oldPrice}
                 image={product.image}
                 hoverImage={product.hoverImage}
+                href={`/product/${product.id}?from=${slug}`}
               />
             ))}
           </div>

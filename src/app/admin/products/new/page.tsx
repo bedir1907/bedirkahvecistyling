@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
 
 type Category = {
   id: number
@@ -167,16 +168,50 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block mb-2 font-medium">Görsel URL</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className="w-full border rounded px-4 py-3"
-              required
-            />
-          </div>
+          <div className="space-y-3">
+  <label className="block font-medium">Kapak Görseli</label>
+
+  <div className="flex flex-wrap items-center gap-3">
+    <CloudinaryUploadButton
+      buttonText="Bilgisayardan Kapak Görseli Seç"
+      onUploadSuccess={(url) =>
+        setForm((prev) => ({
+          ...prev,
+          image: url,
+        }))
+      }
+    />
+
+    {form.image ? (
+      <button
+        type="button"
+        onClick={() =>
+          setForm((prev) => ({
+            ...prev,
+            image: "",
+          }))
+        }
+        className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
+      >
+        Görseli Kaldır
+      </button>
+    ) : null}
+  </div>
+
+  {form.image ? (
+    <div className="rounded-xl border p-3 bg-gray-50">
+      <img
+        src={form.image}
+        alt="Ürün kapak görsel önizleme"
+        className="w-full max-w-sm h-56 object-cover rounded-lg border"
+      />
+    </div>
+  ) : (
+    <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
+      Henüz kapak görseli seçilmedi.
+    </div>
+  )}
+</div>
 
           <div>
             <label className="block mb-2 font-medium">Kategori</label>

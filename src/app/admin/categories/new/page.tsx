@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
 
 export default function NewCategoryPage() {
   const router = useRouter()
@@ -18,9 +19,7 @@ export default function NewCategoryPage() {
 
   const [loading, setLoading] = useState(false)
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type } = e.target
 
     if (type === "checkbox") {
@@ -66,9 +65,7 @@ export default function NewCategoryPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Yeni Kategori Ekle</h1>
-            <p className="text-gray-600 mt-1">
-              Yeni kategori bilgilerini gir
-            </p>
+            <p className="text-gray-600 mt-1">Yeni kategori bilgilerini gir</p>
           </div>
 
           <Link
@@ -107,15 +104,49 @@ export default function NewCategoryPage() {
             />
           </div>
 
-          <div>
-            <label className="block mb-2 font-medium">Görsel URL</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className="w-full border rounded px-4 py-3"
-              placeholder="https://..."
-            />
+          <div className="space-y-3">
+            <label className="block font-medium">Kategori Görseli</label>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <CloudinaryUploadButton
+                buttonText="Bilgisayardan Görsel Seç"
+                onUploadSuccess={(url) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    image: url,
+                  }))
+                }
+              />
+
+              {form.image ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      image: "",
+                    }))
+                  }
+                  className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
+                >
+                  Görseli Kaldır
+                </button>
+              ) : null}
+            </div>
+
+            {form.image ? (
+              <div className="rounded-xl border p-3 bg-gray-50">
+                <img
+                  src={form.image}
+                  alt="Kategori görsel önizleme"
+                  className="w-full max-w-sm h-48 object-cover rounded-lg border"
+                />
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
+                Henüz kategori görseli seçilmedi.
+              </div>
+            )}
           </div>
 
           <div>

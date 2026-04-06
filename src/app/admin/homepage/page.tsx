@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
 
 type LinkOption = {
   label: string
@@ -237,15 +238,50 @@ export default function AdminHomepagePage() {
               />
             </div>
 
-            <div>
-              <label className="block mb-2 font-medium">Kart Görsel URL</label>
-              <input
-                name="heroCard1Image"
-                value={form.heroCard1Image}
-                onChange={handleChange}
-                className="w-full border rounded px-4 py-3"
-              />
-            </div>
+            <div className="space-y-3">
+  <label className="block font-medium">Kart Görseli</label>
+
+  <div className="flex flex-wrap items-center gap-3">
+    <CloudinaryUploadButton
+      buttonText="Kart 1 Görseli Seç"
+      onUploadSuccess={(url) =>
+        setForm((prev) => ({
+          ...prev,
+          heroCard1Image: url,
+        }))
+      }
+    />
+
+    {form.heroCard1Image ? (
+      <button
+        type="button"
+        onClick={() =>
+          setForm((prev) => ({
+            ...prev,
+            heroCard1Image: "",
+          }))
+        }
+        className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
+      >
+        Görseli Kaldır
+      </button>
+    ) : null}
+  </div>
+
+  {form.heroCard1Image ? (
+    <div className="rounded-xl border p-3 bg-gray-50">
+      <img
+        src={form.heroCard1Image}
+        alt="Kart 1 görsel önizleme"
+        className="w-full max-w-sm h-48 object-cover rounded-lg border"
+      />
+    </div>
+  ) : (
+    <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
+      Henüz kart görseli seçilmedi.
+    </div>
+  )}
+</div>
 
             <div>
               <label className="block mb-2 font-medium">Kart Linki</label>
@@ -288,15 +324,50 @@ export default function AdminHomepagePage() {
               />
             </div>
 
-            <div>
-              <label className="block mb-2 font-medium">Kart Görsel URL</label>
-              <input
-                name="heroCard2Image"
-                value={form.heroCard2Image}
-                onChange={handleChange}
-                className="w-full border rounded px-4 py-3"
-              />
-            </div>
+            <div className="space-y-3">
+  <label className="block font-medium">Kart Görseli</label>
+
+  <div className="flex flex-wrap items-center gap-3">
+    <CloudinaryUploadButton
+      buttonText="Kart 2 Görseli Seç"
+      onUploadSuccess={(url) =>
+        setForm((prev) => ({
+          ...prev,
+          heroCard2Image: url,
+        }))
+      }
+    />
+
+    {form.heroCard2Image ? (
+      <button
+        type="button"
+        onClick={() =>
+          setForm((prev) => ({
+            ...prev,
+            heroCard2Image: "",
+          }))
+        }
+        className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
+      >
+        Görseli Kaldır
+      </button>
+    ) : null}
+  </div>
+
+  {form.heroCard2Image ? (
+    <div className="rounded-xl border p-3 bg-gray-50">
+      <img
+        src={form.heroCard2Image}
+        alt="Kart 2 görsel önizleme"
+        className="w-full max-w-sm h-48 object-cover rounded-lg border"
+      />
+    </div>
+  ) : (
+    <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
+      Henüz kart görseli seçilmedi.
+    </div>
+  )}
+</div>
 
             <div>
               <label className="block mb-2 font-medium">Kart Linki</label>

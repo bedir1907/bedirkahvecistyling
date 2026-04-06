@@ -54,7 +54,11 @@ function getBaseUrl(request: Request) {
   const forwardedHost =
     request.headers.get("x-forwarded-host") || request.headers.get("host")
 
-  if (forwardedHost && forwardedHost !== "null" && forwardedHost !== "undefined") {
+  if (
+    forwardedHost &&
+    forwardedHost !== "null" &&
+    forwardedHost !== "undefined"
+  ) {
     return `${forwardedProto}://${forwardedHost}`.replace(/\/$/, "")
   }
 
@@ -71,6 +75,7 @@ export async function POST(request: Request) {
     const baseUrl = getBaseUrl(request)
     const customer = await getCustomerUserFromCookie()
     const addressId = Number(body.addressId)
+    const billingSameAsShipping = Boolean(body.billingSameAsShipping)
 
     let name = normalizeString(body.name)
     let email = normalizeString(body.email).toLowerCase()
@@ -79,6 +84,14 @@ export async function POST(request: Request) {
     let district = normalizeString(body.district)
     let address = normalizeString(body.address)
     let note = normalizeString(body.note)
+
+    let billingName = normalizeString(body.billingName)
+    let billingPhone = normalizeString(body.billingPhone)
+    let billingCity = normalizeString(body.billingCity)
+    let billingDistrict = normalizeString(body.billingDistrict)
+    let billingAddress = normalizeString(body.billingAddress)
+    let billingNote = normalizeString(body.billingNote)
+
     const cart = Array.isArray(body.cart) ? body.cart : []
 
     if (customer) {
@@ -112,6 +125,29 @@ export async function POST(request: Request) {
 
     if (!name || !email || !phone || !city || !district || !address) {
       return NextResponse.json({ error: "Eksik bilgi var" }, { status: 400 })
+    }
+
+    if (billingSameAsShipping) {
+      billingName = name
+      billingPhone = phone
+      billingCity = city
+      billingDistrict = district
+      billingAddress = address
+      billingNote = note
+    }
+
+    if (
+      !billingSameAsShipping &&
+      (!billingName ||
+        !billingPhone ||
+        !billingCity ||
+        !billingDistrict ||
+        !billingAddress)
+    ) {
+      return NextResponse.json(
+        { error: "Fatura adresi bilgileri eksik" },
+        { status: 400 }
+      )
     }
 
     if (cart.length === 0) {
@@ -209,6 +245,15 @@ export async function POST(request: Request) {
         district,
         address,
         note: note || null,
+
+        billingSameAsShipping,
+        billingName: billingName || null,
+        billingPhone: billingPhone || null,
+        billingCity: billingCity || null,
+        billingDistrict: billingDistrict || null,
+        billingAddress: billingAddress || null,
+        billingNote: billingNote || null,
+
         totalPrice,
         status: "PENDING",
         stockRestored: false,
@@ -244,10 +289,10 @@ export async function POST(request: Request) {
       request.headers.get("x-forwarded-for") ||
       request.headers.get("x-real-ip") ||
       ""
-    const buyerIp =
-      forwardedFor.split(",")[0]?.trim() || "127.0.0.1"
+    const buyerIp = forwardedFor.split(",")[0]?.trim() || "127.0.0.1"
 
     const cleanPhone = phone.replace(/\D/g, "").slice(-10)
+    const cleanBillingPhone = billingPhone.replace(/\D/g, "").slice(-10)
 
     const initializeRequest = {
       locale: "tr",
@@ -282,10 +327,10 @@ export async function POST(request: Request) {
         zipCode: "34000",
       },
       billingAddress: {
-        contactName: name,
-        city,
+        contactName: billingName || name,
+        city: billingCity || city,
         country: "Turkey",
-        address,
+        address: billingAddress || address,
         zipCode: "34000",
       },
       basketItems,

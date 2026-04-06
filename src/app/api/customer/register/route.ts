@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
-import { setCustomerSession } from "@/lib/customer-auth"
 
 function normalize(value: unknown) {
   return String(value || "").trim()
+}
+
+function isStrongPassword(password: string) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password)
 }
 
 export async function POST(request: Request) {
@@ -13,8 +16,8 @@ export async function POST(request: Request) {
 
     const name = normalize(body.name)
     const email = normalize(body.email).toLowerCase()
-    const password = normalize(body.password)
     const phone = normalize(body.phone)
+    const password = normalize(body.password)
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -23,9 +26,12 @@ export async function POST(request: Request) {
       )
     }
 
-    if (password.length < 6) {
+    if (!isStrongPassword(password)) {
       return NextResponse.json(
-        { error: "Şifre en az 6 karakter olmalı" },
+        {
+          error:
+            "Şifre en az 8 karakter olmalı ve büyük harf, küçük harf, rakam ve özel karakter içermelidir.",
+        },
         { status: 400 }
       )
     }
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, 12)
 
     const customer = await prisma.customerUser.create({
       data: {
@@ -49,20 +55,19 @@ export async function POST(request: Request) {
         email,
         phone: phone || null,
         passwordHash,
+        emailVerified: false,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        phone: true,
       },
     })
-
-    await setCustomerSession(customer.id, customer.email)
 
     return NextResponse.json({
       success: true,
       customer,
+      message: "Kayıt başarıyla oluşturuldu.",
     })
   } catch (error) {
     console.error("Customer register hatası:", error)

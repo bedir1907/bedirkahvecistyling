@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { ShoppingBag, User } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useCartStore } from "@/store/cartStore"
 
 type Category = {
@@ -19,6 +20,8 @@ type Customer = {
 } | null
 
 export default function StoreNavbar() {
+  const pathname = usePathname()
+
   const [categories, setCategories] = useState<Category[]>([])
   const [mounted, setMounted] = useState(false)
   const [customer, setCustomer] = useState<Customer>(null)
@@ -53,6 +56,8 @@ export default function StoreNavbar() {
   useEffect(() => {
     async function fetchCustomer() {
       try {
+        setCustomerLoading(true)
+
         const res = await fetch("/api/customer/me", {
           cache: "no-store",
         })
@@ -73,7 +78,7 @@ export default function StoreNavbar() {
     }
 
     fetchCustomer()
-  }, [])
+  }, [pathname])
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/5">

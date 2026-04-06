@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
+        emailVerified: customer.emailVerified,
       },
     })
   } catch (error) {

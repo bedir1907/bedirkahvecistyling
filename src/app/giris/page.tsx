@@ -72,6 +72,15 @@ export default function LoginPage() {
             />
           </div>
 
+          <div className="text-right">
+            <Link
+              href="/sifremi-unuttum"
+              className="text-sm text-gray-600 hover:text-black transition underline"
+            >
+              Şifremi unuttum
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
