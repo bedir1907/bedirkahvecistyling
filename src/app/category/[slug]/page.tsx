@@ -115,9 +115,9 @@ export default function CategoryPage({ params }: Props) {
 
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500 mb-2">
-              Kategori
-            </p>
+           <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-gray-700 mb-3">
+  Kategori
+</p>
             <h1 className="text-3xl md:text-4xl font-bold">
               {category?.name || slug}
             </h1>

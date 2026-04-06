@@ -145,7 +145,7 @@ export default function StoreNavbar() {
             <div className="flex items-center gap-5 min-w-max text-sm font-medium">
               <Link
                 href="/"
-                className="whitespace-nowrap hover:text-gray-500 transition"
+                className="whitespace-nowrap rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium hover:bg-black hover:text-white transition"
               >
                 Anasayfa
               </Link>
@@ -154,7 +154,7 @@ export default function StoreNavbar() {
                 <Link
                   key={category.id}
                   href={`/category/${category.slug}`}
-                  className="whitespace-nowrap hover:text-gray-500 transition"
+                  className="whitespace-nowrap rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium hover:bg-black hover:text-white transition"
                 >
                   {category.name}
                 </Link>
