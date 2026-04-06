@@ -13,7 +13,7 @@ type Props = {
   id?: number
   name: string
   price: number
-  oldPrice: number | null
+  oldPrice?: number | null
   image: string
   hoverImage?: string | null
   href?: string

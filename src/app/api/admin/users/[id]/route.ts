@@ -37,7 +37,7 @@ export async function DELETE(_: Request, context: Context) {
       )
     }
 
-    if (currentUser.id === targetUserId) {
+    if (currentUser.userId === targetUserId) {
       return NextResponse.json(
         { error: "Kendi hesabını silemezsin" },
         { status: 400 }

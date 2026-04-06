@@ -14,6 +14,7 @@ type Product = {
   oldPrice: number | null
   image: string
   category: string
+  hoverImage?: string | null
 }
 
 type Category = {

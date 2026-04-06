@@ -5,7 +5,7 @@ export default async function ProductGrid() {
   const products = await prisma.product.findMany({
     orderBy: {
       id: "asc",
-    },
+          },
   })
 
   return (
@@ -17,7 +17,7 @@ export default async function ProductGrid() {
           name={product.name}
           price={product.price}
           image={product.image}
-          hoverImage={product.hoverImage}
+          
         />
       ))}
     </section>

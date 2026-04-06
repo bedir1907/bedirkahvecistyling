@@ -86,7 +86,7 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
-    if (currentUser.id === targetUserId && role !== "CREATOR") {
+    if (currentUser.userId === targetUserId && role !== "CREATOR") {
       return NextResponse.json(
         { error: "Kendi hesabının creator rolünü düşüremezsin" },
         { status: 400 }
