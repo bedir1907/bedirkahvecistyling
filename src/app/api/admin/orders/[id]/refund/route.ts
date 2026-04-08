@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { getIyzipay } from "@/lib/iyzico"
+
 export async function POST(
   _: Request,
   context: { params: Promise<{ id: string }> }
@@ -54,6 +55,7 @@ export async function POST(
     }
 
     const result = await new Promise<any>((resolve, reject) => {
+      const iyzico = getIyzipay()
       iyzico.refund.create(refundRequest, (err: any, res: any) => {
         if (err) return reject(err)
         resolve(res)
