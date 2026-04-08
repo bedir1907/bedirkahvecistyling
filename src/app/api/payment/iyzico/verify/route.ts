@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
-
+export const runtime = "nodejs"
 export async function POST(request: Request) {
   try {
     const body = await request.json()

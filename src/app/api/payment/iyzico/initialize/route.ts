@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { iyzico } from "@/lib/iyzico"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
+export const runtime = "nodejs"
 
 function normalizeString(value: unknown) {
   return String(value || "").trim()

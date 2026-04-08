@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
 import { prisma } from "@/lib/prisma"
 import { sendOrderEmail } from "@/lib/mail"
+export const runtime = "nodejs"
 
 function cleanBaseUrl(value?: string | null) {
   if (!value) return null
