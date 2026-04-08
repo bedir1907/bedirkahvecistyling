@@ -80,22 +80,30 @@ export default function StoreNavbar() {
     fetchCustomer()
   }, [pathname])
 
+  function isCategoryActive(slug: string) {
+    return pathname === `/category/${slug}`
+  }
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/5">
-      <div className="max-w-7xl mx-auto px-4">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/10 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
+      <div className="max-w-7xl mx-auto px-4 md:px-5">
         <div className="h-[78px] flex items-center justify-between gap-6">
-          <div className="flex items-center gap-10 min-w-0">
+          <div className="flex items-center gap-8 xl:gap-10 min-w-0">
             <Link
               href="/"
-              className="shrink-0 text-2xl md:text-3xl font-semibold tracking-[0.18em] leading-none"
+              className="shrink-0 text-[22px] md:text-[28px] font-semibold tracking-[0.18em] leading-none text-black"
             >
               E-TİCARET
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-7 text-[15px] font-medium min-w-0">
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-[15px] font-medium min-w-0">
               <Link
                 href="/"
-                className="text-black hover:text-gray-500 transition whitespace-nowrap"
+                className={`transition whitespace-nowrap ${
+                  pathname === "/"
+                    ? "text-black"
+                    : "text-black/70 hover:text-black"
+                }`}
               >
                 Anasayfa
               </Link>
@@ -104,7 +112,11 @@ export default function StoreNavbar() {
                 <Link
                   key={category.id}
                   href={`/category/${category.slug}`}
-                  className="text-black hover:text-gray-500 transition whitespace-nowrap"
+                  className={`transition whitespace-nowrap ${
+                    isCategoryActive(category.slug)
+                      ? "text-black"
+                      : "text-black/70 hover:text-black"
+                  }`}
                 >
                   {category.name}
                 </Link>
@@ -115,7 +127,7 @@ export default function StoreNavbar() {
           <div className="flex items-center gap-3 md:gap-4 shrink-0">
             <Link
               href="/cart"
-              className="relative inline-flex items-center justify-center w-11 h-11 rounded-full border border-gray-200 hover:border-black hover:bg-black hover:text-white transition"
+              className="relative inline-flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white text-black/80 hover:border-black hover:bg-black hover:text-white transition"
               aria-label="Sepet"
               title="Sepet"
             >
@@ -131,7 +143,7 @@ export default function StoreNavbar() {
             {!customerLoading && (
               <Link
                 href={customer ? "/hesabim" : "/giris"}
-                className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-transparent hover:border-gray-200 hover:bg-gray-50 transition text-[15px] font-medium"
+                className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-black/10 bg-white text-[15px] font-medium text-black/80 hover:border-black/20 hover:bg-gray-50 hover:text-black transition"
               >
                 <User size={17} strokeWidth={1.9} />
                 {customer ? "Hesabım" : "Giriş"}
@@ -142,10 +154,14 @@ export default function StoreNavbar() {
 
         {categories.length > 0 && (
           <div className="lg:hidden pb-4 overflow-x-auto">
-            <div className="flex items-center gap-5 min-w-max text-sm font-medium">
+            <div className="flex items-center gap-2.5 min-w-max">
               <Link
                 href="/"
-                className="whitespace-nowrap rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium hover:bg-black hover:text-white transition"
+                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                  pathname === "/"
+                    ? "border-black bg-black text-white"
+                    : "border-black/10 bg-[#f5f3ee] text-black/80 hover:bg-black hover:text-white"
+                }`}
               >
                 Anasayfa
               </Link>
@@ -154,7 +170,11 @@ export default function StoreNavbar() {
                 <Link
                   key={category.id}
                   href={`/category/${category.slug}`}
-                  className="whitespace-nowrap rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium hover:bg-black hover:text-white transition"
+                  className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                    isCategoryActive(category.slug)
+                      ? "border-black bg-black text-white"
+                      : "border-black/10 bg-[#f5f3ee] text-black/80 hover:bg-black hover:text-white"
+                  }`}
                 >
                   {category.name}
                 </Link>
