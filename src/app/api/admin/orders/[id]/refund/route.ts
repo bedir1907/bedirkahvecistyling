@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
-import { iyzico } from "@/lib/iyzico"
-
+import { getIyzipay } from "@/lib/iyzico"
 export async function POST(
   _: Request,
   context: { params: Promise<{ id: string }> }

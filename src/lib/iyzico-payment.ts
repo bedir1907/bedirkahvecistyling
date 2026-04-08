@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { iyzico } from "@/lib/iyzico"
+import { getIyzipay } from "@/lib/iyzico"
 
 type VerifyOrderPaymentInput = {
   orderNumber?: string
