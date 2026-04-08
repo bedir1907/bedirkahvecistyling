@@ -2,6 +2,20 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["iyzipay"],
+  outputFileTracingIncludes: {
+    "/api/payment/iyzico/initialize": [
+      "./node_modules/iyzipay/lib/resources/**/*",
+    ],
+    "/api/payment/iyzico/callback": [
+      "./node_modules/iyzipay/lib/resources/**/*",
+    ],
+    "/api/payment/iyzico/verify": [
+      "./node_modules/iyzipay/lib/resources/**/*",
+    ],
+    "/api/payment/iyzico/webhook": [
+      "./node_modules/iyzipay/lib/resources/**/*",
+    ],
+  },
   images: {
     remotePatterns: [
       {
@@ -22,6 +36,5 @@ const nextConfig: NextConfig = {
     ],
   },
 }
-
 
 export default nextConfig

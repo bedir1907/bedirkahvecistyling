@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { iyzico } from "@/lib/iyzico"
+import { getIyzipay } from "@/lib/iyzico"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
+
 export const runtime = "nodejs"
 
 function normalizeString(value: unknown) {
@@ -72,6 +73,8 @@ function getBaseUrl(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const iyzico = getIyzipay()
+
     const body = await request.json()
     const baseUrl = getBaseUrl(request)
     const customer = await getCustomerUserFromCookie()
@@ -293,7 +296,6 @@ export async function POST(request: Request) {
     const buyerIp = forwardedFor.split(",")[0]?.trim() || "127.0.0.1"
 
     const cleanPhone = phone.replace(/\D/g, "").slice(-10)
-    const cleanBillingPhone = billingPhone.replace(/\D/g, "").slice(-10)
 
     const initializeRequest = {
       locale: "tr",
