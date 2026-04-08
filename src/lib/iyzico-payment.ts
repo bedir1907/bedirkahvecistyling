@@ -22,6 +22,7 @@ function isFailureResult(result: any) {
 
 async function retrieveCheckoutForm(token: string) {
   return await new Promise<any>((resolve, reject) => {
+    const iyzico = getIyzipay()
     iyzico.checkoutForm.retrieve(
       {
         locale: "TR",
