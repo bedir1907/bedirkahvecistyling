@@ -1,13 +1,13 @@
-import Iyzipay from "iyzipay"
-
-declare global {
-  var iyzicoGlobal: Iyzipay | undefined
-}
+let iyzicoInstance: any = null
 
 export function getIyzipay() {
-  if (global.iyzicoGlobal) {
-    return global.iyzicoGlobal
+  // daha önce oluşturulduysa tekrar oluşturma
+  if (iyzicoInstance) {
+    return iyzicoInstance
   }
+
+  // 🔥 CRITICAL: lazy require (import yok!)
+  const Iyzipay = require("iyzipay")
 
   const apiKey = process.env.IYZICO_API_KEY
   const secretKey = process.env.IYZICO_SECRET_KEY
@@ -17,13 +17,11 @@ export function getIyzipay() {
     throw new Error("Iyzico env değişkenleri eksik")
   }
 
-  const instance = new Iyzipay({
+  iyzicoInstance = new Iyzipay({
     apiKey,
     secretKey,
     uri,
   })
 
-  global.iyzicoGlobal = instance
-
-  return instance
+  return iyzicoInstance
 }
