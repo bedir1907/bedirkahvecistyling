@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "src/app/api/payment/iyzico/initialize/route.ts": {
+      "includeFiles": "node_modules/iyzipay/lib/**"
+    },
+    "src/app/api/payment/iyzico/callback/route.ts": {
+      "includeFiles": "node_modules/iyzipay/lib/**"
+    },
+    "src/app/api/payment/iyzico/verify/route.ts": {
+      "includeFiles": "node_modules/iyzipay/lib/**"
+    },
+    "src/app/api/payment/iyzico/webhook/route.ts": {
+      "includeFiles": "node_modules/iyzipay/lib/**"
+    },
+    "src/app/api/admin/orders/[id]/refund/route.ts": {
+      "includeFiles": "node_modules/iyzipay/lib/**"
+    }
+  }
+}
