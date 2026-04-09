@@ -4,16 +4,19 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["iyzipay"],
   outputFileTracingIncludes: {
     "/api/payment/iyzico/initialize": [
-      "./node_modules/iyzipay/lib/resources/**/*",
+      "./node_modules/iyzipay/lib/**/*",
     ],
     "/api/payment/iyzico/callback": [
-      "./node_modules/iyzipay/lib/resources/**/*",
+      "./node_modules/iyzipay/lib/**/*",
     ],
     "/api/payment/iyzico/verify": [
-      "./node_modules/iyzipay/lib/resources/**/*",
+      "./node_modules/iyzipay/lib/**/*",
     ],
     "/api/payment/iyzico/webhook": [
-      "./node_modules/iyzipay/lib/resources/**/*",
+      "./node_modules/iyzipay/lib/**/*",
+    ],
+    "/api/admin/orders/[id]/refund": [
+      "./node_modules/iyzipay/lib/**/*",
     ],
   },
   images: {

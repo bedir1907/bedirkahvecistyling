@@ -340,6 +340,7 @@ export async function POST(request: Request) {
     }
 
     const result = await new Promise<any>((resolve, reject) => {
+      const iyzico = getIyzipay()
       iyzico.checkoutFormInitialize.create(
         initializeRequest,
         (err: any, res: any) => {
