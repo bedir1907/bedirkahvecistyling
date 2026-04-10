@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
-import { getIyzipay } from "@/lib/iyzico"
+import { refundPayment } from "@/lib/iyzico"
+
+export const runtime = "nodejs"
 
 export async function POST(
   _: Request,
@@ -32,11 +34,11 @@ export async function POST(
     }
 
     if (!["PAID", "APPROVED", "SHIPPED", "DELIVERED"].includes(order.status)) {
-  return NextResponse.json(
-    { error: "Bu sipariş durumu için iade yapılamaz" },
-    { status: 400 }
-  )
-}
+      return NextResponse.json(
+        { error: "Bu sipariş durumu için iade yapılamaz" },
+        { status: 400 }
+      )
+    }
 
     if (!order.paymentTransactionId) {
       return NextResponse.json(
@@ -45,21 +47,13 @@ export async function POST(
       )
     }
 
-    const refundRequest = {
+    const result = await refundPayment({
       locale: "tr",
       conversationId: `refund_${order.orderNumber}`,
       paymentTransactionId: order.paymentTransactionId,
       price: String(order.totalPrice),
       currency: "TRY",
       ip: "85.34.78.112",
-    }
-
-    const result = await new Promise<any>((resolve, reject) => {
-      const iyzico = getIyzipay()
-      iyzico.refund.create(refundRequest, (err: any, res: any) => {
-        if (err) return reject(err)
-        resolve(res)
-      })
     })
 
     if (result.status !== "success") {
@@ -96,11 +90,11 @@ export async function POST(
       return await tx.order.update({
         where: { id: order.id },
         data: {
-  status: "REFUNDED",
-  refundedAt: new Date(),
-  refundAmount: order.totalPrice,
-  stockRestored: true,
-},
+          status: "REFUNDED",
+          refundedAt: new Date(),
+          refundAmount: order.totalPrice,
+          stockRestored: true,
+        },
       })
     })
 

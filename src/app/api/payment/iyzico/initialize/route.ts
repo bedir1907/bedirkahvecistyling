@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getIyzipay } from "@/lib/iyzico"
+import { initializeCheckoutForm } from "@/lib/iyzico"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
 
 export const runtime = "nodejs"
@@ -73,8 +73,7 @@ function getBaseUrl(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const iyzico = getIyzipay()
-
+    
     const body = await request.json()
     const baseUrl = getBaseUrl(request)
     const customer = await getCustomerUserFromCookie()
@@ -339,16 +338,7 @@ export async function POST(request: Request) {
       basketItems,
     }
 
-    const result = await new Promise<any>((resolve, reject) => {
-      const iyzico = getIyzipay()
-      iyzico.checkoutFormInitialize.create(
-        initializeRequest,
-        (err: any, res: any) => {
-          if (err) return reject(err)
-          resolve(res)
-        }
-      )
-    })
+   const result = await initializeCheckoutForm(initializeRequest)
 
     if (
       !result ||

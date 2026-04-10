@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { getIyzipay } from "@/lib/iyzico"
+import { retrieveCheckoutForm } from "@/lib/iyzico"
 
 type VerifyOrderPaymentInput = {
   orderNumber?: string
@@ -18,22 +18,6 @@ function isFailureResult(result: any) {
     result?.paymentStatus === "FAILURE" ||
     result?.status === "failure"
   )
-}
-
-async function retrieveCheckoutForm(token: string) {
-  return await new Promise<any>((resolve, reject) => {
-    const iyzico = getIyzipay()
-    iyzico.checkoutForm.retrieve(
-      {
-        locale: "TR",
-        token,
-      },
-      (err: any, res: any) => {
-        if (err) return reject(err)
-        resolve(res)
-      }
-    )
-  })
 }
 
 async function finalizePaidOrder(orderId: number, result: any) {
@@ -92,7 +76,9 @@ async function finalizePaidOrder(orderId: number, result: any) {
       data: {
         status: "PAID",
         paidAt: freshOrder.paidAt || new Date(),
-        paymentId: result?.paymentId ? String(result.paymentId) : freshOrder.paymentId,
+        paymentId: result?.paymentId
+          ? String(result.paymentId)
+          : freshOrder.paymentId,
         paymentTransactionId:
           result?.itemTransactions?.[0]?.paymentTransactionId
             ? String(result.itemTransactions[0].paymentTransactionId)
@@ -191,7 +177,11 @@ export async function verifyOrderPayment(input: VerifyOrderPaymentInput) {
     }
   }
 
-  const result = await retrieveCheckoutForm(order.paymentToken)
+  const result = await retrieveCheckoutForm({
+    locale: "tr",
+    conversationId: order.paymentConversationId || undefined,
+    token: order.paymentToken,
+  })
 
   if (isSuccessResult(result)) {
     const finalized = await finalizePaidOrder(order.id, result)
