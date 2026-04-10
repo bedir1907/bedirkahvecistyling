@@ -1,25 +1,22 @@
 import crypto from "crypto"
 
-function getIyzicoConfig() {
-  const apiKey = process.env.IYZICO_API_KEY
-  const secretKey = process.env.IYZICO_SECRET_KEY
-  const baseUrl = process.env.IYZICO_BASE_URL
+function getRequiredEnv(name: string) {
+  const value = process.env[name]
 
-  if (!apiKey || !secretKey || !baseUrl) {
-    throw new Error("Iyzico env değişkenleri eksik")
+  if (!value) {
+    throw new Error(`${name} env değişkeni eksik`)
   }
 
-  return {
-    apiKey,
-    secretKey,
-    baseUrl,
-  }
+  return value
 }
 
-function createAuthorization(path: string, body: string, randomKey: string) {
-  const { apiKey, secretKey } = getIyzicoConfig()
+const apiKey = getRequiredEnv("IYZICO_API_KEY")
+const secretKey = getRequiredEnv("IYZICO_SECRET_KEY")
+const baseUrl = getRequiredEnv("IYZICO_BASE_URL")
 
+function createAuthorization(path: string, body: string, randomKey: string) {
   const payload = `${randomKey}${path}${body}`
+
   const signature = crypto
     .createHmac("sha256", secretKey)
     .update(payload)
@@ -32,8 +29,6 @@ function createAuthorization(path: string, body: string, randomKey: string) {
 }
 
 async function iyzicoPost<T>(path: string, data: Record<string, unknown>) {
-  const { baseUrl } = getIyzicoConfig()
-
   const body = JSON.stringify(data)
   const randomKey = `${Date.now()}${Math.floor(Math.random() * 100000)}`
   const authorization = createAuthorization(path, body, randomKey)
@@ -87,6 +82,10 @@ export async function retrieveCheckoutForm(data: {
     paidPrice?: number | string
     currency?: string
     basketId?: string
+    paymentId?: string | number
+    itemTransactions?: Array<{
+      paymentTransactionId?: string | number
+    }>
   }>("/payment/iyzipos/checkoutform/auth/ecom/detail", data)
 }
 
