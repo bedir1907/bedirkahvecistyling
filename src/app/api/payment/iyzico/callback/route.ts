@@ -10,11 +10,7 @@ function cleanBaseUrl(value?: string | null) {
 
   const normalized = String(value).trim().replace(/\/$/, "")
 
-  if (
-    !normalized ||
-    normalized === "null" ||
-    normalized === "undefined"
-  ) {
+  if (!normalized || normalized === "null" || normalized === "undefined") {
     return null
   }
 
@@ -29,6 +25,11 @@ function cleanBaseUrl(value?: string | null) {
 function getBaseUrl(request: Request) {
   const url = new URL(request.url)
 
+  // 🔥 Önce kendi siteni kullan
+  const envBaseUrl = cleanBaseUrl(process.env.APP_BASE_URL)
+  if (envBaseUrl) return envBaseUrl
+
+  // Sonra fallback
   const origin = cleanBaseUrl(request.headers.get("origin"))
   if (origin) return origin
 
@@ -61,9 +62,6 @@ function getBaseUrl(request: Request) {
   )
 
   if (forwardedHost) return forwardedHost
-
-  const envBaseUrl = cleanBaseUrl(process.env.APP_BASE_URL)
-  if (envBaseUrl) return envBaseUrl
 
   return cleanBaseUrl(url.origin) || "http://localhost:3000"
 }
