@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
+import { refundPayment } from "@/lib/iyzico"
 
 type Context = {
   params: Promise<{
@@ -158,6 +159,32 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
+    // PAID sipariş CANCELLED yapılıyorsa otomatik refund dene
+    if (nextStatus === "CANCELLED" && order.status === "PAID") {
+      if (!order.paymentTransactionId) {
+        return NextResponse.json(
+          { error: "İade için paymentTransactionId bulunamadı" },
+          { status: 400 }
+        )
+      }
+
+      const refundResult = await refundPayment({
+        locale: "tr",
+        conversationId: `refund_${order.orderNumber}`,
+        paymentTransactionId: order.paymentTransactionId,
+        price: String(order.totalPrice),
+        currency: "TRY",
+        ip: "85.34.78.112",
+      })
+
+      if (refundResult.status !== "success") {
+        return NextResponse.json(
+          { error: refundResult.errorMessage || "İade başarısız" },
+          { status: 400 }
+        )
+      }
+    }
+
     const updatedOrder = await prisma.$transaction(async (tx) => {
       if (nextStatus === "CANCELLED" && !order.stockRestored) {
         for (const item of order.items) {
@@ -188,6 +215,9 @@ export async function PATCH(request: Request, context: Context) {
           data: {
             status: nextStatus,
             stockRestored: true,
+            refundedAt: order.status === "PAID" ? new Date() : order.refundedAt,
+            refundAmount:
+              order.status === "PAID" ? order.totalPrice : order.refundAmount,
           },
           include: {
             items: true,
@@ -207,11 +237,11 @@ export async function PATCH(request: Request, context: Context) {
     })
 
     return NextResponse.json(updatedOrder)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin sipariş güncelleme hatası:", error)
 
     return NextResponse.json(
-      { error: "Sipariş güncellenemedi" },
+      { error: error.message || "Sipariş güncellenemedi" },
       { status: 500 }
     )
   }
