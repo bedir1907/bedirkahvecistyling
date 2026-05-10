@@ -54,10 +54,13 @@ export async function PATCH(request: Request) {
       },
     })
 
-    const allowedLinks = new Set<string>([
-      "/",
-      ...categories.map((category) => `/category/${category.slug}`),
-    ])
+   const allowedLinks = new Set<string>([
+  "/",
+  "/koleksiyon",
+  "/category/new-season",      // sanal kategori
+  "/category/indirimdekiler",  // sanal kategori
+  ...categories.map((category) => `/category/${category.slug}`),
+])
 
     const announcementLink = normalizeString(body.announcementLink)
     const heroButtonLink = normalizeString(body.heroButtonLink)

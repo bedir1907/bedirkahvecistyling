@@ -132,9 +132,7 @@ export default function StoreNavbar() {
                 <Link href="/" className={`transition whitespace-nowrap ${pathname === "/" ? "text-black" : "text-black/60 hover:text-black"}`}>
                   Anasayfa
                 </Link>
-                <Link href="/koleksiyon" className={`transition whitespace-nowrap ${pathname === "/koleksiyon" ? "text-black" : "text-black/60 hover:text-black"}`}>
-                  Tüm Ürünler
-                </Link>
+                
                 {categories.map((cat) => (
                   <Link
                     key={cat.id}
@@ -181,9 +179,7 @@ export default function StoreNavbar() {
           {categories.length > 0 && (
             <div className="lg:hidden pb-3 overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-2 min-w-max">
-                <Link href="/koleksiyon" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/koleksiyon" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
-                  Tüm Ürünler
-                </Link>
+                
                 {categories.map((cat) => (
                   <Link
                     key={cat.id}
@@ -216,8 +212,7 @@ export default function StoreNavbar() {
             {/* Nav */}
             <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
               <MobileLink href="/" label="🏠 Anasayfa" active={pathname === "/"} onClick={() => setMobileMenuOpen(false)} />
-              <MobileLink href="/koleksiyon" label="👕 Tüm Ürünler" active={pathname === "/koleksiyon"} onClick={() => setMobileMenuOpen(false)} />
-
+              
               {categories.length > 0 && (
                 <p className="px-3 pt-4 pb-1 text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
                   Kategoriler

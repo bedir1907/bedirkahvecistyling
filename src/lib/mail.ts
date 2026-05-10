@@ -14,7 +14,7 @@ export async function sendOrderEmail({
   total: number
 }) {
   const result = await resend.emails.send({
-    from: "E-Ticaret <onboarding@resend.dev>",
+    from: "E-Ticaret <info@bedirkahvecistyling.com>",
     to,
     subject: "Siparişiniz alındı 🎉",
     html: `
