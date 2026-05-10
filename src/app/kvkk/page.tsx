@@ -33,19 +33,19 @@ export default function KvkkPage() {
               şeffaf bir biçimde bilgi vermek amacıyla hazırlanmıştır.
             </p>
 
-            {/* 1 */}
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">1. Veri Sorumlusunun Kimliği</h2>
               <div className="bg-white border border-black/8 rounded-2xl px-5 py-4 space-y-1 text-sm">
-                <p><span className="font-medium text-black w-32 inline-block">Unvan</span> Bedir Kahveci Styling</p>
-                <p><span className="font-medium text-black w-32 inline-block">Adres</span> [Şirket adresi buraya yazılacak]</p>
-                <p><span className="font-medium text-black w-32 inline-block">E-posta</span> kvkk@bedirkahveci.com</p>
-                <p><span className="font-medium text-black w-32 inline-block">Telefon</span> [Telefon numarası]</p>
-                <p><span className="font-medium text-black w-32 inline-block">Web Sitesi</span> www.bedirkahveci.com</p>
+                <p><span className="font-medium text-black w-40 inline-block">Unvan</span> Bedir Kahveci Styling</p>
+                <p><span className="font-medium text-black w-40 inline-block">Adres</span> Yeniköy Mah. Amiral Şükrü Okan Cad. Altay Apartmanı No:26, Tirebolu / Giresun 28500</p>
+                <p><span className="font-medium text-black w-40 inline-block">Vergi Dairesi</span> Tirebolu Vergi Dairesi</p>
+                <p><span className="font-medium text-black w-40 inline-block">Vergi No</span> 4880688583</p>
+                <p><span className="font-medium text-black w-40 inline-block">E-posta</span> info@bedirkahvecistyling.com</p>
+                <p><span className="font-medium text-black w-40 inline-block">Telefon</span> +90 553 136 12 61</p>
+                <p><span className="font-medium text-black w-40 inline-block">Web Sitesi</span> www.bedirkahvecistyling.com</p>
               </div>
             </div>
 
-            {/* 2 */}
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">2. İşlenen Kişisel Veriler</h2>
               <p className="mb-3">Aşağıda belirtilen kategorilerdeki kişisel verileriniz işlenebilmektedir:</p>
@@ -76,10 +76,8 @@ export default function KvkkPage() {
               </div>
             </div>
 
-            {/* 3 */}
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">3. Kişisel Verilerin İşlenme Amaçları</h2>
-              <p className="mb-3">Kişisel verileriniz aşağıdaki amaçlarla işlenebilir:</p>
               <ul className="space-y-2 list-none">
                 {[
                   "Sipariş alma, doğrulama, hazırlama ve teslimat süreçlerinin yürütülmesi",
@@ -92,7 +90,7 @@ export default function KvkkPage() {
                   "Site güvenliğinin sağlanması, dolandırıcılık ve yetkisiz erişimlerin önlenmesi",
                   "Hukuki uyuşmazlıkların çözümünde delil ve kayıt yükümlülüğünün yerine getirilmesi",
                   "Yasal bildirim yükümlülüklerinin yerine getirilmesi (vergi dairesi, gümrük vb.)",
-                  "Web sitesi işlevselliğinin ve kullanıcı deneyiminin geliştirilmesi (analitik)",
+                  "Web sitesi işlevselliğinin ve kullanıcı deneyiminin geliştirilmesi",
                   "Açık rıza verilmesi halinde: e-bülten, kampanya ve kişiselleştirilmiş pazarlama iletişimi",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
@@ -103,12 +101,8 @@ export default function KvkkPage() {
               </ul>
             </div>
 
-            {/* 4 */}
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">4. Hukuki İşleme Sebepleri</h2>
-              <p className="mb-3">
-                Kişisel verileriniz, KVKK'nın 5. ve 6. maddeleri kapsamında aşağıdaki hukuki sebeplere dayanılarak işlenmektedir:
-              </p>
               <div className="space-y-3">
                 {[
                   ["Sözleşmenin kurulması veya ifası", "Sipariş, teslimat, iade ve müşteri hesabı işlemleri"],
@@ -124,19 +118,15 @@ export default function KvkkPage() {
               </div>
             </div>
 
-            {/* 5 */}
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">5. Kişisel Verilerin Aktarımı</h2>
-              <p className="mb-3">
-                Kişisel verileriniz, yalnızca belirtilen amaçlarla ve gerekli ölçüde aşağıdaki taraflarla paylaşılabilir:
-              </p>
               <div className="space-y-2 text-sm">
                 {[
                   ["Ödeme Kuruluşları", "Iyzico Ödeme Hizmetleri A.Ş. — ödeme işlemlerinin güvenli biçimde gerçekleştirilmesi"],
                   ["Kargo & Lojistik Firmaları", "Sipariş teslimatının sağlanması amacıyla anlaşmalı kargo şirketleri"],
-                  ["Bulut & Altyapı Hizmetleri", "Neon (veritabanı), Cloudinary (görsel depolama), Resend (e-posta altyapısı) — veri işleme sözleşmeleri kapsamında"],
+                  ["Bulut & Altyapı Hizmetleri", "Neon (veritabanı), Cloudinary (görsel depolama), Resend (e-posta altyapısı)"],
                   ["Mali Müşavirlik / Muhasebe", "Fatura ve muhasebe yükümlülüklerinin yerine getirilmesi"],
-                  ["Yetkili Kamu Kurum ve Kuruluşları", "Yasal zorunluluk, mahkeme kararı veya idari talep olması halinde ilgili makamlarla"],
+                  ["Yetkili Kamu Kurum ve Kuruluşları", "Yasal zorunluluk, mahkeme kararı veya idari talep halinde"],
                 ].map(([taraf, aciklama]) => (
                   <div key={taraf} className="flex gap-3 border-b border-black/6 py-3 last:border-0">
                     <span className="font-medium text-black min-w-[200px] shrink-0">{taraf}</span>
@@ -149,21 +139,8 @@ export default function KvkkPage() {
               </p>
             </div>
 
-            {/* 6 */}
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">6. Yurt Dışına Veri Aktarımı</h2>
-              <p>
-                Kullandığımız bazı altyapı hizmetleri (Cloudinary, Resend, Neon gibi) sunucuları yurt dışında bulunan
-                sağlayıcılar tarafından işletilmektedir. Bu aktarımlar, KVKK'nın 9. maddesi ve Kişisel Verileri Koruma
-                Kurulu'nun belirlediği güvenceler çerçevesinde gerçekleştirilmektedir. İlgili sağlayıcılar, uluslararası
-                veri koruma standartlarına (GDPR uyumu, Standart Sözleşme Maddeleri vb.) uygunluk taahhüdü altında
-                hareket etmektedir.
-              </p>
-            </div>
-
-            {/* 7 */}
-            <div>
-              <h2 className="text-xl font-semibold text-black mb-3">7. Saklama Süreleri</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">6. Saklama Süreleri</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead>
@@ -177,9 +154,9 @@ export default function KvkkPage() {
                       ["Sipariş ve fatura kayıtları", "10 yıl (Türk Ticaret Kanunu ve Vergi Usul Kanunu gereği)"],
                       ["Müşteri hesap bilgileri", "Hesap aktif olduğu süre + hesap silinmesinden itibaren 3 yıl"],
                       ["Müşteri destek kayıtları", "Talebin kapanmasından itibaren 3 yıl"],
-                      ["Ödeme işlem kayıtları", "10 yıl (6362 sayılı Sermaye Piyasası Kanunu ve ödeme mevzuatı gereği)"],
+                      ["Ödeme işlem kayıtları", "10 yıl (ödeme mevzuatı gereği)"],
                       ["Web sitesi log kayıtları", "2 yıl (5651 sayılı Kanun gereği)"],
-                      ["Pazarlama iletişimi", "Rıza geri çekilene kadar; rıza geri çekilmesinden sonra 3 yıl (ispat amaçlı)"],
+                      ["Pazarlama iletişimi", "Rıza geri çekilene kadar; rıza geri çekilmesinden sonra 3 yıl"],
                     ].map(([tur, sure]) => (
                       <tr key={tur} className="even:bg-gray-50/60">
                         <td className="px-4 py-3 font-medium text-black align-top">{tur}</td>
@@ -191,21 +168,18 @@ export default function KvkkPage() {
               </div>
             </div>
 
-            {/* 8 */}
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">8. İlgili Kişi Hakları (KVKK Madde 11)</h2>
-              <p className="mb-3">Kişisel verilerinize ilişkin olarak aşağıdaki haklara sahipsiniz:</p>
+              <h2 className="text-xl font-semibold text-black mb-3">7. İlgili Kişi Hakları (KVKK Madde 11)</h2>
               <div className="grid md:grid-cols-2 gap-3">
                 {[
                   ["🔍 Bilgi Edinme", "Kişisel verilerinizin işlenip işlenmediğini öğrenme"],
                   ["📋 Bilgi Talep Etme", "İşlenmiş verilere ilişkin bilgi alma"],
-                  ["🎯 Amaç Sorgulama", "Verilerin hangi amaçla işlendiğini ve amacına uygun kullanılıp kullanılmadığını öğrenme"],
-                  ["🌐 Aktarım Bilgisi", "Verilerin yurt içi veya yurt dışında kimlere aktarıldığını öğrenme"],
-                  ["✏️ Düzeltme Talep Etme", "Eksik veya yanlış verilerin düzeltilmesini isteme"],
-                  ["🗑️ Silme veya Yok Etme", "Yasal saklama süresi dolmuş verilerin silinmesini isteme"],
-                  ["📣 Bildirme Talebi", "Düzeltme/silme işlemlerinin aktarılan üçüncü kişilere bildirilmesini talep etme"],
-                  ["❌ İtiraz Hakkı", "İşlenen verilerin münhasıran otomatik sistemler aracılığıyla analiz edilmesi sonucunda aleyhinize bir sonuç doğurmasına itiraz etme"],
-                  ["⚖️ Zararın Giderilmesi", "Kanuna aykırı işleme nedeniyle uğradığınız zararın tazminini talep etme"],
+                  ["🎯 Amaç Sorgulama", "Verilerin hangi amaçla işlendiğini öğrenme"],
+                  ["🌐 Aktarım Bilgisi", "Verilerin kimlere aktarıldığını öğrenme"],
+                  ["✏️ Düzeltme", "Eksik veya yanlış verilerin düzeltilmesini isteme"],
+                  ["🗑️ Silme", "Yasal saklama süresi dolmuş verilerin silinmesini isteme"],
+                  ["❌ İtiraz", "Otomatik sistemler aracılığıyla aleyhine sonuç doğurmasına itiraz"],
+                  ["⚖️ Tazminat", "Kanuna aykırı işleme nedeniyle zararın giderilmesini talep etme"],
                 ].map(([hak, aciklama]) => (
                   <div key={hak} className="bg-white border border-black/8 rounded-xl px-4 py-3">
                     <p className="font-semibold text-sm text-black">{hak}</p>
@@ -215,61 +189,39 @@ export default function KvkkPage() {
               </div>
             </div>
 
-            {/* 9 */}
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">9. Başvuru Yöntemi</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">8. Başvuru Yöntemi</h2>
               <p className="mb-4">
                 KVKK kapsamındaki haklarınızı kullanmak için aşağıdaki kanallardan bize ulaşabilirsiniz.
-                Başvurunuzda kimliğinizi doğrulayıcı bilgilere yer vermeniz, talebinizin daha hızlı işleme
-                alınmasını sağlayacaktır. Başvurular, yasal süre olan <strong className="text-black">30 gün</strong> içinde
-                yanıtlanır; talebin niteliğine göre bu süre uzatılabilir ve tarafınıza bildirim yapılır.
+                Başvurular yasal süre olan <strong className="text-black">30 gün</strong> içinde yanıtlanır.
               </p>
               <div className="bg-white border border-black/8 rounded-2xl px-5 py-5 space-y-2 text-sm">
                 <p>
-                  <span className="font-semibold text-black">E-posta ile:</span>{" "}
-                  <a href="mailto:kvkk@bedirkahveci.com" className="underline hover:text-black transition">
-                    kvkk@bedirkahveci.com
+                  <span className="font-semibold text-black">E-posta:</span>{" "}
+                  <a href="mailto:info@bedirkahvecistyling.com" className="underline hover:text-black transition">
+                    info@bedirkahvecistyling.com
                   </a>{" "}
-                  — Konu satırına "KVKK Başvurusu" yazılması önerilir.
+                  — Konu: "KVKK Başvurusu"
                 </p>
                 <p>
-                  <span className="font-semibold text-black">Posta ile:</span>{" "}
-                  Bedir Kahveci Styling, [Şirket adresi] — "KVKK Başvurusu" ibaresiyle
-                </p>
-                <p className="text-gray-500 text-xs pt-2 border-t border-black/6">
-                  Kimlik tespiti amacıyla ek belge talep edilebilir. Başvuru ücretsizdir; ancak işlemin
-                  ayrıca bir maliyet gerektirmesi halinde Kişisel Verileri Koruma Kurulu tarafından belirlenen
-                  tarifeye göre ücret alınabilir.
+                  <span className="font-semibold text-black">Posta:</span>{" "}
+                  Yeniköy Mah. Amiral Şükrü Okan Cad. Altay Apartmanı No:26, Tirebolu / Giresun 28500
                 </p>
               </div>
             </div>
 
-            {/* 10 */}
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">10. Çerezler</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">9. Çerezler</h2>
               <p>
-                Web sitemizde kullandığımız çerezler ve tercih yönetimi hakkında ayrıntılı bilgiye{" "}
-                <Link href="/cerez-politikasi" className="underline hover:text-black transition">
-                  Çerez Politikamız
-                </Link>{" "}
+                Web sitemizde kullandığımız çerezler hakkında ayrıntılı bilgiye{" "}
+                <Link href="/cerez-politikasi" className="underline hover:text-black transition">Çerez Politikamız</Link>{" "}
                 sayfasından ulaşabilirsiniz.
-              </p>
-            </div>
-
-            {/* 11 */}
-            <div>
-              <h2 className="text-xl font-semibold text-black mb-3">11. Değişiklikler</h2>
-              <p>
-                Bu Aydınlatma Metni, yasal mevzuat değişiklikleri veya iş süreçlerindeki güncellemeler
-                doğrultusunda zaman zaman revize edilebilir. Güncel metin her zaman bu sayfada yayımlanır.
-                Önemli değişiklikler halinde kullanıcılara bildirim yapılır.
               </p>
             </div>
 
           </div>
         </div>
       </section>
-
       <StoreFooter />
     </main>
   )

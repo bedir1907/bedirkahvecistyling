@@ -10,92 +10,100 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError("")
 
     try {
       setLoading(true)
 
       const res = await fetch("/api/customer/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.error || "Giriş yapılamadı")
-      }
+      if (!res.ok) throw new Error(data.error || "Giriş yapılamadı")
 
       router.push("/hesabim")
       router.refresh()
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Giriş yapılamadı")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Giriş yapılamadı")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md border rounded-2xl p-8 bg-white">
-        <h1 className="text-3xl font-bold mb-2">Giriş Yap</h1>
-        <p className="text-gray-500 mb-6">Müşteri hesabınla giriş yap.</p>
+    <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fafaf8]">
+      <div className="w-full max-w-md">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm text-gray-600 block mb-2">E-posta</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3"
-              placeholder="ornek@mail.com"
-            />
-          </div>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block leading-none">
+            <span className="block text-[15px] font-semibold tracking-[0.22em] uppercase text-black">Bedir Kahveci</span>
+            <span className="block text-[10px] font-light tracking-[0.35em] uppercase text-black/40">Styling</span>
+          </Link>
+        </div>
 
-          <div>
-            <label className="text-sm text-gray-600 block mb-2">Şifre</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3"
-              placeholder="••••••••"
-            />
-          </div>
+        <div className="border border-black/10 rounded-3xl p-8 bg-white shadow-sm">
+          <h1 className="text-2xl font-medium tracking-tight mb-1">Giriş Yap</h1>
+          <p className="text-gray-500 text-sm mb-7">Müşteri hesabınla giriş yap.</p>
 
-          <div className="text-right">
-            <Link
-              href="/sifremi-unuttum"
-              className="text-sm text-gray-600 hover:text-black transition underline"
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1.5">E-posta</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                placeholder="ornek@mail.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1.5">Şifre</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-black text-white rounded-xl px-4 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
             >
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+            </button>
+          </form>
+
+          <div className="mt-5 flex items-center justify-between text-sm">
+            <Link href="/sifremi-unuttum" className="text-gray-500 hover:text-black transition">
               Şifremi unuttum
             </Link>
+            <Link href="/kayit" className="text-black font-medium hover:opacity-70 transition">
+              Hesap oluştur →
+            </Link>
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-black text-white rounded-xl px-4 py-3 disabled:opacity-50"
-          >
-            {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
-          </button>
-        </form>
-
-        <p className="text-sm text-gray-600 mt-6 text-center">
-          Hesabın yok mu?{" "}
-          <Link href="/kayit" className="font-medium text-black underline">
-            Kayıt Ol
-          </Link>
-        </p>
       </div>
     </main>
   )
