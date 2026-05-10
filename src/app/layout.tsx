@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import StoreNavbar from "@/components/store/StoreNavbar"
-import CookieBanner from "@/components/store/CookieBanner"
-import WhatsappFloat from "@/components/store/WhatsappFloat"
+import StoreShell from "@/components/store/StoreShell"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -17,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://e-ticaret.com"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://bedirkahvecistyling.com"
   ),
   title: {
-    default: "E-TİCARET — Modern Giyim",
-    template: "%s | E-TİCARET",
+    default: "Bedir Kahveci Styling",
+    template: "%s | Bedir Kahveci Styling",
   },
   description:
     "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi. Ücretsiz kargo, kolay iade.",
@@ -29,14 +27,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    siteName: "E-TİCARET",
-    title: "E-TİCARET — Modern Giyim",
+    siteName: "Bedir Kahveci Styling",
+    title: "Bedir Kahveci Styling",
     description:
       "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "E-TİCARET — Modern Giyim",
+    title: "Bedir Kahveci Styling",
     description:
       "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi.",
   },
@@ -53,12 +51,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black`}
       >
-        <StoreNavbar />
+        {/* StoreShell — admin sayfalarında otomatik gizlenir */}
+        <StoreShell />
         {children}
-        {/* KVKK çerez onay banner */}
-        <CookieBanner />
-        {/* WhatsApp — sadece admin'den aktif edilince görünür */}
-        <WhatsappFloat />
       </body>
     </html>
   )
