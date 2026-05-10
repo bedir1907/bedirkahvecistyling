@@ -27,27 +27,17 @@ export default function StoreNavbar() {
   const [mounted, setMounted] = useState(false)
   const [customer, setCustomer] = useState<Customer>(null)
   const [customerLoading, setCustomerLoading] = useState(true)
-
-  // Mobil menü
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  // Arama
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const cartCount = useCartStore((state) => state.getCartCount())
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
 
-  // Sayfa değişince mobil menüyü kapat
-  useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [pathname])
+  useEffect(() => { setMobileMenuOpen(false) }, [pathname])
 
-  // Arama açılınca input'a odaklan
   useEffect(() => {
     if (searchOpen) {
       setTimeout(() => searchInputRef.current?.focus(), 50)
@@ -56,16 +46,15 @@ export default function StoreNavbar() {
     }
   }, [searchOpen])
 
-  // ESC ile kapat
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setSearchOpen(false)
         setMobileMenuOpen(false)
       }
     }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
   }, [])
 
   useEffect(() => {
@@ -73,10 +62,8 @@ export default function StoreNavbar() {
       try {
         const res = await fetch("/api/categories")
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Kategoriler alınamadı")
         setCategories(Array.isArray(data) ? data : [])
-      } catch (error) {
-        console.error(error)
+      } catch {
         setCategories([])
       }
     }
@@ -89,8 +76,7 @@ export default function StoreNavbar() {
         setCustomerLoading(true)
         const res = await fetch("/api/customer/me", { cache: "no-store" })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Kullanıcı bilgisi alınamadı")
-        setCustomer(data.customer || null)
+        setCustomer(res.ok ? data.customer || null : null)
       } catch {
         setCustomer(null)
       } finally {
@@ -100,7 +86,7 @@ export default function StoreNavbar() {
     fetchCustomer()
   }, [pathname])
 
-  function isCategoryActive(slug: string) {
+  function isActive(slug: string) {
     return pathname === `/category/${slug}`
   }
 
@@ -112,125 +98,99 @@ export default function StoreNavbar() {
     router.push(`/arama?q=${encodeURIComponent(q)}`)
   }
 
+  const iconBtn = "inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/10 bg-white text-black/70 hover:border-black hover:bg-black hover:text-white transition shrink-0"
+
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/10 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
-        <div className="max-w-7xl mx-auto px-4 md:px-5">
-          <div className="h-[78px] flex items-center justify-between gap-6">
-            {/* Sol: Logo + Desktop Nav */}
-            <div className="flex items-center gap-8 xl:gap-10 min-w-0">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-black/10">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Ana satır */}
+          <div className="h-16 md:h-[72px] flex items-center justify-between gap-4">
+
+            {/* Sol: Hamburger (mobil) + Logo + Nav (desktop) */}
+            <div className="flex items-center gap-3 md:gap-6 min-w-0">
+              {/* Hamburger — sadece mobil */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className={`${iconBtn} lg:hidden`}
+                aria-label="Menü"
+              >
+                <Menu size={18} />
+              </button>
+
+              {/* Logo */}
               <Link
                 href="/"
-                className="shrink-0 text-[22px] md:text-[28px] font-semibold tracking-[0.18em] leading-none text-black"
+                className="shrink-0 text-[20px] md:text-[24px] font-semibold tracking-[0.18em] leading-none text-black"
               >
                 E-TİCARET
               </Link>
 
-              <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-[15px] font-medium min-w-0">
-                <Link
-                  href="/"
-                  className={`transition whitespace-nowrap ${
-                    pathname === "/"
-                      ? "text-black"
-                      : "text-black/70 hover:text-black"
-                  }`}
-                >
+              {/* Desktop nav */}
+              <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-[14px] font-medium">
+                <Link href="/" className={`transition whitespace-nowrap ${pathname === "/" ? "text-black" : "text-black/60 hover:text-black"}`}>
                   Anasayfa
                 </Link>
-
-                {categories.map((category) => (
+                <Link href="/koleksiyon" className={`transition whitespace-nowrap ${pathname === "/koleksiyon" ? "text-black" : "text-black/60 hover:text-black"}`}>
+                  Tüm Ürünler
+                </Link>
+                {categories.map((cat) => (
                   <Link
-                    key={category.id}
-                    href={`/category/${category.slug}`}
-                    className={`transition whitespace-nowrap ${
-                      isCategoryActive(category.slug)
-                        ? "text-black"
-                        : "text-black/70 hover:text-black"
-                    }`}
+                    key={cat.id}
+                    href={`/category/${cat.slug}`}
+                    className={`transition whitespace-nowrap ${isActive(cat.slug) ? "text-black" : "text-black/60 hover:text-black"}`}
                   >
-                    {category.name}
+                    {cat.name}
                   </Link>
                 ))}
               </nav>
             </div>
 
-            {/* Sağ: İkonlar */}
-            <div className="flex items-center gap-2 md:gap-3 shrink-0">
-              {/* Arama ikonu */}
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white text-black/80 hover:border-black hover:bg-black hover:text-white transition"
-                aria-label="Ara"
-                title="Ara"
-              >
-                <Search size={18} strokeWidth={1.9} />
+            {/* Sağ: ikonlar */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Arama */}
+              <button type="button" onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Ara">
+                <Search size={17} />
               </button>
 
               {/* Sepet */}
-              <Link
-                href="/cart"
-                className="relative inline-flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white text-black/80 hover:border-black hover:bg-black hover:text-white transition"
-                aria-label="Sepet"
-                title="Sepet"
-              >
-                <ShoppingBag size={19} strokeWidth={1.9} />
+              <Link href="/cart" className={`${iconBtn} relative`} aria-label="Sepet">
+                <ShoppingBag size={18} />
                 {mounted && cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-black text-white text-[11px] font-medium">
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-semibold flex items-center justify-center">
                     {cartCount}
                   </span>
                 )}
               </Link>
 
-              {/* Kullanıcı */}
+              {/* Hesap — sadece desktop */}
               {!customerLoading && (
                 <Link
                   href={customer ? "/hesabim" : "/giris"}
-                  className="hidden md:inline-flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-black/10 bg-white text-[15px] font-medium text-black/80 hover:border-black/20 hover:bg-gray-50 hover:text-black transition"
+                  className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-full border border-black/10 text-[13px] font-medium text-black/70 hover:border-black hover:bg-black hover:text-white transition"
                 >
-                  <User size={17} strokeWidth={1.9} />
+                  <User size={15} />
                   {customer ? "Hesabım" : "Giriş"}
                 </Link>
               )}
-
-              {/* Hamburger — sadece mobile */}
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white text-black/80 hover:border-black hover:bg-black hover:text-white transition"
-                aria-label="Menü"
-              >
-                {mobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
-              </button>
             </div>
           </div>
 
-          {/* Desktop: kategori scroll (tablet) */}
+          {/* Mobil kategori scroll bar */}
           {categories.length > 0 && (
-            <div className="lg:hidden pb-4 overflow-x-auto">
-              <div className="flex items-center gap-2.5 min-w-max">
-                <Link
-                  href="/"
-                  className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                    pathname === "/"
-                      ? "border-black bg-black text-white"
-                      : "border-black/10 bg-[#f5f3ee] text-black/80 hover:bg-black hover:text-white"
-                  }`}
-                >
-                  Anasayfa
+            <div className="lg:hidden pb-3 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-2 min-w-max">
+                <Link href="/koleksiyon" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/koleksiyon" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+                  Tüm Ürünler
                 </Link>
-
-                {categories.map((category) => (
+                {categories.map((cat) => (
                   <Link
-                    key={category.id}
-                    href={`/category/${category.slug}`}
-                    className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                      isCategoryActive(category.slug)
-                        ? "border-black bg-black text-white"
-                        : "border-black/10 bg-[#f5f3ee] text-black/80 hover:bg-black hover:text-white"
-                    }`}
+                    key={cat.id}
+                    href={`/category/${cat.slug}`}
+                    className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive(cat.slug) ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}
                   >
-                    {category.name}
+                    {cat.name}
                   </Link>
                 ))}
               </div>
@@ -239,101 +199,92 @@ export default function StoreNavbar() {
         </div>
       </header>
 
-      {/* ── Mobil Tam Ekran Menü ────────────────────────────────────────────── */}
+      {/* ── Mobil tam ekran menü ──────────────────────────────────────────────── */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 h-[78px] border-b border-black/10 shrink-0">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[22px] font-semibold tracking-[0.18em]"
-            >
-              E-TİCARET
-            </Link>
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-black/10"
-              aria-label="Menüyü kapat"
-            >
-              <X size={20} />
-            </button>
-          </div>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-y-0 left-0 w-[280px] bg-white flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 h-16 border-b border-black/8 shrink-0">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-[18px] font-semibold tracking-[0.18em]">
+                E-TİCARET
+              </Link>
+              <button type="button" onClick={() => setMobileMenuOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full border border-black/10">
+                <X size={17} />
+              </button>
+            </div>
 
-          {/* Nav linkleri */}
-          <nav className="flex-1 overflow-y-auto px-5 py-8 space-y-1">
-            <MobileNavLink href="/" label="Anasayfa" active={pathname === "/"} onClick={() => setMobileMenuOpen(false)} />
-            {categories.map((category) => (
-              <MobileNavLink
-                key={category.id}
-                href={`/category/${category.slug}`}
-                label={category.name}
-                active={isCategoryActive(category.slug)}
-                onClick={() => setMobileMenuOpen(false)}
-              />
-            ))}
-          </nav>
+            {/* Nav */}
+            <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
+              <MobileLink href="/" label="🏠 Anasayfa" active={pathname === "/"} onClick={() => setMobileMenuOpen(false)} />
+              <MobileLink href="/koleksiyon" label="👕 Tüm Ürünler" active={pathname === "/koleksiyon"} onClick={() => setMobileMenuOpen(false)} />
 
-          {/* Alt butonlar */}
-          <div className="px-5 pb-8 pt-4 border-t border-black/10 space-y-3 shrink-0">
-            <Link
-              href={customer ? "/hesabim" : "/giris"}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl border border-black/10 font-medium text-black/80 hover:bg-black hover:text-white transition"
-            >
-              <User size={18} />
-              {customer ? "Hesabım" : "Giriş Yap"}
-            </Link>
-            <Link
-              href="/cart"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl bg-black text-white font-medium hover:opacity-90 transition"
-            >
-              <ShoppingBag size={18} />
-              Sepet
-              {mounted && cartCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-white text-black text-[11px] font-semibold">
-                  {cartCount}
-                </span>
+              {categories.length > 0 && (
+                <p className="px-3 pt-4 pb-1 text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+                  Kategoriler
+                </p>
               )}
-            </Link>
+              {categories.map((cat) => (
+                <MobileLink
+                  key={cat.id}
+                  href={`/category/${cat.slug}`}
+                  label={cat.name}
+                  active={isActive(cat.slug)}
+                  onClick={() => setMobileMenuOpen(false)}
+                />
+              ))}
+            </nav>
+
+            {/* Alt butonlar */}
+            <div className="px-4 pb-6 pt-3 border-t border-black/8 space-y-2 shrink-0">
+              <Link
+                href={customer ? "/hesabim" : "/giris"}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border border-black/10 text-sm font-medium hover:bg-gray-50 transition"
+              >
+                <User size={16} />
+                {customer ? "Hesabım" : "Giriş Yap"}
+              </Link>
+              <Link
+                href="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition"
+              >
+                <ShoppingBag size={16} />
+                Sepetim
+                {mounted && cartCount > 0 && (
+                  <span className="bg-white text-black text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── Arama Modal ──────────────────────────────────────────────────────── */}
+      {/* ── Arama modal ──────────────────────────────────────────────────────── */}
       {searchOpen && (
         <div
-          className="search-modal-overlay fixed inset-0 z-50 bg-black/40 flex items-start justify-center pt-20 px-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSearchOpen(false)
-          }}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-16 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setSearchOpen(false) }}
         >
-          <div className="search-modal-panel w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 px-5 py-4 border-b border-black/10">
-              <Search size={20} className="shrink-0 text-black/40" />
+          <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 px-4 py-3.5 border-b border-black/8">
+              <Search size={18} className="text-black/30 shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Ürün ara..."
-                className="flex-1 text-lg outline-none bg-transparent placeholder:text-black/30"
+                className="flex-1 text-base outline-none bg-transparent placeholder:text-black/30"
               />
-              <button
-                type="button"
-                onClick={() => setSearchOpen(false)}
-                className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-                aria-label="Kapat"
-              >
-                <X size={18} />
+              <button type="button" onClick={() => setSearchOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition shrink-0">
+                <X size={16} />
               </button>
             </form>
-            <div className="px-5 py-4 text-sm text-black/40">
-              {searchQuery.trim()
-                ? `"${searchQuery}" için Enter'a bas`
-                : "Aramak istediğin ürünü yaz…"}
+            <div className="px-4 py-3 text-sm text-black/40">
+              {searchQuery.trim() ? `"${searchQuery}" için Enter'a bas` : "Aramak istediğin ürünü yaz…"}
             </div>
           </div>
         </div>
@@ -342,26 +293,12 @@ export default function StoreNavbar() {
   )
 }
 
-function MobileNavLink({
-  href,
-  label,
-  active,
-  onClick,
-}: {
-  href: string
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
+function MobileLink({ href, label, active, onClick }: { href: string; label: string; active: boolean; onClick: () => void }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`block px-4 py-3.5 rounded-2xl text-lg font-medium transition ${
-        active
-          ? "bg-black text-white"
-          : "text-black/70 hover:bg-gray-50 hover:text-black"
-      }`}
+      className={`block px-3 py-3 rounded-xl text-sm font-medium transition ${active ? "bg-black text-white" : "text-black/70 hover:bg-gray-50 hover:text-black"}`}
     >
       {label}
     </Link>
