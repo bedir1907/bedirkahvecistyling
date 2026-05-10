@@ -37,13 +37,13 @@ export default async function AdminAnalyticsPage() {
         orderBy: { createdAt: "desc" },
         take: 10,
         select: {
-            id: true,
-            orderNumber: true,
-            name: true,
-            total: true,
-            status: true,
-            createdAt: true,
-          },
+                  id: true,
+                  orderNumber: true,
+                  name: true,
+                  totalPrice: true,
+                  status: true,
+                  createdAt: true,
+                },
       })
       .catch(() => []),
 
@@ -60,10 +60,10 @@ export default async function AdminAnalyticsPage() {
 
   // Toplam ciro hesapla (sadece PAID siparişler)
   const revenueData = await prisma.order
-    .aggregate({ where: { status: "PAID" }, _sum: { total: true } })
-    .catch(() => ({ _sum: { total: 0 } }))
+.aggregate({ where: { status: "PAID" }, _sum: { totalPrice: true } })
+.catch(() => ({ _sum: { totalPrice: 0 } }))
 
-  const totalRevenue = revenueData._sum.total ?? 0
+const totalRevenue = revenueData._sum.totalPrice ?? 0
 
   const statusLabel: Record<string, string> = {
     PAID: "Ödendi",
@@ -126,7 +126,7 @@ export default async function AdminAnalyticsPage() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold">{formatPrice(order.total)}</p>
+                    <p className="text-sm font-semibold">{formatPrice(order.totalPrice)}</p>
                     <span className={`inline-block text-xs px-2 py-0.5 rounded-full mt-1 ${statusColor[order.status] ?? "bg-gray-100 text-gray-600"}`}>
                       {statusLabel[order.status] ?? order.status}
                     </span>

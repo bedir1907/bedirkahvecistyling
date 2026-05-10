@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
@@ -15,7 +15,7 @@ type Product = {
   category: string
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const q = searchParams.get("q") || ""
 
@@ -44,7 +44,6 @@ export default function SearchPage() {
   return (
     <main className="min-h-screen bg-white text-black">
       <section className="max-w-7xl mx-auto px-4 py-10">
-        {/* Breadcrumb */}
         <div className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
           <Link href="/" className="hover:text-black transition">Anasayfa</Link>
           <span>/</span>
@@ -63,7 +62,7 @@ export default function SearchPage() {
         </div>
 
         {!q.trim() ? (
-          <p className="text-gray-500">Arama yapmak için navbar'daki arama butonunu kullanın.</p>
+          <p className="text-gray-500">Arama yapmak için navbar&apos;daki arama butonunu kullanın.</p>
         ) : loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
@@ -79,7 +78,7 @@ export default function SearchPage() {
         ) : products.length === 0 ? (
           <div className="rounded-3xl border p-12 text-center">
             <p className="text-gray-500 mb-4">
-              <strong>"{q}"</strong> için sonuç bulunamadı.
+              <strong>&quot;{q}&quot;</strong> için sonuç bulunamadı.
             </p>
             <Link href="/" className="inline-flex px-6 py-3 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition">
               Anasayfaya Dön
@@ -103,5 +102,13 @@ export default function SearchPage() {
       </section>
       <StoreFooter />
     </main>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <SearchContent />
+    </Suspense>
   )
 }
