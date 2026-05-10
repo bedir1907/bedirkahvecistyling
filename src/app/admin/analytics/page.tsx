@@ -37,13 +37,13 @@ export default async function AdminAnalyticsPage() {
         orderBy: { createdAt: "desc" },
         take: 10,
         select: {
-          id: true,
-          orderNumber: true,
-          customerName: true,
-          total: true,
-          status: true,
-          createdAt: true,
-        },
+            id: true,
+            orderNumber: true,
+            name: true,
+            total: true,
+            status: true,
+            createdAt: true,
+          },
       })
       .catch(() => []),
 
@@ -120,7 +120,7 @@ export default async function AdminAnalyticsPage() {
                 <div key={order.id} className="flex items-center justify-between gap-3 py-2 border-b last:border-0">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
-                    <p className="text-xs text-gray-500">{order.customerName}</p>
+                    <p className="text-xs text-gray-500">{order.name}</p>
                     <p className="text-xs text-gray-400">
                       {new Date(order.createdAt).toLocaleDateString("tr-TR")}
                     </p>
