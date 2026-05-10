@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { formatPrice } from "@/lib/format"
 
 type CardColor = {
   id: number
@@ -40,9 +41,7 @@ export default function ProductCard({
   const safeName = name && name.trim().length > 0 ? name : "Ürün"
 
   const hasDiscount =
-    oldPrice !== null &&
-    oldPrice !== undefined &&
-    oldPrice > price
+    oldPrice !== null && oldPrice !== undefined && oldPrice > price
 
   const discountRate = hasDiscount
     ? Math.round(((oldPrice - price) / oldPrice) * 100)
@@ -80,10 +79,10 @@ export default function ProductCard({
 
       <div className="mt-3 md:mt-4 space-y-1.5 md:space-y-2">
         {category ? (
-  <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-2.5 py-1 text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-700">
-    {category}
-  </p>
-) : null}
+          <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-2.5 py-1 text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-700">
+            {category}
+          </p>
+        ) : null}
 
         <h3 className="text-[14px] sm:text-[15px] md:text-[17px] font-medium leading-[1.35] tracking-tight transition group-hover:text-gray-600 line-clamp-2 min-h-[38px] md:min-h-[46px]">
           {safeName}
@@ -112,21 +111,21 @@ export default function ProductCard({
                 </span>
               ))}
             </div>
-
             <span className="text-[11px] md:text-xs text-gray-500">
               {colors.length} renk
             </span>
           </div>
         ) : null}
 
+        {/* ── Fiyat — formatPrice ile düzgün ₺ formatı ── */}
         <div className="flex items-center gap-2 pt-1">
           <span className="text-[15px] sm:text-base md:text-lg font-semibold tracking-tight">
-            ₺{price}
+            {formatPrice(price)}
           </span>
 
           {hasDiscount ? (
             <span className="text-xs md:text-sm text-gray-400 line-through">
-              ₺{oldPrice}
+              {formatPrice(oldPrice as number)}
             </span>
           ) : null}
         </div>

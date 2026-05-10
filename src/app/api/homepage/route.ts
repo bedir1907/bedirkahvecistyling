@@ -43,14 +43,14 @@ export async function GET() {
       },
     })
 
-    if (!settings) {
-      return NextResponse.json(
-        { error: "Homepage ayarları bulunamadı" },
-        { status: 404 }
-      )
-    }
+   if (!settings) {
+  return NextResponse.json(
+    { error: "Homepage ayarları bulunamadı" },
+    { status: 404 }
+  )
+}
 
-    return NextResponse.json(settings)
+    return NextResponse.json(settings ?? {})
   } catch (error) {
     console.error("Homepage public get hatası:", error)
 

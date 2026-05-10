@@ -2,10 +2,9 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import AnnouncementBar from "@/components/store/AnnouncementBar"
-/*import StoreNavbar from "@/components/store/StoreNavbar"*/
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
+import { formatPrice } from "@/lib/format"
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1200&q=80&auto=format&fit=crop"
@@ -20,27 +19,18 @@ export default function CartPage() {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
+    // AnnouncementBar kaldırıldı — layout'tan geliyor
     <main className="min-h-screen bg-white text-black">
-      <AnnouncementBar />
-       
-
       <section className="max-w-7xl mx-auto px-4 py-14">
         <div className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Sepetim
-          </h1>
-          <p className="text-gray-500 mt-2">
-            Seçtiğin ürünleri kontrol et ve siparişini tamamla.
-          </p>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Sepetim</h1>
+          <p className="text-gray-500 mt-2">Seçtiğin ürünleri kontrol et ve siparişini tamamla.</p>
         </div>
 
         {cart.length === 0 ? (
           <div className="border rounded-3xl p-10 text-center bg-white">
             <p className="text-gray-600 mb-5">Sepetiniz boş.</p>
-            <Link
-              href="/"
-              className="inline-flex px-6 py-3 rounded-2xl bg-black text-white"
-            >
+            <Link href="/" className="inline-flex px-6 py-3 rounded-2xl bg-black text-white">
               Alışverişe Dön
             </Link>
           </div>
@@ -66,15 +56,14 @@ export default function CartPage() {
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div>
                           <h2 className="text-lg font-semibold">{item.name}</h2>
-                          <p className="text-gray-600 mt-1">₺{item.price}</p>
+                          <p className="text-gray-600 mt-1">{formatPrice(item.price)}</p>
                           <p className="text-sm text-gray-500 mt-2">
                             Renk: {item.color} • Beden: {item.size}
                           </p>
                         </div>
-
                         <div className="text-left md:text-right">
                           <p className="text-lg font-semibold">
-                            ₺{item.price * item.quantity}
+                            {formatPrice(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -83,23 +72,15 @@ export default function CartPage() {
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() =>
-                              decreaseQuantity(item.productId, item.variantId)
-                            }
+                            onClick={() => decreaseQuantity(item.productId, item.variantId)}
                             className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition"
                           >
                             -
                           </button>
-
-                          <span className="min-w-[28px] text-center font-medium">
-                            {item.quantity}
-                          </span>
-
+                          <span className="min-w-[28px] text-center font-medium">{item.quantity}</span>
                           <button
                             type="button"
-                            onClick={() =>
-                              increaseQuantity(item.productId, item.variantId)
-                            }
+                            onClick={() => increaseQuantity(item.productId, item.variantId)}
                             className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
                             disabled={item.quantity >= item.stock}
                           >
@@ -109,26 +90,12 @@ export default function CartPage() {
 
                         <button
                           type="button"
-                          onClick={() =>
-                            removeFromCart(item.productId, item.variantId)
-                          }
+                          onClick={() => removeFromCart(item.productId, item.variantId)}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-gray-600 hover:bg-black hover:text-white transition"
                           aria-label="Sepetten çıkar"
-                          title="Sepetten çıkar"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0l1 12h6l1-12M10 11v6M14 11v6"
-                            />
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0l1 12h6l1-12M10 11v6M14 11v6" />
                           </svg>
                           <span>Sepetten Çıkar</span>
                         </button>
@@ -141,26 +108,22 @@ export default function CartPage() {
 
             <aside className="rounded-3xl border bg-gray-50 p-6 lg:sticky lg:top-24">
               <h2 className="text-xl font-semibold mb-6">Sipariş Özeti</h2>
-
               <div className="space-y-4 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Ürün Adedi</span>
                   <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Ara Toplam</span>
-                  <span>₺{total}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Kargo</span>
-                  <span>Ücretsiz</span>
+                  <span className="text-green-600 font-medium">Ücretsiz</span>
                 </div>
-
                 <div className="border-t pt-4 flex items-center justify-between text-base font-semibold">
                   <span>Toplam</span>
-                  <span>₺{total}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
 
@@ -171,7 +134,6 @@ export default function CartPage() {
                 >
                   Ödemeye Geç
                 </Link>
-
                 <button
                   type="button"
                   onClick={clearCart}
@@ -179,6 +141,13 @@ export default function CartPage() {
                 >
                   Sepeti Temizle
                 </button>
+              </div>
+
+              {/* Güven rozetleri */}
+              <div className="mt-6 pt-6 border-t space-y-2">
+                {["🔒 SSL ile güvenli ödeme", "🚚 Ücretsiz kargo", "↩️ 14 gün iade garantisi"].map((badge) => (
+                  <p key={badge} className="text-xs text-gray-500 flex items-center gap-2">{badge}</p>
+                ))}
               </div>
             </aside>
           </div>

@@ -1,26 +1,19 @@
-import AnnouncementBar from "@/components/store/AnnouncementBar"
 import CategoryShowcase from "@/components/store/CategoryShowcase"
 import DiscountedProducts from "@/components/store/DiscountedProducts"
 import HeroSection from "@/components/store/HeroSection"
 import ProductSection from "@/components/store/ProductSection"
 import StoreFooter from "@/components/store/StoreFooter"
-//import StoreNavbar from "@/components/store/StoreNavbar"
+// AnnouncementBar kaldırıldı — layout.tsx → StoreNavbar içinde zaten render ediliyor
 import { prisma } from "@/lib/prisma"
 
 export default async function Home() {
   const settings = await prisma.homepageSettings.findFirst({
-    where: {
-      isActive: true,
-    },
-    orderBy: {
-      id: "asc",
-    },
+    where: { isActive: true },
+    orderBy: { id: "asc" },
   })
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <AnnouncementBar />
-      
       <HeroSection />
 
       {settings?.featuredCategoriesEnabled && (

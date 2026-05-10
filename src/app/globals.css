@@ -12,27 +12,22 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Arial kaldırıldı — layout.tsx'deki Geist font değişkenleri kullanılır */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
+/* ─── Announcement Bar ──────────────────────────────────── */
 .announcement-container {
   position: relative;
   overflow: hidden;
@@ -100,4 +95,45 @@ body {
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* ─── Cookie Banner ─────────────────────────────────────── */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cookie-banner-enter {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Search Modal ──────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-modal-overlay {
+  animation: fadeIn 0.2s ease;
+}
+
+.search-modal-panel {
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }

@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-TİC v2 — Sosyal Medya + Admin Güncellemesi
 
-## Getting Started
+## 📁 Dosya Haritası
 
-First, run the development server:
+```
+prisma/
+├── schema_addition.prisma          ← Bu modeli schema.prisma'ya ekle
+└── social_settings_migration.sql   ← Migration notu + seed SQL
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+src/
+├── app/
+│   ├── layout.tsx                              ← DEĞİŞTİ  (WhatsappFloat eklendi)
+│   │
+│   ├── admin/
+│   │   └── social/page.tsx                     ← YENİ    (sosyal medya admin sayfası)
+│   │
+│   └── api/
+│       ├── admin/social/route.ts               ← YENİ    (admin GET + PATCH)
+│       └── social/route.ts                     ← YENİ    (public GET — footer için)
+│
+└── components/
+    ├── admin/
+    │   └── AdminSidebar.tsx                    ← DEĞİŞTİ  (📱 Sosyal Medya linki eklendi)
+    │
+    └── store/
+        ├── StoreFooter.tsx                     ← DEĞİŞTİ  (dinamik sosyal medya ikonları)
+        └── WhatsappFloat.tsx                   ← YENİ    (sağ altta sabit WhatsApp butonu)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Kurulum Adımları (Sırasıyla)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prisma Schema'ya model ekle
+`prisma/schema.prisma` dosyasını aç,
+en alt satıra `schema_addition.prisma` içindeki `model SocialSettings { ... }` bloğunu yapıştır.
 
-## Learn More
+### 2. Migration çalıştır
+```bash
+npx prisma migrate dev --name add_social_settings
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Dosyaları kopyala
+Yukarıdaki tablodaki her dosyayı projedeki aynı yola yapıştır.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Sunucuyu başlat
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Admin panelinden ayarla
+`/admin/social` sayfasına git →
+İstediğin platformu toggle ile aç →
+URL veya telefon numarasını gir →
+"Ayarları Kaydet"e bas.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ✅ Ne Çalışıyor?
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Özellik | Detay |
+|---------|-------|
+| **Toggle on/off** | Her platform bağımsız açılıp kapatılabilir |
+| **Dinamik footer** | Sadece aktif + URL'li platformlar görünür |
+| **WhatsApp float** | Sağ altta yeşil buton, ping animasyonlu |
+| **Hazır mesaj** | WhatsApp açılınca önceden yazılmış metin |
+| **Admin sidebar** | 📱 Sosyal Medya menüsü eklendi |
+
+---
+
+## WhatsApp Numara Formatı
+```
+905321234567   ✅ doğru  (90 + hat numarası, boşluksuz)
+5321234567     ❌ yanlış (ülke kodu olmadan)
++905321234567  ❌ yanlış (+ işareti)
+```

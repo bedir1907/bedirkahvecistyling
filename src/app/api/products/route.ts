@@ -9,6 +9,8 @@ export async function GET(request: Request) {
     const isNew = searchParams.get("isNew")
     const discounted = searchParams.get("discounted")
     const featured = searchParams.get("featured")
+    // ── YENİ: Arama parametresi ──────────────────────────────────────────────
+    const q = searchParams.get("q")?.trim()
 
     const products = await prisma.product.findMany({
       where: {
@@ -16,18 +18,20 @@ export async function GET(request: Request) {
         ...(category ? { category } : {}),
         ...(isNew === "true" ? { isNew: true } : {}),
         ...(featured === "true" ? { featured: true } : {}),
-        ...(discounted === "true"
+        ...(discounted === "true" ? { oldPrice: { not: null } } : {}),
+        // Arama: ürün adı veya kategoride geçiyor mu?
+        ...(q
           ? {
-              oldPrice: {
-                not: null,
-              },
+              OR: [
+                { name: { contains: q, mode: "insensitive" } },
+                { category: { contains: q, mode: "insensitive" } },
+                { description: { contains: q, mode: "insensitive" } },
+                { color: { contains: q, mode: "insensitive" } },
+              ],
             }
           : {}),
       },
-      orderBy: [
-        { displayOrder: "asc" },
-        { id: "desc" },
-      ],
+      orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
       select: {
         id: true,
         name: true,
@@ -43,39 +47,23 @@ export async function GET(request: Request) {
       },
     })
 
-    // 🔥 HER ÜRÜN İÇİN RENKLERİ EKLE
+    // Her ürün için renk seçeneklerini ekle
     const productsWithColors = await Promise.all(
       products.map(async (product) => {
         const siblings = product.groupCode
           ? await prisma.product.findMany({
-              where: {
-                groupCode: product.groupCode,
-                isActive: true,
-              },
+              where: { groupCode: product.groupCode, isActive: true },
               orderBy: [{ color: "asc" }],
-              select: {
-                id: true,
-                color: true,
-                image: true,
-                slug: true,
-              },
+              select: { id: true, color: true, image: true, slug: true },
             })
           : []
-
-        return {
-          ...product,
-          colors: siblings,
-        }
+        return { ...product, colors: siblings }
       })
     )
 
     return NextResponse.json(productsWithColors)
   } catch (error) {
     console.error("Ürün listeleme hatası:", error)
-
-    return NextResponse.json(
-      { error: "Ürünler getirilemedi" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Ürünler getirilemedi" }, { status: 500 })
   }
 }

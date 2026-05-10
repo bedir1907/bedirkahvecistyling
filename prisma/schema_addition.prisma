@@ -1,0 +1,29 @@
+// Bu bloğu prisma/schema.prisma dosyasının EN ALTINA yapıştır
+// (son model'den sonra)
+
+model SocialSettings {
+  id Int @id @default(autoincrement())
+
+  instagramEnabled Boolean @default(false)
+  instagramUrl     String?
+
+  tiktokEnabled Boolean @default(false)
+  tiktokUrl     String?
+
+  youtubeEnabled Boolean @default(false)
+  youtubeUrl     String?
+
+  whatsappEnabled Boolean @default(false)
+  whatsappNumber  String?
+  whatsappMessage String?
+
+  twitterEnabled Boolean @default(false)
+  twitterUrl     String?
+
+  facebookEnabled Boolean @default(false)
+  facebookUrl     String?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
