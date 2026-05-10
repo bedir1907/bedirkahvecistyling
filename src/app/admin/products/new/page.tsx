@@ -16,18 +16,19 @@ export default function NewProductPage() {
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const [form, setForm] = useState({
+    productCode: "",
     name: "",
     slug: "",
+    color: "",
+    groupCode: "",
     price: "",
     oldPrice: "",
     image: "",
     category: "",
     description: "",
-    sizes: "",
-    colors: "",
-    stock: "",
     featured: false,
     isNew: false,
     isActive: true,
@@ -40,297 +41,337 @@ export default function NewProductPage() {
         const res = await fetch("/api/admin/categories/list")
         const data = await res.json()
         setCategories(data)
-
         if (data.length > 0) {
-          setForm((prev) => ({
-            ...prev,
-            category: data[0].name,
-          }))
+          setForm((prev) => ({ ...prev, category: data[0].name }))
         }
       } catch (error) {
         console.error(error)
       }
     }
-
     fetchCategories()
   }, [])
+
+  // İsimden otomatik slug üret
+  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value
+    const slug = value
+      .toLowerCase()
+      .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
+      .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim()
+    setForm((prev) => ({ ...prev, name: value, slug }))
+  }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name, value, type } = e.target
-
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked
       setForm((prev) => ({ ...prev, [name]: checked }))
       return
     }
-
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+    setError("")
 
     try {
       const res = await fetch("/api/admin/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
-          sizes: form.sizes.split(",").map((item) => item.trim()).filter(Boolean),
-          colors: form.colors.split(",").map((item) => item.trim()).filter(Boolean),
+          productCode: form.productCode,
+          name: form.name,
+          slug: form.slug,
+          color: form.color,
+          groupCode: form.groupCode,
+          price: Number(form.price),
+          oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
+          image: form.image,
+          category: form.category,
+          description: form.description,
+          featured: form.featured,
+          isNew: form.isNew,
+          isActive: form.isActive,
+          displayOrder: Number(form.displayOrder),
+          sizes: [],
+          colors: [],
+          stock: 0,
         }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || "Ürün eklenemedi")
       }
 
-      router.push("/admin/products")
-      router.refresh()
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Ürün eklenemedi")
+      // Ürün oluşturulduktan sonra renk grupları sayfasına yönlendir
+      router.push(`/admin/color-groups/${data.id}/images`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ürün eklenemedi")
     } finally {
       setLoading(false)
     }
   }
 
+  const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-black/40 transition text-sm"
+
   return (
-    <main className="min-h-screen bg-gray-100">
-      <div className="max-w-3xl mx-auto py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Yeni Ürün Ekle</h1>
-            <p className="text-gray-600 mt-1">Yeni ürün bilgilerini gir</p>
+    <main>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Yeni Ürün Ekle</h1>
+          <p className="text-gray-500 mt-1 text-sm">
+            Ürünü kaydettikten sonra renk grupları ve beden/stok bilgilerini ekleyebilirsiniz.
+          </p>
+        </div>
+        <Link
+          href="/admin/products"
+          className="text-sm border rounded-xl px-4 py-2 hover:bg-gray-50 transition"
+        >
+          ← Geri
+        </Link>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+
+        {/* Temel Bilgiler */}
+        <div className="bg-white border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">Temel Bilgiler</h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                Ürün Kodu <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="productCode"
+                value={form.productCode}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="En az 8 haneli sayı (ör: 10000001)"
+                required
+              />
+              <p className="text-xs text-gray-400 mt-1">Sadece rakam, en az 8 hane</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                Group Code <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="groupCode"
+                value={form.groupCode}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="ör: GROUP-001"
+                required
+              />
+              <p className="text-xs text-gray-400 mt-1">Aynı ürünün farklı renkleri aynı kodu paylaşır</p>
+            </div>
           </div>
 
-          <Link
-            href="/admin/products"
-            className="border border-black px-4 py-2 rounded hover:bg-black hover:text-white"
-          >
-            Geri Dön
-          </Link>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow p-6 space-y-5"
-        >
           <div>
-            <label className="block mb-2 font-medium">Ürün Adı</label>
+            <label className="block text-sm font-medium mb-1.5">
+              Ürün Adı <span className="text-red-500">*</span>
+            </label>
             <input
               name="name"
               value={form.name}
-              onChange={handleChange}
-              className="w-full border rounded px-4 py-3"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium">Slug</label>
-            <input
-              name="slug"
-              value={form.slug}
-              onChange={handleChange}
-              className="w-full border rounded px-4 py-3"
+              onChange={handleNameChange}
+              className={inputCls}
+              placeholder="ör: Basic Oversize Tişört"
               required
             />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-2 font-medium">Fiyat</label>
+              <label className="block text-sm font-medium mb-1.5">Slug</label>
               <input
-                name="price"
-                value={form.price}
+                name="slug"
+                value={form.slug}
                 onChange={handleChange}
-                type="number"
-                className="w-full border rounded px-4 py-3"
+                className={inputCls}
+                placeholder="otomatik oluşur"
                 required
               />
             </div>
 
             <div>
-              <label className="block mb-2 font-medium">Eski Fiyat</label>
+              <label className="block text-sm font-medium mb-1.5">
+                Renk <span className="text-red-500">*</span>
+              </label>
               <input
-                name="oldPrice"
-                value={form.oldPrice}
+                name="color"
+                value={form.color}
                 onChange={handleChange}
-                type="number"
-                className="w-full border rounded px-4 py-3"
+                className={inputCls}
+                placeholder="ör: Siyah"
+                required
               />
             </div>
           </div>
 
-          <div className="space-y-3">
-  <label className="block font-medium">Kapak Görseli</label>
-
-  <div className="flex flex-wrap items-center gap-3">
-    <CloudinaryUploadButton
-      buttonText="Bilgisayardan Kapak Görseli Seç"
-      onUploadSuccess={(url) =>
-        setForm((prev) => ({
-          ...prev,
-          image: url,
-        }))
-      }
-    />
-
-    {form.image ? (
-      <button
-        type="button"
-        onClick={() =>
-          setForm((prev) => ({
-            ...prev,
-            image: "",
-          }))
-        }
-        className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
-      >
-        Görseli Kaldır
-      </button>
-    ) : null}
-  </div>
-
-  {form.image ? (
-    <div className="rounded-xl border p-3 bg-gray-50">
-      <img
-        src={form.image}
-        alt="Ürün kapak görsel önizleme"
-        className="w-full max-w-sm h-56 object-cover rounded-lg border"
-      />
-    </div>
-  ) : (
-    <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
-      Henüz kapak görseli seçilmedi.
-    </div>
-  )}
-</div>
-
           <div>
-            <label className="block mb-2 font-medium">Kategori</label>
+            <label className="block text-sm font-medium mb-1.5">
+              Kategori <span className="text-red-500">*</span>
+            </label>
             <select
               name="category"
               value={form.category}
               onChange={handleChange}
-              className="w-full border rounded px-4 py-3"
+              className={inputCls}
               required
             >
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>{cat.name}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block mb-2 font-medium">Açıklama</label>
+            <label className="block text-sm font-medium mb-1.5">Açıklama</label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleChange}
-              className="w-full border rounded px-4 py-3 min-h-[120px]"
-              required
+              className={`${inputCls} min-h-[120px]`}
+              placeholder="Ürün açıklaması..."
             />
           </div>
+        </div>
 
+        {/* Fiyat */}
+        <div className="bg-white border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">Fiyat</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-2 font-medium">Bedenler (virgülle)</label>
+              <label className="block text-sm font-medium mb-1.5">
+                Satış Fiyatı (₺) <span className="text-red-500">*</span>
+              </label>
               <input
-                name="sizes"
-                value={form.sizes}
+                name="price"
+                value={form.price}
                 onChange={handleChange}
-                className="w-full border rounded px-4 py-3"
-                placeholder="S, M, L, XL"
+                type="number"
+                className={inputCls}
+                placeholder="599"
                 required
               />
             </div>
-
             <div>
-              <label className="block mb-2 font-medium">Renkler (virgülle)</label>
+              <label className="block text-sm font-medium mb-1.5">
+                Eski Fiyat (₺) <span className="text-gray-400 font-normal">opsiyonel</span>
+              </label>
               <input
-                name="colors"
-                value={form.colors}
+                name="oldPrice"
+                value={form.oldPrice}
                 onChange={handleChange}
-                className="w-full border rounded px-4 py-3"
-                placeholder="Siyah, Beyaz"
-                required
+                type="number"
+                className={inputCls}
+                placeholder="799"
               />
             </div>
           </div>
+        </div>
+
+        {/* Kapak Görseli */}
+        <div className="bg-white border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">Kapak Görseli</h2>
+          <p className="text-sm text-gray-500">
+            Bu görsel ürün listelerinde gösterilir. Renk grupları sayfasından her renk için ayrı görseller ekleyebilirsiniz.
+          </p>
+
+          <CloudinaryUploadButton
+            buttonText="Kapak Görseli Yükle"
+            onUploadSuccess={(url) => setForm((prev) => ({ ...prev, image: url }))}
+          />
+
+          {form.image && (
+            <div className="relative w-40 h-40 rounded-xl overflow-hidden border">
+              <img src={form.image} alt="Kapak" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, image: "" }))}
+                className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full text-xs flex items-center justify-center hover:bg-black transition"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Vitrin Ayarları */}
+        <div className="bg-white border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">Vitrin Ayarları</h2>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-2 font-medium">Stok</label>
-              <input
-                name="stock"
-                value={form.stock}
-                onChange={handleChange}
-                type="number"
-                className="w-full border rounded px-4 py-3"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block mb-2 font-medium">Vitrin Sırası</label>
+              <label className="block text-sm font-medium mb-1.5">Vitrin Sırası</label>
               <input
                 name="displayOrder"
                 value={form.displayOrder}
                 onChange={handleChange}
                 type="number"
-                className="w-full border rounded px-4 py-3"
+                className={inputCls}
               />
             </div>
           </div>
 
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={form.featured}
-              onChange={handleChange}
-            />
-            <span>Öne çıkan ürün</span>
-          </label>
+          <div className="space-y-3">
+            {[
+              { name: "featured", label: "⭐ Öne çıkan ürün", sub: "Ana sayfada öne çıkan bölümünde göster" },
+              { name: "isNew", label: "🆕 Yeni gelen ürün", sub: "Yeni gelenler bölümünde göster" },
+              { name: "isActive", label: "✅ Aktif", sub: "Mağazada görünsün" },
+            ].map((item) => (
+              <label key={item.name} className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name={item.name}
+                  checked={form[item.name as keyof typeof form] as boolean}
+                  onChange={handleChange}
+                  className="mt-1"
+                />
+                <div>
+                  <p className="font-medium text-sm">{item.label}</p>
+                  <p className="text-xs text-gray-400">{item.sub}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
 
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              name="isNew"
-              checked={form.isNew}
-              onChange={handleChange}
-            />
-            <span>Yeni gelen ürün</span>
-          </label>
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              name="isActive"
-              checked={form.isActive}
-              onChange={handleChange}
-            />
-            <span>Aktif ürün</span>
-          </label>
-
+        <div className="flex gap-3 pb-8">
           <button
             type="submit"
             disabled={loading}
-            className="bg-black text-white px-6 py-3 rounded hover:opacity-90 disabled:opacity-50"
+            className="bg-black text-white px-8 py-3 rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50"
           >
-            {loading ? "Kaydediliyor..." : "Ürünü Kaydet"}
+            {loading ? "Kaydediliyor..." : "Ürünü Kaydet →"}
           </button>
-        </form>
-      </div>
+          <Link
+            href="/admin/products"
+            className="border px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition"
+          >
+            İptal
+          </Link>
+        </div>
+      </form>
     </main>
   )
 }
