@@ -5,7 +5,7 @@ import ProductSection from "@/components/store/ProductSection"
 import StoreFooter from "@/components/store/StoreFooter"
 // AnnouncementBar kaldırıldı — layout.tsx → StoreNavbar içinde zaten render ediliyor
 import { prisma } from "@/lib/prisma"
-
+export const dynamic = "force-dynamic"
 export default async function Home() {
   const settings = await prisma.homepageSettings.findFirst({
     where: { isActive: true },
