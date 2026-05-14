@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { verifyIyzicoWebhookSignature } from "@/lib/iyzico-webhook"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
-import { sendOrderEmail } from "@/lib/mail"
+import { sendOrderEmail } from "@/lib/customer-email"
 export const runtime = "nodejs"
 export async function POST(request: Request) {
   try {

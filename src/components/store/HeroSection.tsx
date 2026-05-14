@@ -240,16 +240,9 @@ export default function HeroSection() {
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition duration-300" />
 
                       <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-white">
-                        <p className="text-3xl md:text-5xl font-semibold leading-tight drop-shadow-md">
-                          {activeCard.title || "Öne Çıkan Koleksiyon"}
-                        </p>
+                        
 
-                        <div className="mt-4 inline-flex items-center gap-2 text-sm md:text-base font-medium">
-                          Koleksiyonu Gör
-                          <span className="group-hover:translate-x-1 transition">
-                            →
-                          </span>
-                        </div>
+                       
                       </div>
                     </div>
                   </Link>

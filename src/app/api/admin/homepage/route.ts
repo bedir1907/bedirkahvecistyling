@@ -54,13 +54,13 @@ export async function PATCH(request: Request) {
       },
     })
 
-   const allowedLinks = new Set<string>([
-  "/",
-  "/koleksiyon",
-  "/category/new-season",      // sanal kategori
-  "/category/indirimdekiler",  // sanal kategori
-  ...categories.map((category) => `/category/${category.slug}`),
-])
+    const allowedLinks = new Set<string>([
+      "/category/new-season",
+      "/category/indirimdekiler",
+      "/koleksiyon",
+      "/",
+      ...categories.map((category) => `/category/${category.slug}`),
+    ])
 
     const announcementLink = normalizeString(body.announcementLink)
     const heroButtonLink = normalizeString(body.heroButtonLink)
@@ -168,4 +168,4 @@ export async function PATCH(request: Request) {
       { status: 500 }
     )
   }
-}   
+}

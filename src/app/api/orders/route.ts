@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { sendOrderEmail } from "@/lib/mail"
+import { sendOrderEmail } from "@/lib/customer-email"
 
 function generateOrderNumber() {
   return "ORD-" + Date.now()

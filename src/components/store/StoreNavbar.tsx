@@ -19,6 +19,9 @@ type Customer = {
   phone: string | null
 } | null
 
+// Bu slug'lar navbar'da sabit olarak zaten var, kategorilerden tekrar gelmesin
+const VIRTUAL_SLUGS = ["new-season", "indirimdekiler"]
+
 export default function StoreNavbar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -51,7 +54,10 @@ export default function StoreNavbar() {
   }, [])
 
   useEffect(() => {
-    fetch("/api/categories").then(r => r.json()).then(d => setCategories(Array.isArray(d) ? d : [])).catch(() => setCategories([]))
+    fetch("/api/categories")
+      .then(r => r.json())
+      .then(d => setCategories(Array.isArray(d) ? d : []))
+      .catch(() => setCategories([]))
   }, [])
 
   useEffect(() => {
@@ -66,6 +72,9 @@ export default function StoreNavbar() {
     }
     fetchCustomer()
   }, [pathname])
+
+  // Sanal kategorileri filtrele
+  const realCategories = categories.filter(cat => !VIRTUAL_SLUGS.includes(cat.slug))
 
   function isActive(slug: string) { return pathname === `/category/${slug}` }
 
@@ -103,10 +112,16 @@ export default function StoreNavbar() {
 
               {/* Desktop nav */}
               <nav className="hidden lg:flex items-center gap-5 xl:gap-6 text-[14px] font-medium">
-                <Link href="/" className={`transition whitespace-nowrap ${pathname === "/" ? "text-black" : "text-black/60 hover:text-black"}`}>Anasayfa</Link>
-                <Link href="/category/new-season" className={`transition whitespace-nowrap ${pathname === "/category/new-season" ? "text-black" : "text-black/60 hover:text-black"}`}>Yeni Sezon</Link>
-                <Link href="/category/indirimdekiler" className={`transition whitespace-nowrap ${pathname === "/category/indirimdekiler" ? "text-black" : "text-black/60 hover:text-black"}`}>İndirimdekiler</Link>
-                {categories.map((cat) => (
+                <Link href="/" className={`transition whitespace-nowrap ${pathname === "/" ? "text-black" : "text-black/60 hover:text-black"}`}>
+                  Anasayfa
+                </Link>
+                <Link href="/category/new-season" className={`transition whitespace-nowrap ${pathname === "/category/new-season" ? "text-black" : "text-black/60 hover:text-black"}`}>
+                  Yeni Sezon
+                </Link>
+                <Link href="/category/indirimdekiler" className={`transition whitespace-nowrap ${pathname === "/category/indirimdekiler" ? "text-black" : "text-black/60 hover:text-black"}`}>
+                  İndirimdekiler
+                </Link>
+                {realCategories.map((cat) => (
                   <Link key={cat.id} href={`/category/${cat.slug}`} className={`transition whitespace-nowrap ${isActive(cat.slug) ? "text-black" : "text-black/60 hover:text-black"}`}>
                     {cat.name}
                   </Link>
@@ -122,7 +137,9 @@ export default function StoreNavbar() {
               <Link href="/cart" className={`${iconBtn} relative`} aria-label="Sepet">
                 <ShoppingBag size={18} />
                 {mounted && cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-semibold flex items-center justify-center">{cartCount}</span>
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-semibold flex items-center justify-center">
+                    {cartCount}
+                  </span>
                 )}
               </Link>
               {!customerLoading && (
@@ -135,19 +152,21 @@ export default function StoreNavbar() {
           </div>
 
           {/* Mobil scroll tab */}
-          {categories.length > 0 && (
-            <div className="lg:hidden pb-3 overflow-x-auto no-scrollbar">
-              <div className="flex items-center gap-2 min-w-max">
-                <Link href="/category/new-season" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/new-season" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>Yeni Sezon</Link>
-                <Link href="/category/indirimdekiler" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/indirimdekiler" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>İndirimdekiler</Link>
-                {categories.map((cat) => (
-                  <Link key={cat.id} href={`/category/${cat.slug}`} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive(cat.slug) ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
+          <div className="lg:hidden pb-3 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 min-w-max">
+              <Link href="/category/new-season" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/new-season" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+                Yeni Sezon
+              </Link>
+              <Link href="/category/indirimdekiler" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/indirimdekiler" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+                İndirimdekiler
+              </Link>
+              {realCategories.map((cat) => (
+                <Link key={cat.id} href={`/category/${cat.slug}`} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive(cat.slug) ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+                  {cat.name}
+                </Link>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </header>
 
@@ -169,10 +188,13 @@ export default function StoreNavbar() {
               <MobileLink href="/" label="Anasayfa" active={pathname === "/"} onClick={() => setMobileMenuOpen(false)} />
               <MobileLink href="/category/new-season" label="Yeni Sezon" active={pathname === "/category/new-season"} onClick={() => setMobileMenuOpen(false)} />
               <MobileLink href="/category/indirimdekiler" label="İndirimdekiler" active={pathname === "/category/indirimdekiler"} onClick={() => setMobileMenuOpen(false)} />
-              {categories.length > 0 && (
-                <p className="px-3 pt-4 pb-1 text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Kategoriler</p>
+
+              {realCategories.length > 0 && (
+                <p className="px-3 pt-4 pb-1 text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+                  Kategoriler
+                </p>
               )}
-              {categories.map((cat) => (
+              {realCategories.map((cat) => (
                 <MobileLink key={cat.id} href={`/category/${cat.slug}`} label={cat.name} active={isActive(cat.slug)} onClick={() => setMobileMenuOpen(false)} />
               ))}
             </nav>
@@ -200,7 +222,14 @@ export default function StoreNavbar() {
           <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
             <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 px-4 py-3.5 border-b border-black/8">
               <Search size={18} className="text-black/30 shrink-0" />
-              <input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Ürün ara..." className="flex-1 text-base outline-none bg-transparent placeholder:text-black/30" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Ürün ara..."
+                className="flex-1 text-base outline-none bg-transparent placeholder:text-black/30"
+              />
               <button type="button" onClick={() => setSearchOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition shrink-0">
                 <X size={16} />
               </button>
@@ -215,9 +244,20 @@ export default function StoreNavbar() {
   )
 }
 
-function MobileLink({ href, label, active, onClick }: { href: string; label: string; active: boolean; onClick: () => void }) {
+function MobileLink({ href, label, active, onClick }: {
+  href: string
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
   return (
-    <Link href={href} onClick={onClick} className={`block px-3 py-3 rounded-xl text-sm font-medium transition ${active ? "bg-black text-white" : "text-black/70 hover:bg-gray-50 hover:text-black"}`}>
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`block px-3 py-3 rounded-xl text-sm font-medium transition ${
+        active ? "bg-black text-white" : "text-black/70 hover:bg-gray-50 hover:text-black"
+      }`}
+    >
       {label}
     </Link>
   )
