@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
               value={form.email}
               onChange={handleChange}
               className="w-full border rounded px-4 py-3"
-              placeholder="admin@site.com"
+              placeholder="bedirkahveci1907@icloud.com"
               required
             />
           </div>
