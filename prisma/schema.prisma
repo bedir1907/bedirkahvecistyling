@@ -337,3 +337,11 @@ model SocialSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model ShippingSettings {
+  id          Int      @id @default(autoincrement())
+  fee         Int      @default(0)    // Kargo ücreti (kuruş cinsinden değil, TL)
+  freeAbove   Int?                    // Bu tutarın üzerinde ücretsiz (null = hiç ücretsiz yok)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

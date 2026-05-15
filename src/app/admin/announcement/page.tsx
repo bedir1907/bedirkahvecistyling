@@ -13,7 +13,6 @@ export default function AdminAnnouncementPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-
   const [enabled, setEnabled] = useState(false)
   const [text, setText] = useState("")
   const [link, setLink] = useState("")
@@ -24,7 +23,7 @@ export default function AdminAnnouncementPage() {
     async function fetchData() {
       try {
         const [settingsRes, linksRes] = await Promise.all([
-          fetch("/api/admin/homepage"),
+          fetch("/api/admin/announcement"),
           fetch("/api/admin/link-options"),
         ])
         const settingsData = await settingsRes.json()
@@ -47,7 +46,7 @@ export default function AdminAnnouncementPage() {
   async function save() {
     setSaving(true); setError(""); setSuccess("")
     try {
-      const res = await fetch("/api/admin/homepage", {
+      const res = await fetch("/api/admin/announcement", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -126,7 +125,7 @@ export default function AdminAnnouncementPage() {
               rows={3}
               disabled={!enabled}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition disabled:bg-gray-50 disabled:text-gray-400"
-              placeholder="ör: Tüm siparişlerde ücretsiz kargo! 🚀"
+              placeholder="ör: Yeni sezon ürünleri geldi! 🎉"
             />
           </div>
 
