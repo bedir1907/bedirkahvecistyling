@@ -5,33 +5,42 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
 
-    const category = searchParams.get("category")
+    const category = searchParams.get("category")       // eski: isme göre (backward compat)
+    const categorySlug = searchParams.get("categorySlug") // yeni: slug'a göre
     const isNew = searchParams.get("isNew")
     const discounted = searchParams.get("discounted")
     const featured = searchParams.get("featured")
-    // ── YENİ: Arama parametresi ──────────────────────────────────────────────
-    const q = searchParams.get("q")?.trim()
+    const q = searchParams.get("q")
+
+    // Slug verilmişse → DB'den kategori adını bul, o adla filtrele
+    let categoryName: string | null = category ?? null
+
+    if (categorySlug) {
+      const cat = await prisma.category.findFirst({
+        where: { slug: categorySlug, isActive: true },
+        select: { name: true },
+      })
+      categoryName = cat?.name ?? null
+    }
 
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
-        ...(category ? { category } : {}),
+        ...(categoryName ? { category: categoryName } : {}),
         ...(isNew === "true" ? { isNew: true } : {}),
         ...(featured === "true" ? { featured: true } : {}),
         ...(discounted === "true" ? { oldPrice: { not: null } } : {}),
-        // Arama: ürün adı veya kategoride geçiyor mu?
-        ...(q
-          ? {
-              OR: [
-                { name: { contains: q, mode: "insensitive" } },
-                { category: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-                { color: { contains: q, mode: "insensitive" } },
-              ],
-            }
-          : {}),
+        ...(q ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { category: { contains: q, mode: "insensitive" } },
+          ],
+        } : {}),
       },
-      orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
+      orderBy: [
+        { displayOrder: "asc" },
+        { id: "desc" },
+      ],
       select: {
         id: true,
         name: true,
@@ -47,7 +56,7 @@ export async function GET(request: Request) {
       },
     })
 
-    // Her ürün için renk seçeneklerini ekle
+    // Her ürün için renk grubu kardeşlerini ekle
     const productsWithColors = await Promise.all(
       products.map(async (product) => {
         const siblings = product.groupCode
@@ -57,6 +66,7 @@ export async function GET(request: Request) {
               select: { id: true, color: true, image: true, slug: true },
             })
           : []
+
         return { ...product, colors: siblings }
       })
     )

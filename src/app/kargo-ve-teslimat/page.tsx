@@ -1,12 +1,28 @@
+"use client"
+
 import Link from "next/link"
 import StoreFooter from "@/components/store/StoreFooter"
+import { useEffect, useState } from "react"
+import { formatPrice } from "@/lib/format"
 
-export const metadata = {
-  title: "Kargo ve Teslimat",
-  description: "Bedir Kahveci Styling kargo ve teslimat bilgileri.",
+type ShippingSettings = {
+  fee: number
+  freeAbove: number | null
 }
 
 export default function KargoVeTeslimatPage() {
+  const [shipping, setShipping] = useState<ShippingSettings | null>(null)
+
+  useEffect(() => {
+    fetch("/api/shipping").then(r => r.json()).then(d => setShipping(d)).catch(() => {})
+  }, [])
+
+  const shippingText = shipping === null
+    ? "Yükleniyor..."
+    : shipping.fee === 0
+      ? "Ücretsiz"
+      : formatPrice(shipping.fee)
+
   return (
     <main className="min-h-screen bg-white text-black">
       <section className="max-w-4xl mx-auto px-4 py-10">
@@ -20,11 +36,12 @@ export default function KargoVeTeslimatPage() {
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Müşteri Hizmetleri</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Kargo ve Teslimat</h1>
 
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Özet kartlar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
             {[
-              { icon: "🚚", title: "3–7 İş Günü", sub: "Ortalama teslimat" },
-              { icon: "📦", title: "Ücretsiz Kargo", sub: "Tüm siparişlerde" },
-              { icon: "🔍", title: "Takip", sub: "SMS + e-posta" },
+              { icon: "🚚", title: "Teslimat Süresi", sub: "3–7 iş günü" },
+              { icon: "📦", title: "Kargo Ücreti", sub: shippingText },
+              { icon: "🔍", title: "Takip", sub: "SMS + E-posta" },
               { icon: "🇹🇷", title: "Türkiye Geneli", sub: "Her adrese teslimat" },
             ].map((item) => (
               <div key={item.title} className="bg-white border border-black/8 rounded-2xl px-4 py-4 text-center">
@@ -38,7 +55,27 @@ export default function KargoVeTeslimatPage() {
           <div className="mt-10 space-y-8 text-gray-700 leading-8">
 
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">1. Sipariş Hazırlama</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">1. Kargo Ücreti</h2>
+              {shipping === null ? (
+                <p>Kargo ücreti bilgisi yükleniyor...</p>
+              ) : shipping.fee === 0 ? (
+                <p>Tüm siparişlerinizde kargo ücretsizdir.</p>
+              ) : (
+                <div className="space-y-2">
+                  <p>
+                    Sipariş başına kargo ücreti <strong className="text-black">{formatPrice(shipping.fee)}</strong>'dir.
+                  </p>
+                  {shipping.freeAbove && (
+                    <p className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800 text-sm">
+                      🎉 <strong>{formatPrice(shipping.freeAbove)}</strong> ve üzeri siparişlerde kargo ücretsizdir!
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-black mb-3">2. Sipariş Hazırlama</h2>
               <p>
                 Ödemenizin onaylanmasının ardından siparişiniz en geç <strong className="text-black">1–2 iş günü</strong>{" "}
                 içinde hazırlanarak kargoya teslim edilir. Hafta sonu ve resmi tatillerde kargoya verme yapılmamaktadır.
@@ -46,7 +83,7 @@ export default function KargoVeTeslimatPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">2. Teslimat Süreleri</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">3. Teslimat Süreleri</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead>
@@ -58,17 +95,15 @@ export default function KargoVeTeslimatPage() {
                   </thead>
                   <tbody className="divide-y divide-black/8">
                     {[
-                      ["İstanbul", "1–3 iş günü", "Ücretsiz"],
-                      ["Büyükşehirler", "2–4 iş günü", "Ücretsiz"],
-                      ["Diğer İller", "3–6 iş günü", "Ücretsiz"],
-                      ["Uzak/Köy Adresleri", "5–7 iş günü", "Ücretsiz"],
-                    ].map(([bolge, sure, ucret]) => (
+                      ["İstanbul", "1–3 iş günü"],
+                      ["Büyükşehirler", "2–4 iş günü"],
+                      ["Diğer İller", "3–6 iş günü"],
+                      ["Uzak/Köy Adresleri", "5–7 iş günü"],
+                    ].map(([bolge, sure]) => (
                       <tr key={bolge} className="even:bg-gray-50/60">
                         <td className="px-4 py-3 font-medium text-black">{bolge}</td>
                         <td className="px-4 py-3 text-gray-600">{sure}</td>
-                        <td className="px-4 py-3">
-                          <span className="inline-block bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">{ucret}</span>
-                        </td>
+                        <td className="px-4 py-3 text-gray-600">{shippingText}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -77,7 +112,7 @@ export default function KargoVeTeslimatPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">3. Kargo Takibi</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">4. Kargo Takibi</h2>
               <p>
                 Siparişiniz kargoya verildiğinde e-posta ve SMS ile kargo takip numarası iletilir.
                 Hesabınıza giriş yaparak{" "}
@@ -87,7 +122,7 @@ export default function KargoVeTeslimatPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-black mb-3">4. Dikkat Edilmesi Gerekenler</h2>
+              <h2 className="text-xl font-semibold text-black mb-3">5. Dikkat Edilmesi Gerekenler</h2>
               <ul className="space-y-2">
                 {[
                   "Paket teslimatta hasar görmüş ise kargo görevlisine tutanak tutturmanız önerilir.",
@@ -107,8 +142,7 @@ export default function KargoVeTeslimatPage() {
               <p className="text-sm text-white/80 leading-7">
                 <a href="mailto:info@bedirkahvecistyling.com" className="underline">info@bedirkahvecistyling.com</a>
                 {" "}— Telefon: <a href="tel:+905531361261" className="underline">+90 553 136 12 61</a>
-                <br />
-                En geç 1 iş günü içinde yanıtlanır.
+                <br />En geç 1 iş günü içinde yanıtlanır.
               </p>
             </div>
 

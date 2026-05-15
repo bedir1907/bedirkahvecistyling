@@ -195,7 +195,7 @@ export default function StoreFooter() {
         <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: "🔒", title: "Güvenli Ödeme", sub: "SSL ile korumalı" },
-            { icon: "🚚", title: "Ücretsiz Kargo", sub: "Tüm siparişlerde" },
+            { icon: "🚚", title: "Hızlı Teslimat", sub: "3-7 iş günü" },
             { icon: "↩️", title: "Kolay İade", sub: "14 gün içinde" },
             { icon: "💳", title: "Iyzico ile Öde", sub: "3D Secure güvencesi" },
           ].map((badge) => (
