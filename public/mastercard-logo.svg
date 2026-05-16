@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130" width="200" height="130">
+  <!-- Sol kırmızı daire -->
+  <circle cx="70" cy="60" r="55" fill="#EB001B"/>
+  <!-- Sağ turuncu daire -->
+  <circle cx="130" cy="60" r="55" fill="#F79E1B"/>
+  <!-- Kesişim alanı -->
+  <path d="M100 18.6C111.4 27.5 119 41.4 119 57s-7.6 29.5-19 38.4C88.6 86.5 81 72.6 81 57s7.6-29.5 19-38.4z" fill="#FF5F00"/>
+  <!-- mastercard yazısı -->
+  <text x="100" y="126" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" fill="#231F20" text-anchor="middle" letter-spacing="-0.3">mastercard</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" width="260" height="60">
+  <defs>
+    <linearGradient id="chevGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C7D8FF"/>
+      <stop offset="100%" stop-color="#4A7FFF"/>
+    </linearGradient>
+  </defs>
+  <!-- Chevron shape -->
+  <polygon points="4,8 44,8 58,30 44,52 4,52 18,30" fill="url(#chevGrad)"/>
+  <!-- iyzico -->
+  <text x="70" y="40" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900" fill="#2563EB" letter-spacing="-0.5">iyzico</text>
+  <!-- ile Öde -->
+  <text x="174" y="40" font-family="Arial, sans-serif" font-size="26" font-weight="400" fill="#4B5563"> ile Öde</text>
+</svg>

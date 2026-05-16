@@ -216,9 +216,47 @@ export default function StoreFooter() {
         </div>
 
         {/* Alt bar */}
-        <div className="mt-10 pt-6 border-t border-black/10 text-sm text-gray-500 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <p>© {new Date().getFullYear()} Bedir Kahveci Styling. Tüm hakları saklıdır.</p>
-          <p>Vergi Dairesi: Tirebolu · VKN: 4880688583</p>
+        <div className="mt-10 pt-6 border-t border-black/10 text-sm text-gray-500 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p>© {new Date().getFullYear()} Bedir Kahveci Styling. Tüm hakları saklıdır.</p>
+            <p>Vergi Dairesi: Tirebolu · VKN: 4880688583</p>
+          </div>
+
+          {/* Ödeme logoları */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Visa */}
+            <div className="h-9 px-3 bg-white border border-black/10 rounded-md flex items-center justify-center" aria-label="Visa ile ödeme">
+              <Image
+                src="/visa-logo.svg"
+                alt="Visa"
+                width={52}
+                height={16}
+                className="h-4 w-auto object-contain"
+              />
+            </div>
+
+            {/* Mastercard */}
+            <div className="h-9 px-2 bg-white border border-black/10 rounded-md flex items-center justify-center" aria-label="Mastercard ile ödeme">
+              <Image
+                src="/mastercard-logo.svg"
+                alt="Mastercard"
+                width={52}
+                height={34}
+                className="h-8 w-auto object-contain"
+              />
+            </div>
+
+            {/* iyzico ile Öde */}
+            <div className="h-9 flex items-center" aria-label="iyzico ile öde">
+              <Image
+                src="/iyzico-ile-ode.svg"
+                alt="iyzico ile Öde"
+                width={110}
+                height={28}
+                className="h-7 w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </footer>
