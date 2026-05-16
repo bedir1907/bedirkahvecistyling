@@ -45,7 +45,7 @@ export default function AdminSidebar({ user }: Props) {
   }
 
   function isActive(href: string) {
-    return href === "/admin" ? pathname === href : pathname.startsWith(href)
+    return href === "/bksy0net1mp4neli" ? pathname === href : pathname.startsWith(href)
   }
 
   function linkCls(href: string) {
@@ -90,27 +90,27 @@ export default function AdminSidebar({ user }: Props) {
         {/* Genel */}
         <p className="px-3 mb-1.5 text-[10px] uppercase tracking-widest font-semibold text-gray-400">Genel</p>
         <div className="space-y-0.5 mb-4">
-          <Link href="/admin" className={linkCls("/admin")}>
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin") ? "#fff" : "#d1d5db" }} />
+          <Link href="/bksy0net1mp4neli" className={linkCls("/bksy0net1mp4neli")}>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli") ? "#fff" : "#d1d5db" }} />
             Dashboard
           </Link>
-          <Link href="/admin/analytics" className={linkCls("/admin/analytics")}>
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/analytics") ? "#fff" : "#d1d5db" }} />
+          <Link href="/bksy0net1mp4neli/analytics" className={linkCls("/bksy0net1mp4neli/analytics")}>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/analytics") ? "#fff" : "#d1d5db" }} />
             Analiz & Raporlar
           </Link>
-          <Link href="/admin/stock" className={linkCls("/admin/stock")}>
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/stock") ? "#fff" : "#d1d5db" }} />
+          <Link href="/bksy0net1mp4neli/stock" className={linkCls("/bksy0net1mp4neli/stock")}>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/stock") ? "#fff" : "#d1d5db" }} />
             Stok Takip
           </Link>
           {canSeeOrders && (
-            <Link href="/admin/orders" className={linkCls("/admin/orders")}>
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/orders") ? "#fff" : "#d1d5db" }} />
+            <Link href="/bksy0net1mp4neli/orders" className={linkCls("/bksy0net1mp4neli/orders")}>
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/orders") ? "#fff" : "#d1d5db" }} />
               Siparişler
             </Link>
           )}
           {canSeeUsers && (
-            <Link href="/admin/users" className={linkCls("/admin/users")}>
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/users") ? "#fff" : "#d1d5db" }} />
+            <Link href="/bksy0net1mp4neli/users" className={linkCls("/bksy0net1mp4neli/users")}>
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/users") ? "#fff" : "#d1d5db" }} />
               Kullanıcılar
             </Link>
           )}
@@ -121,12 +121,12 @@ export default function AdminSidebar({ user }: Props) {
           <>
             <p className="px-3 mb-1.5 text-[10px] uppercase tracking-widest font-semibold text-gray-400">Katalog</p>
             <div className="space-y-0.5 mb-4">
-              <Link href="/admin/products" className={linkCls("/admin/products")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/products") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/products" className={linkCls("/bksy0net1mp4neli/products")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/products") ? "#fff" : "#d1d5db" }} />
                 Ürünler
               </Link>
-              <Link href="/admin/categories" className={linkCls("/admin/categories")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/categories") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/categories" className={linkCls("/bksy0net1mp4neli/categories")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/categories") ? "#fff" : "#d1d5db" }} />
                 Kategoriler
               </Link>
             </div>
@@ -134,24 +134,24 @@ export default function AdminSidebar({ user }: Props) {
             {/* Site Yönetimi */}
             <p className="px-3 mb-1.5 text-[10px] uppercase tracking-widest font-semibold text-gray-400">Site Yönetimi</p>
             <div className="space-y-0.5 mb-4">
-              <Link href="/admin/homepage" className={linkCls("/admin/homepage")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/homepage") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/homepage" className={linkCls("/bksy0net1mp4neli/homepage")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/homepage") ? "#fff" : "#d1d5db" }} />
                 Ana Sayfa Ayarları
               </Link>
-              <Link href="/admin/announcement" className={linkCls("/admin/announcement")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/announcement") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/announcement" className={linkCls("/bksy0net1mp4neli/announcement")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/announcement") ? "#fff" : "#d1d5db" }} />
                 Duyuru Bandı
               </Link>
-              <Link href="/admin/social" className={linkCls("/admin/social")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/social") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/social" className={linkCls("/bksy0net1mp4neli/social")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/social") ? "#fff" : "#d1d5db" }} />
                 Sosyal Medya
               </Link>
-              <Link href="/admin/shipping" className={linkCls("/admin/shipping")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/shipping") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/shipping" className={linkCls("/bksy0net1mp4neli/shipping")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/shipping") ? "#fff" : "#d1d5db" }} />
                 Kargo Ayarları
               </Link>
-              <Link href="/admin/site-pages" className={linkCls("/admin/site-pages")}>
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/admin/site-pages") ? "#fff" : "#d1d5db" }} />
+              <Link href="/bksy0net1mp4neli/site-pages" className={linkCls("/bksy0net1mp4neli/site-pages")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/site-pages") ? "#fff" : "#d1d5db" }} />
                 Sayfa İçerikleri
               </Link>
             </div>

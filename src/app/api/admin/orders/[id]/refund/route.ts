@@ -2,22 +2,18 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { refundPayment } from "@/lib/iyzico"
+import { getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 
 export async function POST(
-  _: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getAdminUserFromCookie()
 
-    if (
-      !currentUser ||
-      (!currentUser.canViewOrders &&
-        !currentUser.canSell &&
-        currentUser.role !== "CREATOR")
-    ) {
+    if (!currentUser || currentUser.role !== "CREATOR") {
       return NextResponse.json({ error: "Yetkisiz" }, { status: 403 })
     }
 
@@ -53,7 +49,7 @@ export async function POST(
       paymentTransactionId: order.paymentTransactionId,
       price: String(order.totalPrice),
       currency: "TRY",
-      ip: "85.34.78.112",
+      ip: getClientIp(request),
     })
 
     if (result.status !== "success") {

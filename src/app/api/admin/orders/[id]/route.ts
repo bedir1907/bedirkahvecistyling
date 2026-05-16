@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
 import { refundPayment } from "@/lib/iyzico"
+import { getClientIp } from "@/lib/rate-limit"
 
 type Context = {
   params: Promise<{
@@ -152,6 +153,17 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
+    if (
+      ["CANCELLED", "REFUNDED"].includes(nextStatus) &&
+      ["PAID", "APPROVED", "SHIPPED", "DELIVERED"].includes(order.status) &&
+      currentUser.role !== "CREATOR"
+    ) {
+      return NextResponse.json(
+        { error: "Iade veya odeme iptali icin creator yetkisi gerekli" },
+        { status: 403 }
+      )
+    }
+
     if (order.status === "CANCELLED" && nextStatus !== "CANCELLED") {
       return NextResponse.json(
         { error: "İptal edilen sipariş tekrar aktif yapılamaz" },
@@ -174,7 +186,7 @@ export async function PATCH(request: Request, context: Context) {
         paymentTransactionId: order.paymentTransactionId,
         price: String(order.totalPrice),
         currency: "TRY",
-        ip: "85.34.78.112",
+        ip: getClientIp(request),
       })
 
       if (refundResult.status !== "success") {

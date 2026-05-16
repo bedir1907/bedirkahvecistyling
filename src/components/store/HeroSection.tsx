@@ -239,11 +239,13 @@ export default function HeroSection() {
                     >
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition duration-300" />
 
-                      <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-white">
-                        
-
-                       
-                      </div>
+                      {activeCard.title && (
+                        <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 text-white">
+                          <h2 className="max-w-[85%] text-2xl md:text-4xl font-semibold leading-tight drop-shadow-sm">
+                            {activeCard.title}
+                          </h2>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </div>

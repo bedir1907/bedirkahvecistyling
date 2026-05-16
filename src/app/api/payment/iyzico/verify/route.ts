@@ -1,24 +1,35 @@
 import { NextResponse } from "next/server"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 export const runtime = "nodejs"
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`payment-verify:${ip}`, 30, 15 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla dogrulama denemesi yapildi. Lutfen biraz sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
 
-    const orderNumber =
-      typeof body.orderNumber === "string" ? body.orderNumber.trim() : ""
     const token = typeof body.token === "string" ? body.token.trim() : ""
 
-    if (!orderNumber && !token) {
+    if (!token) {
       return NextResponse.json(
-        { error: "orderNumber veya token gerekli" },
+        { error: "token gerekli" },
         { status: 400 }
       )
     }
 
     const verification = await verifyOrderPayment({
-      orderNumber: orderNumber || undefined,
-      token: token || undefined,
+      token,
     })
 
     return NextResponse.json(verification)

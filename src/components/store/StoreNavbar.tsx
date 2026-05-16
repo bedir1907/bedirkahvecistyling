@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
@@ -101,13 +102,15 @@ export default function StoreNavbar() {
               </button>
 
               {/* Logo */}
-              <Link href="/" className="shrink-0 leading-none">
-                <span className="block text-[13px] md:text-[15px] font-semibold tracking-[0.22em] uppercase text-black leading-tight">
-                  Bedir Kahveci
-                </span>
-                <span className="block text-[10px] md:text-[11px] font-light tracking-[0.35em] uppercase text-black/50 leading-tight">
-                  Styling
-                </span>
+              <Link href="/" className="shrink-0 inline-flex items-center" aria-label="Bedir Kahveci Styling ana sayfa">
+                <Image
+                  src="/bk-logo.svg"
+                  alt="Bedir Kahveci Styling"
+                  width={56}
+                  height={56}
+                  priority
+                  className="h-12 w-12 md:h-14 md:w-14 object-contain"
+                />
               </Link>
 
               {/* Desktop nav */}
@@ -175,9 +178,14 @@ export default function StoreNavbar() {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileMenuOpen(false)}>
           <div className="absolute inset-y-0 left-0 w-[280px] bg-white flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 h-16 border-b border-black/8 shrink-0">
-              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="leading-none">
-                <span className="block text-[13px] font-semibold tracking-[0.22em] uppercase text-black leading-tight">Bedir Kahveci</span>
-                <span className="block text-[10px] font-light tracking-[0.35em] uppercase text-black/50 leading-tight">Styling</span>
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex items-center" aria-label="Bedir Kahveci Styling ana sayfa">
+                <Image
+                  src="/bk-logo.svg"
+                  alt="Bedir Kahveci Styling"
+                  width={48}
+                  height={48}
+                  className="h-11 w-11 object-contain"
+                />
               </Link>
               <button type="button" onClick={() => setMobileMenuOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full border border-black/10">
                 <X size={17} />

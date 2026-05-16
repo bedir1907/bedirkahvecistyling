@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { sendCustomerResetPasswordEmail } from "@/lib/customer-email"
+import { getTrustedBaseUrl } from "@/lib/base-url"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 function normalize(value: unknown) {
   return String(value || "").trim()
@@ -9,6 +11,19 @@ function normalize(value: unknown) {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`forgot-password:${ip}`, 5, 60 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla deneme yapildi. Lutfen daha sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
     const email = normalize(body.email).toLowerCase()
 
@@ -32,19 +47,20 @@ export async function POST(request: Request) {
       })
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex")
+    const rawToken = crypto.randomBytes(32).toString("hex")
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex")
     const resetExpiresAt = new Date(Date.now() + 1000 * 60 * 60)
 
     await prisma.customerUser.update({
       where: { id: customer.id },
       data: {
-        passwordResetToken: resetToken,
+        passwordResetToken: hashedToken,
         passwordResetExpiresAt: resetExpiresAt,
       },
     })
 
-    const baseUrl = process.env.APP_BASE_URL || "http://localhost:3000"
-    const resetUrl = `${baseUrl}/sifre-sifirla?token=${resetToken}`
+    const baseUrl = getTrustedBaseUrl()
+    const resetUrl = `${baseUrl}/sifre-sifirla?token=${rawToken}`
 
     await sendCustomerResetPasswordEmail({
       to: customer.email,

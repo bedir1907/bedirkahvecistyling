@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 
 type SocialSettings = {
@@ -110,9 +111,14 @@ export default function StoreFooter() {
 
           {/* Brand */}
           <div>
-            <Link href="/" className="inline-block leading-none mb-5">
-              <span className="block text-[15px] font-semibold tracking-[0.22em] uppercase text-black leading-tight">Bedir Kahveci</span>
-              <span className="block text-[11px] font-light tracking-[0.35em] uppercase text-black/40 leading-tight">Styling</span>
+            <Link href="/" className="inline-flex items-center mb-5" aria-label="Bedir Kahveci Styling ana sayfa">
+              <Image
+                src="/bk-logo.svg"
+                alt="Bedir Kahveci Styling"
+                width={72}
+                height={72}
+                className="h-16 w-16 object-contain"
+              />
             </Link>
 
             <p className="text-gray-600 leading-7 max-w-xs text-sm">

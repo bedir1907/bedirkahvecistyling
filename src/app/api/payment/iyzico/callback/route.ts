@@ -1,47 +1,8 @@
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
 import { prisma } from "@/lib/prisma"
 import { sendOrderEmail } from "@/lib/customer-email"
+import { getTrustedBaseUrl } from "@/lib/base-url"
 export const runtime = "nodejs"
-
-function cleanBaseUrl(value?: string | null) {
-  if (!value) return null
-  const normalized = String(value).trim().replace(/\/$/, "")
-  if (!normalized || normalized === "null" || normalized === "undefined") return null
-  try {
-    new URL(normalized)
-    return normalized
-  } catch {
-    return null
-  }
-}
-
-function getBaseUrl(request: Request) {
-  const url = new URL(request.url)
-  const envBaseUrl = cleanBaseUrl(process.env.APP_BASE_URL)
-  if (envBaseUrl) return envBaseUrl
-
-  const origin = cleanBaseUrl(request.headers.get("origin"))
-  if (origin) return origin
-
-  const referer = request.headers.get("referer")
-  if (referer && referer !== "null" && referer !== "undefined") {
-    try {
-      const refererUrl = new URL(referer)
-      const cleaned = cleanBaseUrl(refererUrl.origin)
-      if (cleaned) return cleaned
-    } catch { }
-  }
-
-  const forwardedProtoRaw = request.headers.get("x-forwarded-proto")
-  const forwardedHostRaw = request.headers.get("x-forwarded-host") || request.headers.get("host")
-  const forwardedProto = forwardedProtoRaw && forwardedProtoRaw !== "null" && forwardedProtoRaw !== "undefined"
-    ? forwardedProtoRaw.replace(":", "") : null
-  const forwardedHost = cleanBaseUrl(
-    forwardedHostRaw ? `${forwardedProto || url.protocol.replace(":", "")}://${forwardedHostRaw}` : null
-  )
-  if (forwardedHost) return forwardedHost
-  return cleanBaseUrl(url.origin) || "http://localhost:3000"
-}
 
 // Iyzico POST ile yönlendirdiği için 302 redirect 405 hatasına yol açıyor.
 // Bunun yerine HTML döndürüp browser'ın GET ile gitmesini sağlıyoruz.
@@ -69,7 +30,7 @@ function htmlRedirect(url: string): Response {
 }
 
 export async function POST(request: Request) {
-  const baseUrl = getBaseUrl(request)
+  const baseUrl = getTrustedBaseUrl()
 
   try {
     const formData = await request.formData()

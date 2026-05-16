@@ -9,7 +9,7 @@ import WhatsappFloat from "@/components/store/WhatsappFloat"
 export default function StoreShell() {
   const pathname = usePathname()
 
-  if (pathname.startsWith("/admin")) return null
+  if (pathname.startsWith("/bksy0net1mp4neli")) return null
 
   return (
     <>

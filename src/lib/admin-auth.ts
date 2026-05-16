@@ -1,13 +1,5 @@
 import { SignJWT, jwtVerify } from "jose"
 
-const secret = process.env.ADMIN_JWT_SECRET
-
-if (!secret) {
-  throw new Error("ADMIN_JWT_SECRET tanımlı değil")
-}
-
-const secretKey = new TextEncoder().encode(secret)
-
 export type AdminTokenPayload = {
   userId: number
   email: string
@@ -21,17 +13,27 @@ export type AdminTokenPayload = {
   canViewSensitiveData: boolean
 }
 
+function getSecretKey() {
+  const secret = process.env.ADMIN_JWT_SECRET
+
+  if (!secret) {
+    throw new Error("ADMIN_JWT_SECRET tanimli degil")
+  }
+
+  return new TextEncoder().encode(secret)
+}
+
 export async function createAdminToken(payload: AdminTokenPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secretKey)
+    .sign(getSecretKey())
 }
 
 export async function verifyAdminToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, secretKey)
+    const { payload } = await jwtVerify(token, getSecretKey())
     return payload as AdminTokenPayload
   } catch {
     return null

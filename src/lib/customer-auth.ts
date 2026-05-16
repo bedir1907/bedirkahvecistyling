@@ -43,6 +43,17 @@ function signPayload(payload: string) {
     .digest("hex")
 }
 
+function safeCompare(value: string, expectedValue: string) {
+  const valueBuffer = Buffer.from(value, "utf8")
+  const expectedBuffer = Buffer.from(expectedValue, "utf8")
+
+  if (valueBuffer.length !== expectedBuffer.length) {
+    return false
+  }
+
+  return crypto.timingSafeEqual(valueBuffer, expectedBuffer)
+}
+
 export function createCustomerSessionToken(customerId: number, email: string) {
   const payload: CustomerSessionPayload = {
     customerId,
@@ -63,7 +74,7 @@ export function verifyCustomerSessionToken(token: string) {
 
   const expectedSignature = signPayload(encodedPayload)
 
-  if (signature !== expectedSignature) return null
+  if (!safeCompare(signature, expectedSignature)) return null
 
   try {
     const payload = JSON.parse(
@@ -91,7 +102,7 @@ export async function setCustomerSession(customerId: number, email: string) {
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   })
@@ -102,7 +113,7 @@ export async function clearCustomerSession() {
   cookieStore.set(COOKIE_NAME, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 0,
   })

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST http://localhost:3000/api/admin/login -H \"Content-Type: application/json\" -d '{\"email\":\"hacker@evil.com\",\"password\":\"wrongpass\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/admin/products -H \"Content-Type: application/json\" -H \"Origin: https://evil-site.com\" -d '{\"name\":\"hack\"}')"
+    ]
+  }
+}

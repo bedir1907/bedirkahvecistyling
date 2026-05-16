@@ -2,9 +2,23 @@ import bcrypt from "bcryptjs"
 import { NextResponse } from "next/server"
 import { createAdminToken } from "@/lib/admin-auth"
 import { prisma } from "@/lib/prisma"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`admin-login:${ip}`, 8, 15 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla deneme yapildi. Lutfen biraz sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
 
     const email = body.email
@@ -48,7 +62,7 @@ export async function POST(request: Request) {
     response.cookies.set("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     })

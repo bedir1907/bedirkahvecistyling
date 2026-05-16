@@ -10,7 +10,7 @@ export default function AdminLogoutButton() {
       method: "POST",
     })
 
-    router.push("/admin/login")
+    router.push("/bksy0net1mp4neli/login")
     router.refresh()
   }
 

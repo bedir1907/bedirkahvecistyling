@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { initializeCheckoutForm } from "@/lib/iyzico"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
+import { getTrustedBaseUrl } from "@/lib/base-url"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 
@@ -10,7 +13,7 @@ function normalizeString(value: unknown) {
 }
 
 function generateOrderNumber() {
-  return "ORD-" + Date.now()
+  return `ORD-${Date.now()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`
 }
 
 type CartItem = {
@@ -33,49 +36,23 @@ function formatDate(date: Date) {
   )}`
 }
 
-function getBaseUrl(request: Request) {
-  const url = new URL(request.url)
-
-  const origin = request.headers.get("origin")
-  if (origin && origin !== "null" && origin !== "undefined") {
-    return origin.replace(/\/$/, "")
-  }
-
-  const referer = request.headers.get("referer")
-  if (referer && referer !== "null" && referer !== "undefined") {
-    try {
-      const refererUrl = new URL(referer)
-      return refererUrl.origin.replace(/\/$/, "")
-    } catch {
-      // ignore
-    }
-  }
-
-  const forwardedProto =
-    request.headers.get("x-forwarded-proto") || url.protocol.replace(":", "")
-  const forwardedHost =
-    request.headers.get("x-forwarded-host") || request.headers.get("host")
-
-  if (
-    forwardedHost &&
-    forwardedHost !== "null" &&
-    forwardedHost !== "undefined"
-  ) {
-    return `${forwardedProto}://${forwardedHost}`.replace(/\/$/, "")
-  }
-
-  if (process.env.APP_BASE_URL) {
-    return process.env.APP_BASE_URL.replace(/\/$/, "")
-  }
-
-  return url.origin.replace(/\/$/, "")
-}
-
 export async function POST(request: Request) {
   try {
-    
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`payment-initialize:${ip}`, 20, 15 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla odeme denemesi yapildi. Lutfen biraz sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
-    const baseUrl = getBaseUrl(request)
+    const baseUrl = getTrustedBaseUrl()
     const customer = await getCustomerUserFromCookie()
     const addressId = Number(body.addressId)
     const billingSameAsShipping = Boolean(body.billingSameAsShipping)

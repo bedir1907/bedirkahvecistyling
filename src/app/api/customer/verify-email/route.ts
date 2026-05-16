@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: Request) {
@@ -13,25 +14,18 @@ export async function POST(request: Request) {
       )
     }
 
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex")
+
     const customer = await prisma.customerUser.findFirst({
       where: {
-        emailVerificationToken: token,
+        emailVerificationToken: hashedToken,
+        emailVerificationExpiresAt: { gt: new Date() },
       },
     })
 
     if (!customer) {
       return NextResponse.json(
-        { error: "Geçersiz doğrulama bağlantısı" },
-        { status: 400 }
-      )
-    }
-
-    if (
-      !customer.emailVerificationExpiresAt ||
-      customer.emailVerificationExpiresAt < new Date()
-    ) {
-      return NextResponse.json(
-        { error: "Doğrulama bağlantısının süresi dolmuş" },
+        { error: "Geçersiz veya süresi dolmuş doğrulama bağlantısı" },
         { status: 400 }
       )
     }

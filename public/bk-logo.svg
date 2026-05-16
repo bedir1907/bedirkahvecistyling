@@ -1,0 +1,14 @@
+<svg width="360" height="360" viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="360" height="360" fill="white"/>
+  <circle cx="180" cy="180" r="154" stroke="#E7E7E7" stroke-width="8"/>
+  <path d="M181 337C95.4 337 26 267.6 26 182C26 96.4 95.4 27 181 27C266.6 27 336 96.4 336 182" stroke="#050505" stroke-width="6" stroke-linecap="round"/>
+  <path d="M322.5 289.5C322.5 289.5 315.5 304.5 303.5 316.5C291.5 328.5 276.5 335.5 276.5 335.5" stroke="#050505" stroke-width="6" stroke-linecap="round" stroke-dasharray="0.1 18"/>
+  <path d="M97 87H165C184.9 87 201 103.1 201 123C201 142.9 184.9 159 165 159H117" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M117 159H168C188.4 159 205 175.6 205 196C205 216.4 188.4 233 168 233H97" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M156 123V276" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M97 233H156" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M210 276V164" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M210 235L281 88" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <path d="M235 184L292 276" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
+  <text x="294" y="304" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#050505" transform="rotate(-68 294 304)">Bedir Kahveci Styling</text>
+</svg>

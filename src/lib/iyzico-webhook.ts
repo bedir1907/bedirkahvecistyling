@@ -50,5 +50,12 @@ export function verifyIyzicoWebhookSignature(
     .update(raw)
     .digest("hex")
 
-  return expectedSignature.toLowerCase() === signatureHeader.toLowerCase()
+  const expected = Buffer.from(expectedSignature.toLowerCase(), "utf8")
+  const received = Buffer.from(signatureHeader.toLowerCase(), "utf8")
+
+  if (expected.length !== received.length) {
+    return false
+  }
+
+  return crypto.timingSafeEqual(expected, received)
 }

@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { sendCustomerVerificationEmail } from "@/lib/customer-email"
+import { getTrustedBaseUrl } from "@/lib/base-url"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 function normalize(value: unknown) {
   return String(value || "").trim()
@@ -14,6 +16,19 @@ function isStrongPassword(password: string) {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`customer-register:${ip}`, 6, 60 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla kayit denemesi yapildi. Lutfen daha sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
 
     const name = normalize(body.name)
@@ -52,7 +67,8 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, 12)
 
     // Doğrulama tokeni oluştur
-    const verificationToken = crypto.randomBytes(32).toString("hex")
+    const rawToken = crypto.randomBytes(32).toString("hex")
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex")
     const verificationExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24) // 24 saat
 
     const customer = await prisma.customerUser.create({
@@ -62,7 +78,7 @@ export async function POST(request: Request) {
         phone: phone || null,
         passwordHash,
         emailVerified: false,
-        emailVerificationToken: verificationToken,
+        emailVerificationToken: hashedToken,
         emailVerificationExpiresAt: verificationExpiresAt,
       },
       select: {
@@ -73,8 +89,8 @@ export async function POST(request: Request) {
     })
 
     // Doğrulama maili gönder
-    const baseUrl = process.env.APP_BASE_URL || "http://localhost:3000"
-    const verificationUrl = `${baseUrl}/email-dogrula?token=${verificationToken}`
+    const baseUrl = getTrustedBaseUrl()
+    const verificationUrl = `${baseUrl}/email-dogrula?token=${rawToken}`
 
     try {
       await sendCustomerVerificationEmail({

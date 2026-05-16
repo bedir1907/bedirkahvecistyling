@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
+import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 
 function normalize(value: unknown) {
@@ -42,25 +43,18 @@ export async function POST(request: Request) {
       )
     }
 
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex")
+
     const customer = await prisma.customerUser.findFirst({
       where: {
-        passwordResetToken: token,
+        passwordResetToken: hashedToken,
+        passwordResetExpiresAt: { gt: new Date() },
       },
     })
 
     if (!customer) {
       return NextResponse.json(
-        { error: "Geçersiz şifre sıfırlama bağlantısı" },
-        { status: 400 }
-      )
-    }
-
-    if (
-      !customer.passwordResetExpiresAt ||
-      customer.passwordResetExpiresAt < new Date()
-    ) {
-      return NextResponse.json(
-        { error: "Şifre sıfırlama bağlantısının süresi dolmuş" },
+        { error: "Geçersiz veya süresi dolmuş şifre sıfırlama bağlantısı" },
         { status: 400 }
       )
     }

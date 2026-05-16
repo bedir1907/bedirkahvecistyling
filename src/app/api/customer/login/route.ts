@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { setCustomerSession } from "@/lib/customer-auth"
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 function normalize(value: unknown) {
   return String(value || "").trim()
@@ -9,6 +10,19 @@ function normalize(value: unknown) {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const rateLimit = checkRateLimit(`customer-login:${ip}`, 12, 15 * 60 * 1000)
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Cok fazla deneme yapildi. Lutfen biraz sonra tekrar deneyin." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        }
+      )
+    }
+
     const body = await request.json()
 
     const email = normalize(body.email).toLowerCase()

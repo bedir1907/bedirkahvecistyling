@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 function isStrongPassword(password: string) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password)
@@ -65,9 +66,15 @@ export default function RegisterPage() {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block leading-none">
-            <span className="block text-[15px] font-semibold tracking-[0.22em] uppercase text-black">Bedir Kahveci</span>
-            <span className="block text-[10px] font-light tracking-[0.35em] uppercase text-black/40">Styling</span>
+          <Link href="/" className="inline-flex items-center justify-center" aria-label="Bedir Kahveci Styling ana sayfa">
+            <Image
+              src="/bk-logo.svg"
+              alt="Bedir Kahveci Styling"
+              width={80}
+              height={80}
+              priority
+              className="h-20 w-20 object-contain"
+            />
           </Link>
         </div>
 

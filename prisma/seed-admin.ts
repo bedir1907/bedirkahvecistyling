@@ -18,11 +18,23 @@ const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const passwordHash = await bcrypt.hash("hanife.1907", 10)
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (!adminPassword) {
+    throw new Error("ADMIN_PASSWORD tanimli degil")
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL
+
+  if (!adminEmail) {
+    throw new Error("ADMIN_EMAIL tanimli degil")
+  }
+
+  const passwordHash = await bcrypt.hash(adminPassword, 12)
 
   await prisma.adminUser.upsert({
     where: {
-      email: "bedirkahveci1907@icloud.com",
+      email: adminEmail,
     },
     update: {
       name: "Site Sahibi",
@@ -39,7 +51,7 @@ async function main() {
     },
     create: {
       name: "Site Sahibi",
-      email: "bedirkahveci1907@icloud.com",
+      email: adminEmail,
       passwordHash,
       role: "CREATOR",
       isActive: true,

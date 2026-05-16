@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
+import { sendCustomerVerificationEmail } from "@/lib/customer-email"
+import { getTrustedBaseUrl } from "@/lib/base-url"
 
 function normalize(value: unknown) {
   return String(value || "").trim()
@@ -43,20 +46,44 @@ export async function PATCH(request: Request) {
       )
     }
 
+    const emailChanged = email !== customer.email
+    const verificationToken = emailChanged ? crypto.randomBytes(32).toString("hex") : null
+    const verificationExpiresAt = emailChanged
+      ? new Date(Date.now() + 1000 * 60 * 60 * 24)
+      : null
+
     const updated = await prisma.customerUser.update({
       where: { id: customer.id },
       data: {
         name,
         email,
         phone: phone || null,
+        ...(emailChanged
+          ? {
+              emailVerified: false,
+              emailVerificationToken: verificationToken,
+              emailVerificationExpiresAt: verificationExpiresAt,
+            }
+          : {}),
       },
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
+        emailVerified: true,
       },
     })
+
+    if (emailChanged && verificationToken) {
+      const verificationUrl = `${getTrustedBaseUrl()}/email-dogrula?token=${verificationToken}`
+
+      await sendCustomerVerificationEmail({
+        to: updated.email,
+        name: updated.name,
+        verificationUrl,
+      })
+    }
 
     return NextResponse.json({
       success: true,
