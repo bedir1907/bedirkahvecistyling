@@ -722,13 +722,13 @@ export default function AdminProductsPage() {
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   <a
-                    href={`/admin/products/${product.id}/edit`}
+                    href={`/bksy0net1mp4neli/products/${product.id}/edit`}
                     className="text-xs border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition text-center"
                   >
                     Düzenle
                   </a>
                   <a
-                    href={`/admin/products/${product.id}/images`}
+                    href={`/bksy0net1mp4neli/products/${product.id}/images`}
                     className="text-xs border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition text-center"
                   >
                     Görseller
@@ -1006,11 +1006,11 @@ export default function AdminProductsPage() {
                         </td>
                         <td className="p-4">
                           <div className="flex flex-wrap gap-2">
-                            <button type="button" onClick={() => { if (isEditing) { cancelEdit(); router.push("/bksy0net1mp4neli/products") } else { router.push(`/admin/products?edit=${product.id}`) } }}
+                            <button type="button" onClick={() => { if (isEditing) { cancelEdit(); router.push("/bksy0net1mp4neli/products") } else { router.push(`/bksy0net1mp4neli/products?edit=${product.id}`) } }}
                               className="border border-black px-3 py-2 rounded-xl hover:bg-black hover:text-white">
                               {isEditing ? "Kapat" : "Düzenle"}
                             </button>
-                            <button type="button" onClick={() => { window.location.href = `/admin/products/${product.id}/images` }}
+                            <button type="button" onClick={() => { window.location.href = `/bksy0net1mp4neli/products/${product.id}/images` }}
                               className="border border-black px-3 py-2 rounded-xl hover:bg-black hover:text-white">
                               Görseller
                             </button>

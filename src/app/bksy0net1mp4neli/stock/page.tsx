@@ -105,7 +105,7 @@ export default function AdminStockPage() {
                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStockBadge(product.stock)}`}>
                   {product.stock > 0 ? `${product.stock} adet` : "Tükendi"}
                 </span>
-                <Link href={`/admin/products/${product.id}/edit`} className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
+                <Link href={`/bksy0net1mp4neli/products/${product.id}/edit`} className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
                   Düzenle
                 </Link>
               </div>
@@ -143,7 +143,7 @@ export default function AdminStockPage() {
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <Link href={`/admin/products/${product.id}/edit`} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
+                    <Link href={`/bksy0net1mp4neli/products/${product.id}/edit`} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
                       Düzenle
                     </Link>
                   </td>

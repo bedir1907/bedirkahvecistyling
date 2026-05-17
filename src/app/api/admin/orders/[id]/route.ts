@@ -4,6 +4,8 @@ import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
 import { refundPayment } from "@/lib/iyzico"
 import { getClientIp } from "@/lib/rate-limit"
+import { sendShippedEmail } from "@/lib/customer-email"
+import { getCargoCompany } from "@/lib/cargo-companies"
 
 type Context = {
   params: Promise<{
@@ -113,8 +115,10 @@ export async function PATCH(request: Request, context: Context) {
     const body = await request.json()
 
     const nextStatus = String(body.status || "").trim().toUpperCase()
+    const cargoCompany = String(body.cargoCompany || "").trim()
+    const trackingNumber = String(body.trackingNumber || "").trim()
 
-    if (!VALID_STATUSES.includes(nextStatus as any)) {
+    if (!VALID_STATUSES.includes(nextStatus as (typeof VALID_STATUSES)[number])) {
       return NextResponse.json(
         { error: "Geçersiz sipariş durumu" },
         { status: 400 }
@@ -171,6 +175,20 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
+    // SHIPPED geçişinde kargo bilgisi zorunlu
+    if (nextStatus === "SHIPPED") {
+      if (!cargoCompany) {
+        return NextResponse.json({ error: "Kargo firması seçilmedi" }, { status: 400 })
+      }
+      if (!trackingNumber) {
+        return NextResponse.json({ error: "Takip numarası girilmedi" }, { status: 400 })
+      }
+      const knownCompany = getCargoCompany(cargoCompany)
+      if (!knownCompany) {
+        return NextResponse.json({ error: "Geçersiz kargo firması" }, { status: 400 })
+      }
+    }
+
     // PAID sipariş CANCELLED yapılıyorsa otomatik refund dene
     if (nextStatus === "CANCELLED" && order.status === "PAID") {
       if (!order.paymentTransactionId) {
@@ -198,6 +216,19 @@ export async function PATCH(request: Request, context: Context) {
     }
 
     const updatedOrder = await prisma.$transaction(async (tx) => {
+      if (nextStatus === "SHIPPED") {
+        return await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: nextStatus,
+            cargoCompany,
+            trackingNumber,
+            shippedAt: new Date(),
+          },
+          include: { items: true },
+        })
+      }
+
       if (nextStatus === "CANCELLED" && !order.stockRestored) {
         for (const item of order.items) {
           const variant = await tx.productVariant.findFirst({
@@ -248,12 +279,28 @@ export async function PATCH(request: Request, context: Context) {
       })
     })
 
-    return NextResponse.json(updatedOrder)
-  } catch (error: any) {
-    console.error("Admin sipariş güncelleme hatası:", error)
+    if (nextStatus === "SHIPPED") {
+      const company = getCargoCompany(cargoCompany)!
+      try {
+        await sendShippedEmail({
+          to: order.email,
+          name: order.name,
+          orderNumber: order.orderNumber,
+          cargoCompanyName: company.name,
+          trackingNumber,
+          trackingUrl: company.trackingUrl(trackingNumber),
+        })
+      } catch (emailError) {
+        console.error("Kargo mail gönderilemedi:", emailError)
+      }
+    }
 
+    return NextResponse.json(updatedOrder)
+  } catch (error) {
+    console.error("Admin sipariş güncelleme hatası:", error)
+    const message = error instanceof Error ? error.message : "Sipariş güncellenemedi"
     return NextResponse.json(
-      { error: error.message || "Sipariş güncellenemedi" },
+      { error: message },
       { status: 500 }
     )
   }

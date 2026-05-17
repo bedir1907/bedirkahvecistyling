@@ -272,6 +272,9 @@ paidAt                DateTime?
 paymentTransactionId  String?
 refundedAt            DateTime?
 refundAmount          Int?
+  cargoCompany          String?
+  trackingNumber        String?
+  shippedAt             DateTime?
   items OrderItem[]
 
   createdAt DateTime @default(now())

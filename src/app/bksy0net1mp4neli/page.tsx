@@ -91,7 +91,7 @@ export default async function AdminDashboardPage() {
           ) : (
             <div className="space-y-2">
               {latestOrders.map((order) => (
-                <Link key={order.id} href={`/admin/orders/${order.id}`} className="flex items-center justify-between py-2.5 border-b last:border-0 hover:bg-gray-50 -mx-2 px-2 rounded-xl transition">
+                <Link key={order.id} href={`/bksy0net1mp4neli/orders/${order.id}`} className="flex items-center justify-between py-2.5 border-b last:border-0 hover:bg-gray-50 -mx-2 px-2 rounded-xl transition">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
                     <p className="text-xs text-gray-500">{order.name}</p>

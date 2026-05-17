@@ -156,7 +156,7 @@ export default function AdminOrdersPage() {
                     <p className="text-xs text-gray-400">{order.items.length} ürün • {new Date(order.createdAt).toLocaleDateString("tr-TR")}</p>
                     <p className="font-semibold text-gray-900 mt-0.5">{formatPrice(order.totalPrice)}</p>
                   </div>
-                  <Link href={`/admin/orders/${order.id}`} className="bg-gray-900 text-white text-xs px-4 py-2 rounded-xl hover:opacity-80 transition">
+                  <Link href={`/bksy0net1mp4neli/orders/${order.id}`} className="bg-gray-900 text-white text-xs px-4 py-2 rounded-xl hover:opacity-80 transition">
                     Detay
                   </Link>
                 </div>
@@ -206,7 +206,7 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString("tr-TR")}</td>
                     <td className="px-5 py-4">
-                      <Link href={`/admin/orders/${order.id}`} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
+                      <Link href={`/bksy0net1mp4neli/orders/${order.id}`} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
                         Detay
                       </Link>
                     </td>

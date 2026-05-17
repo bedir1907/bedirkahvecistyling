@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { use, useEffect, useMemo, useState } from "react"
 import { formatPrice } from "@/lib/format"
+import { CARGO_COMPANIES } from "@/lib/cargo-companies"
 
 type OrderItem = {
   id: number
@@ -28,6 +29,9 @@ type Order = {
   totalPrice: number
   status: string
   stockRestored: boolean
+  cargoCompany: string | null
+  trackingNumber: string | null
+  shippedAt: string | null
   createdAt: string
   updatedAt: string
   items: OrderItem[]
@@ -78,6 +82,8 @@ export default function AdminOrderDetailPage({ params }: Props) {
 
   const [order, setOrder] = useState<Order | null>(null)
   const [status, setStatus] = useState("")
+  const [cargoCompany, setCargoCompany] = useState("")
+  const [trackingNumber, setTrackingNumber] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [refunding, setRefunding] = useState(false)
@@ -122,7 +128,7 @@ export default function AdminOrderDetailPage({ params }: Props) {
       const res = await fetch(`/api/admin/orders/${order.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, cargoCompany, trackingNumber }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Sipariş güncellenemedi")
@@ -276,6 +282,33 @@ export default function AdminOrderDetailPage({ params }: Props) {
               </div>
             </div>
 
+            {/* Kargo bilgileri (sipariş kargodaysa) */}
+            {order.cargoCompany && order.trackingNumber && (
+              <div className="bg-blue-50 rounded-2xl border border-blue-200 p-5 md:p-6">
+                <h2 className="text-lg font-semibold mb-4 text-blue-900">Kargo Bilgileri</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-blue-600 mb-0.5">Kargo Firması</p>
+                    <p className="font-medium text-blue-900">
+                      {CARGO_COMPANIES.find((c) => c.key === order.cargoCompany)?.name ?? order.cargoCompany}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-blue-600 mb-0.5">Takip Numarası</p>
+                    <p className="font-medium text-blue-900">{order.trackingNumber}</p>
+                  </div>
+                  {order.shippedAt && (
+                    <div>
+                      <p className="text-blue-600 mb-0.5">Kargoya Verilme</p>
+                      <p className="font-medium text-blue-900">
+                        {new Date(order.shippedAt).toLocaleString("tr-TR")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Teslimat */}
             <div className="bg-white rounded-2xl border p-5 md:p-6">
               <h2 className="text-lg font-semibold mb-4">Teslimat Bilgileri</h2>
@@ -329,11 +362,40 @@ export default function AdminOrderDetailPage({ params }: Props) {
                 </select>
               </div>
 
+              {/* Kargo bilgileri (sadece SHIPPED seçiliyken) */}
+              {status === "SHIPPED" && (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1.5">Kargo Firması</p>
+                    <select
+                      value={cargoCompany}
+                      onChange={(e) => setCargoCompany(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400"
+                    >
+                      <option value="">Seçiniz...</option>
+                      {CARGO_COMPANIES.map((c) => (
+                        <option key={c.key} value={c.key}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1.5">Takip Numarası</p>
+                    <input
+                      type="text"
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      placeholder="Kargo takip numarasını girin"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Güncelle butonu */}
               <button
                 type="button"
                 onClick={updateStatus}
-                disabled={saving || isCancelled || isRefunded || isFailed || !status || status === order.status}
+                disabled={saving || isCancelled || isRefunded || isFailed || !status || status === order.status || (status === "SHIPPED" && (!cargoCompany || !trackingNumber))}
                 className="w-full bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {saving ? "Kaydediliyor..." :

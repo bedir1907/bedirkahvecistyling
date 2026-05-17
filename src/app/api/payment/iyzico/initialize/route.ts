@@ -74,6 +74,12 @@ export async function POST(request: Request) {
 
     const cart = Array.isArray(body.cart) ? body.cart : []
 
+    // Kargo ücretini DB'den çek (client'a güvenmeyiz)
+    const shippingSettings = await prisma.shippingSettings.findFirst({
+      where: { isActive: true },
+      orderBy: { id: "desc" },
+    })
+
     if (customer) {
       email = customer.email
       name = name || customer.name
@@ -211,6 +217,14 @@ export async function POST(request: Request) {
       })
     }
 
+    // Kargo maliyetini server-side hesapla
+    const shippingFee = shippingSettings?.fee ?? 0
+    const freeAbove = shippingSettings?.freeAbove ?? null
+    const shippingCost = (shippingFee > 0 && (freeAbove === null || totalPrice < freeAbove))
+      ? shippingFee
+      : 0
+    const grandTotal = totalPrice + shippingCost
+
     const conversationId = `conv_${Date.now()}`
     const orderNumber = generateOrderNumber()
 
@@ -234,7 +248,7 @@ export async function POST(request: Request) {
         billingAddress: billingAddress || null,
         billingNote: billingNote || null,
 
-        totalPrice,
+        totalPrice: grandTotal,
         status: "PENDING",
         stockRestored: false,
         paymentProvider: "IYZICO",
@@ -257,13 +271,22 @@ export async function POST(request: Request) {
 
     const callbackUrl = `${baseUrl}/api/payment/iyzico/callback`
 
-    const basketItems = order.items.map((item) => ({
-      id: String(item.productId),
-      name: item.productName,
-      category1: "Genel",
-      itemType: "PHYSICAL",
-      price: String(item.price * item.quantity),
-    }))
+    const basketItems = [
+      ...order.items.map((item) => ({
+        id: String(item.productId),
+        name: item.productName,
+        category1: "Genel",
+        itemType: "PHYSICAL",
+        price: String(item.price * item.quantity),
+      })),
+      ...(shippingCost > 0 ? [{
+        id: "shipping",
+        name: "Kargo Ücreti",
+        category1: "Kargo",
+        itemType: "PHYSICAL",
+        price: String(shippingCost),
+      }] : []),
+    ]
 
     const forwardedFor =
       request.headers.get("x-forwarded-for") ||
@@ -276,8 +299,8 @@ export async function POST(request: Request) {
     const initializeRequest = {
       locale: "tr",
       conversationId,
-      price: String(totalPrice),
-      paidPrice: String(totalPrice),
+      price: String(grandTotal),
+      paidPrice: String(grandTotal),
       currency: "TRY",
       basketId: order.orderNumber,
       paymentGroup: "PRODUCT",
@@ -343,12 +366,9 @@ export async function POST(request: Request) {
       orderNumber: order.orderNumber,
       paymentPageUrl: result.paymentPageUrl,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Iyzico initialize hatası:", error)
-
-    return NextResponse.json(
-      { error: error.message || "Ödeme başlatılamadı" },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : "Ödeme başlatılamadı"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -114,7 +114,7 @@ export default function NewProductPage() {
       }
 
       // Ürün oluşturulduktan sonra renk grupları sayfasına yönlendir
-      router.push(`/admin/color-groups/${data.id}/images`)
+      router.push(`/bksy0net1mp4neli/color-groups/${data.id}/images`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ürün eklenemedi")
     } finally {

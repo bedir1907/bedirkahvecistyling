@@ -111,6 +111,53 @@ export async function sendOrderEmail(params: {
   return result
 }
 
+// ── Kargo bildirimi ───────────────────────────────────────────────────────────
+export async function sendShippedEmail(params: {
+  to: string
+  name: string
+  orderNumber: string
+  cargoCompanyName: string
+  trackingNumber: string
+  trackingUrl: string
+}) {
+  const { to, name, orderNumber, cargoCompanyName, trackingNumber, trackingUrl } = params
+
+  const result = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Siparişiniz Kargoya Verildi #${orderNumber} — Bedir Kahveci Styling`,
+    html: buildEmailHtml({
+      title: `Siparişiniz Yola Çıktı! 🚚`,
+      body: `
+        Merhaba ${name},<br/><br/>
+        <strong>#${orderNumber}</strong> numaralı siparişiniz kargoya verildi.<br/><br/>
+        <table style="width:100%; border-collapse:collapse; margin: 16px 0;">
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 10px 0; color: #666; font-size:14px;">Kargo Firması</td>
+            <td style="padding: 10px 0; font-weight:600; font-size:14px; text-align:right;">${cargoCompanyName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; color: #666; font-size:14px;">Takip Numarası</td>
+            <td style="padding: 10px 0; font-weight:600; font-size:14px; text-align:right;">${trackingNumber}</td>
+          </tr>
+        </table>
+        Kargonuzun durumunu aşağıdaki butona tıklayarak takip edebilirsiniz.
+      `,
+      buttonText: "Kargo Takibi",
+      buttonUrl: trackingUrl,
+      footer: "Teslimat hakkında sorularınız için info@bedirkahvecistyling.com adresine yazabilirsiniz.",
+    }),
+  })
+
+  const err = (result as { error?: { message?: string } }).error
+  if (err) {
+    console.error("Shipped mail error:", err)
+    throw new Error(err.message || "Mail gönderilemedi")
+  }
+
+  return result
+}
+
 // ── HTML Şablon builder ───────────────────────────────────────────────────────
 function buildEmailHtml({
   title,
