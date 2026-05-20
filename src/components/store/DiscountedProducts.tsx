@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import ProductCard from "@/components/ProductCard"
 
 type Product = {
@@ -17,34 +17,12 @@ type Product = {
 
 type Props = {
   title?: string
+  initialProducts: Product[]
 }
 
-export default function DiscountedProducts({ title = "İndirimdekiler" }: Props) {
-  const [products, setProducts] = useState<Product[]>([])
+export default function DiscountedProducts({ title = "İndirimdekiler", initialProducts }: Props) {
+  const [products] = useState<Product[]>(initialProducts)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch("/api/products/discounted")
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || "İndirimli ürünler alınamadı")
-        }
-
-        setProducts(Array.isArray(data) ? data : [])
-      } catch (error) {
-        console.error(error)
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
 
   const maxIndex = useMemo(() => {
     if (products.length <= 4) return 0
@@ -63,13 +41,8 @@ export default function DiscountedProducts({ title = "İndirimdekiler" }: Props)
     setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1))
   }
 
-  useEffect(() => {
-    if (currentIndex > maxIndex) {
-      setCurrentIndex(0)
-    }
-  }, [currentIndex, maxIndex])
+  const safeIndex = Math.min(currentIndex, maxIndex)
 
-  if (loading) return null
   if (products.length === 0) return null
 
   return (
@@ -111,7 +84,7 @@ export default function DiscountedProducts({ title = "İndirimdekiler" }: Props)
         <div
           className="flex transition-transform duration-500"
           style={{
-            transform: `translateX(-${currentIndex * 25}%)`,
+            transform: `translateX(-${safeIndex * 25}%)`,
           }}
         >
           {products.map((product) => (

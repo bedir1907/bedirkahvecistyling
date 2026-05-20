@@ -6,22 +6,36 @@ type VerifyOrderPaymentInput = {
   token?: string
 }
 
-function isSuccessResult(result: any) {
+type IyzicoResult = {
+  paymentStatus?: string
+  status?: string
+  paymentId?: string | number
+  errorMessage?: string
+  itemTransactions?: Array<{ paymentTransactionId?: string | number }>
+}
+
+function isSuccessResult(result: IyzicoResult) {
   return (
     result?.paymentStatus === "SUCCESS" ||
     result?.status === "success"
   )
 }
 
-function isFailureResult(result: any) {
+function isFailureResult(result: IyzicoResult) {
   return (
     result?.paymentStatus === "FAILURE" ||
     result?.status === "failure"
   )
 }
 
-async function finalizePaidOrder(orderId: number, result: any) {
+async function finalizePaidOrder(orderId: number, result: IyzicoResult) {
   return await prisma.$transaction(async (tx) => {
+    // Atomically claim PENDING → PAID; if count=0 another transaction already processed this order
+    const claimed = await tx.order.updateMany({
+      where: { id: orderId, status: "PENDING" },
+      data: { status: "PAID" },
+    })
+
     const freshOrder = await tx.order.findUnique({
       where: { id: orderId },
       include: { items: true },
@@ -31,18 +45,14 @@ async function finalizePaidOrder(orderId: number, result: any) {
       throw new Error("Sipariş bulunamadı")
     }
 
-    if (freshOrder.status === "PAID") {
-      return {
-        order: freshOrder,
-        justPaidNow: false,
+    if (claimed.count === 0) {
+      if (
+        freshOrder.status === "CANCELLED" ||
+        freshOrder.status === "REFUNDED"
+      ) {
+        throw new Error("Bu sipariş terminal durumda olduğu için tekrar işlenemez")
       }
-    }
-
-    if (
-      freshOrder.status === "CANCELLED" ||
-      freshOrder.status === "REFUNDED"
-    ) {
-      throw new Error("Bu sipariş terminal durumda olduğu için tekrar işlenemez")
+      return { order: freshOrder, justPaidNow: false }
     }
 
     for (const item of freshOrder.items) {
@@ -72,9 +82,8 @@ async function finalizePaidOrder(orderId: number, result: any) {
     }
 
     const updatedOrder = await tx.order.update({
-      where: { id: freshOrder.id },
+      where: { id: orderId },
       data: {
-        status: "PAID",
         paidAt: freshOrder.paidAt || new Date(),
         paymentId: result?.paymentId
           ? String(result.paymentId)
@@ -89,10 +98,7 @@ async function finalizePaidOrder(orderId: number, result: any) {
       },
     })
 
-    return {
-      order: updatedOrder,
-      justPaidNow: true,
-    }
+    return { order: updatedOrder, justPaidNow: true }
   })
 }
 

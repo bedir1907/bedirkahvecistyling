@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       if (verification.justPaidNow) {
         const order = await prisma.order.findFirst({
           where: { orderNumber: verification.orderNumber },
+          include: { items: true },
         })
 
         if (order) {
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
               name: order.name,
               orderNumber: order.orderNumber,
               total: order.totalPrice,
+              items: order.items,
             })
           } catch (mailError) {
             console.error("Sipariş maili gönderilemedi:", mailError)

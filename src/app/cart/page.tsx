@@ -146,7 +146,10 @@ export default function CartPage() {
 
                 <div className="border-t pt-4 flex items-center justify-between text-base font-semibold">
                   <span>Toplam</span>
-                  <span>{formatPrice(total)}</span>
+                  <div className="text-right">
+                    <span>{formatPrice(total)}</span>
+                    <p className="text-xs text-gray-400 font-normal mt-0.5">KDV Dahil</p>
+                  </div>
                 </div>
               </div>
 

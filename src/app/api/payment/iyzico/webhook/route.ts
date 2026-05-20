@@ -57,6 +57,7 @@ export async function POST(request: Request) {
             name: order.name,
             orderNumber: order.orderNumber,
             total: order.totalPrice,
+            items: order.items,
           })
         } catch (mailError) {
           console.error("Webhook sipariş maili gönderilemedi:", mailError)

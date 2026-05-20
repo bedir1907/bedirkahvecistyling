@@ -111,6 +111,18 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Customer register hatası:", error)
 
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Bu e-posta ile kayıtlı bir kullanıcı zaten var" },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
       { error: "Kayıt oluşturulamadı" },
       { status: 500 }

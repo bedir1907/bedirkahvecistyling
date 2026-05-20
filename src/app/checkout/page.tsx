@@ -554,7 +554,10 @@ export default function CheckoutPage() {
               )}
               <div className="flex items-center justify-between pt-2 border-t border-black/10">
                 <span className="text-gray-500">Toplam</span>
-                <span className="text-2xl font-medium">{formatPrice(grandTotal)}</span>
+                <div className="text-right">
+                  <span className="text-2xl font-medium">{formatPrice(grandTotal)}</span>
+                  <p className="text-xs text-gray-400 mt-0.5">KDV Dahil</p>
+                </div>
               </div>
             </div>
           </aside>

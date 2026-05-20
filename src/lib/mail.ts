@@ -27,7 +27,5 @@ export async function sendOrderEmail({
     `,
   })
 
-  console.log("Resend sonucu:", result)
-
   return result
 }

@@ -43,7 +43,6 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    console.log("Homepage PATCH body:", body)
 
     const categories = await prisma.category.findMany({
       where: {
@@ -132,8 +131,6 @@ export async function PATCH(request: Request) {
         normalizeString(body.discountedProductsTitle) || "İndirimdekiler",
     }
 
-    console.log("Homepage PATCH data:", data)
-
     if (!existing) {
       const created = await prisma.homepageSettings.create({
         data: {
@@ -142,7 +139,6 @@ export async function PATCH(request: Request) {
         },
       })
 
-      console.log("Homepage settings created:", created.id)
       return NextResponse.json(created)
     }
 
@@ -153,7 +149,6 @@ export async function PATCH(request: Request) {
       data,
     })
 
-    console.log("Homepage settings updated:", updated.id)
     return NextResponse.json(updated)
   } catch (error) {
     console.error("Homepage admin patch hatası:", error)

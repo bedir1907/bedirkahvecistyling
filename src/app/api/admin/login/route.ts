@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const body = await request.json()
 
-    const email = body.email
+    const email = String(body.email || "").trim().toLowerCase()
     const password = body.password
 
     const user = await prisma.adminUser.findUnique({

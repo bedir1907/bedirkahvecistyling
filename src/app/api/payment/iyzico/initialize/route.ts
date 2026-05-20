@@ -296,6 +296,13 @@ export async function POST(request: Request) {
 
     const cleanPhone = phone.replace(/\D/g, "").slice(-10)
 
+    if (cleanPhone.length < 10) {
+      return NextResponse.json(
+        { error: "Geçersiz telefon numarası" },
+        { status: 400 }
+      )
+    }
+
     const initializeRequest = {
       locale: "tr",
       conversationId,

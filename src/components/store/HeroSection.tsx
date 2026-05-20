@@ -27,34 +27,14 @@ type HeroCard = {
   link: string | null
 }
 
-export default function HeroSection() {
-  const [settings, setSettings] = useState<HomepageSettings | null>(null)
+export default function HeroSection({ initialSettings }: { initialSettings: HomepageSettings | null }) {
+  const [settings] = useState<HomepageSettings | null>(initialSettings)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
 
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
   const autoSlideRef = useRef<NodeJS.Timeout | null>(null)
-
-  useEffect(() => {
-    async function fetchHomepageSettings() {
-      try {
-        const res = await fetch("/api/homepage")
-        const data = await res.json()
-
-        if (!res.ok) {
-          console.error(data.error || "Hero verisi alınamadı")
-          return
-        }
-
-        setSettings(data)
-      } catch (error) {
-        console.error("Hero fetch hatası:", error)
-      }
-    }
-
-    fetchHomepageSettings()
-  }, [])
 
   const cards = useMemo(() => {
     const nextCards: HeroCard[] = []
@@ -78,16 +58,7 @@ export default function HeroSection() {
     return nextCards
   }, [settings])
 
-  useEffect(() => {
-    if (cards.length === 0) {
-      setCurrentCardIndex(0)
-      return
-    }
-
-    if (currentCardIndex > cards.length - 1) {
-      setCurrentCardIndex(0)
-    }
-  }, [cards, currentCardIndex])
+  const safeCardIndex = cards.length === 0 ? 0 : Math.min(currentCardIndex, cards.length - 1)
 
   function safeSetCard(nextIndex: number) {
     if (isAnimating || cards.length <= 1) return
@@ -104,7 +75,7 @@ export default function HeroSection() {
     if (cards.length <= 1) return
 
     const nextIndex =
-      currentCardIndex === 0 ? cards.length - 1 : currentCardIndex - 1
+      safeCardIndex === 0 ? cards.length - 1 : safeCardIndex - 1
 
     safeSetCard(nextIndex)
   }
@@ -113,7 +84,7 @@ export default function HeroSection() {
     if (cards.length <= 1) return
 
     const nextIndex =
-      currentCardIndex === cards.length - 1 ? 0 : currentCardIndex + 1
+      safeCardIndex === cards.length - 1 ? 0 : safeCardIndex + 1
 
     safeSetCard(nextIndex)
   }
@@ -163,7 +134,7 @@ export default function HeroSection() {
     touchEndX.current = null
   }
 
-  const activeCard = cards[currentCardIndex] || null
+  const activeCard = cards[safeCardIndex] || null
   const heroButtonLink =
     settings?.heroButtonLink && settings.heroButtonLink.trim().length > 0
       ? settings.heroButtonLink
@@ -229,7 +200,7 @@ export default function HeroSection() {
                 <div className="relative overflow-hidden rounded-[28px] shadow-sm">
                   <Link href={activeCard.link || "#"} className="group block">
                     <div
-                      key={currentCardIndex}
+                      key={safeCardIndex}
                       className="aspect-[4/5] bg-gray-200 bg-cover bg-center relative overflow-hidden animate-[heroFadeIn_.35s_ease]"
                       style={
                         activeCard.image
@@ -258,7 +229,7 @@ export default function HeroSection() {
                         type="button"
                         onClick={() => safeSetCard(index)}
                         className={`h-2.5 rounded-full transition-all ${
-                          currentCardIndex === index
+                          safeCardIndex === index
                             ? "w-10 bg-black"
                             : "w-2.5 bg-gray-300"
                         }`}
