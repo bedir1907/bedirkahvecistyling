@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 
@@ -273,6 +274,10 @@ export async function PATCH(request: Request, context: Context) {
       },
     })
 
+    revalidatePath(`/product/${productId}`)
+    revalidatePath("/")
+    revalidatePath("/category/[slug]", "page")
+
     return NextResponse.json(updated)
   } catch (error) {
     console.error("Ürün güncelleme hatası:", error)
@@ -298,6 +303,10 @@ export async function DELETE(_: Request, context: Context) {
         id: Number(id),
       },
     })
+
+    revalidatePath(`/product/${id}`)
+    revalidatePath("/")
+    revalidatePath("/category/[slug]", "page")
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 
@@ -62,6 +63,9 @@ export async function PATCH(request: Request, context: Context) {
       })
     }
 
+    revalidatePath("/")
+    revalidatePath("/category/[slug]", "page")
+
     return NextResponse.json(category)
   } catch (error) {
     console.error("Kategori güncelleme hatası:", error)
@@ -78,6 +82,10 @@ export async function DELETE(_: Request, context: Context) {
 
     const { id } = await context.params
     await prisma.category.delete({ where: { id: Number(id) } })
+
+    revalidatePath("/")
+    revalidatePath("/category/[slug]", "page")
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Kategori silme hatası:", error)

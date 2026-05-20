@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 
@@ -139,6 +140,7 @@ export async function PATCH(request: Request) {
         },
       })
 
+      revalidatePath("/")
       return NextResponse.json(created)
     }
 
@@ -148,6 +150,8 @@ export async function PATCH(request: Request) {
       },
       data,
     })
+
+    revalidatePath("/")
 
     return NextResponse.json(updated)
   } catch (error) {

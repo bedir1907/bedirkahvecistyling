@@ -1,6 +1,5 @@
-import ProductCard from "@/components/ProductCard"
 import SectionHeader from "@/components/store/SectionHeader"
-import HorizontalSlider from "@/components/store/HorizontalSlider"
+import ProductSlider, { type SliderProduct } from "@/components/store/ProductSlider"
 import { prisma } from "@/lib/prisma"
 
 type Props = {
@@ -109,35 +108,25 @@ export default async function ProductSection({
         description={getSectionDescription(featuredOnly, newOnly)}
       />
 
-      <HorizontalSlider>
-        {products.map((product) => {
-          const productColors =
+      <ProductSlider
+        products={products.map((product): SliderProduct => {
+          const colors =
             product.groupCode && siblingMap.has(product.groupCode)
               ? siblingMap.get(product.groupCode) || []
               : []
-
-          return (
-            <div
-              key={product.id}
-              data-slider-item="true"
-              className="w-[280px] shrink-0"
-            >
-              <ProductCard
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                oldPrice={product.oldPrice}
-                image={product.images?.[0]?.url || product.image}
-                //hoverImage={product.images?.[1]?.url || null}
-                href={`/product/${product.id}`}
-                colorName={product.color || ""}
-                category={product.category}
-                colors={productColors}
-              />
-            </div>
-          )
+          return {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            oldPrice: product.oldPrice,
+            image: product.images?.[0]?.url || product.image,
+            colorName: product.color || "",
+            category: product.category,
+            href: `/product/${product.id}`,
+            colors,
+          }
         })}
-      </HorizontalSlider>
+      />
     </section>
   )
 }

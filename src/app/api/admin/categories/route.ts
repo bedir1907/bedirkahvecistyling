@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
         displayOrder: Number(body.displayOrder || 0),
       },
     })
+
+    revalidatePath("/")
+    revalidatePath("/category/[slug]", "page")
 
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
