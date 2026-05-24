@@ -56,7 +56,7 @@ export default function ProductSlider({ products }: { products: SliderProduct[] 
       {n <= IPVIEW ? (
         <div className="hidden md:flex gap-4">
           {products.map((p) => (
-            <div key={p.id} className="flex-1 min-w-0">
+            <div key={p.id} className="w-[calc(25%-12px)] shrink-0">
               <ProductCard
                 id={p.id}
                 name={p.name}
