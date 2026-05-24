@@ -23,20 +23,10 @@ export const metadata: Metadata = {
   },
 }
 export default async function Home() {
-  const [settings, rawDiscounted, rawCollections] = await Promise.all([
+  const [settings, rawCollections] = await Promise.all([
     prisma.homepageSettings.findFirst({
       where: { isActive: true },
       orderBy: { id: "asc" },
-    }),
-    prisma.product.findMany({
-      where: { isActive: true, oldPrice: { not: null } },
-      orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
-      include: {
-        images: {
-          orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
-          take: 2,
-        },
-      },
     }),
     prisma.collection.findMany({
       where: { isActive: true, showOnHome: true },
@@ -52,20 +42,6 @@ export default async function Home() {
       },
     }),
   ])
-
-  const discountedProducts = rawDiscounted
-    .filter((p) => p.oldPrice !== null && p.oldPrice > p.price)
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      oldPrice: p.oldPrice,
-      image: p.images?.[0]?.url || p.image,
-      hoverImage: p.images?.[1]?.url || null,
-      colorName: p.color || "",
-      category: p.category,
-      href: `/product/${p.id}`,
-    }))
 
   const collections = rawCollections.map((col) => ({
     id: col.id,
@@ -103,10 +79,7 @@ export default async function Home() {
       )}
 
       {settings?.discountedProductsEnabled && (
-        <DiscountedProducts
-          title={settings.discountedProductsTitle}
-          initialProducts={discountedProducts}
-        />
+        <DiscountedProducts title={settings.discountedProductsTitle} />
       )}
 
       <StoreFooter />

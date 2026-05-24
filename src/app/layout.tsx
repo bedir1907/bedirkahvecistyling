@@ -37,10 +37,6 @@ export const metadata: Metadata = {
     description: "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi.",
   },
   robots: { index: true, follow: true },
-  icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-  },
 }
 
 export default function RootLayout({

@@ -19,7 +19,6 @@ export type SliderProduct = {
   collectionDiscount?: number | null
 }
 
-// 4 visible items per view → 4 leading + 4 trailing clones
 const IPVIEW = 4
 const OFFSET = IPVIEW
 
@@ -31,11 +30,12 @@ export default function ProductSlider({ products }: { products: SliderProduct[] 
   const n = products.length
   if (n === 0) return null
 
-  if (n <= IPVIEW) {
-    return (
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+  return (
+    <>
+      {/* Mobile: native snap scroll — shows 1 full card + peek of next */}
+      <div className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-2">
         {products.map((p) => (
-          <div key={p.id} className="min-w-[220px] w-[calc(25%-12px)] shrink-0">
+          <div key={p.id} className="snap-start shrink-0 w-[73vw] sm:w-[46vw]">
             <ProductCard
               id={p.id}
               name={p.name}
@@ -51,22 +51,45 @@ export default function ProductSlider({ products }: { products: SliderProduct[] 
           </div>
         ))}
       </div>
-    )
-  }
 
-  return <Slider products={products} />
+      {/* Desktop (md+): static grid when ≤4, infinite slider when >4 */}
+      {n <= IPVIEW ? (
+        <div className="hidden md:flex gap-4">
+          {products.map((p) => (
+            <div key={p.id} className="flex-1 min-w-0">
+              <ProductCard
+                id={p.id}
+                name={p.name}
+                price={p.price}
+                oldPrice={p.oldPrice}
+                image={p.image}
+                href={p.href}
+                colorName={p.colorName}
+                category={p.category}
+                colors={p.colors}
+                collectionDiscount={p.collectionDiscount}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="hidden md:block">
+          <DesktopSlider products={products} />
+        </div>
+      )}
+    </>
+  )
 }
 
-function Slider({ products }: { products: SliderProduct[] }) {
+function DesktopSlider({ products }: { products: SliderProduct[] }) {
   const n = products.length
 
-  // OFFSET leading clones + real items + IPVIEW trailing clones
   const extended = [
     ...Array.from({ length: OFFSET }, (_, i) => products[wrap(n - OFFSET + i, n)]),
     ...products,
     ...Array.from({ length: IPVIEW }, (_, i) => products[wrap(i, n)]),
   ]
-  const total = extended.length // n + 8
+  const total = extended.length
 
   const [pos, setPos] = useState(OFFSET)
   const [animate, setAnimate] = useState(true)
@@ -107,7 +130,7 @@ function Slider({ products }: { products: SliderProduct[] }) {
       <button
         type="button"
         onClick={prev}
-        className="hidden md:flex absolute left-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
+        className="absolute left-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg flex items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
         aria-label="Önceki"
       >
         <ChevronLeft size={19} strokeWidth={2.2} />
@@ -116,7 +139,7 @@ function Slider({ products }: { products: SliderProduct[] }) {
       <button
         type="button"
         onClick={next}
-        className="hidden md:flex absolute right-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
+        className="absolute right-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg flex items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
         aria-label="Sonraki"
       >
         <ChevronRight size={19} strokeWidth={2.2} />
