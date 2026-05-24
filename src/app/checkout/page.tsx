@@ -96,6 +96,9 @@ export default function CheckoutPage() {
   // Kargo ayarları
   const [shipping, setShipping] = useState<{ fee: number; freeAbove: number | null }>({ fee: 0, freeAbove: null })
 
+  // Koleksiyon indirimi (ürün bazlı)
+  const [discountMap, setDiscountMap] = useState<Record<number, number>>({})
+
   const total = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   }, [cart])
@@ -104,19 +107,42 @@ export default function CheckoutPage() {
     return cart.reduce((sum, item) => sum + item.quantity, 0)
   }, [cart])
 
-  // Kargo ücreti hesapla
+  // Sadece koleksiyondaki ürünlere, ürün bazlı indirim
+  const discountAmount = useMemo(() => {
+    return cart.reduce((sum, item) => {
+      const d = discountMap[item.productId] ?? 0
+      if (!d) return sum
+      return sum + Math.round(item.price * item.quantity * d / 100)
+    }, 0)
+  }, [cart, discountMap])
+
+  // Kargo ücreti hesapla (indirim sonrası tutar üzerinden)
+  const discountedTotal = total - discountAmount
   const shippingCost = useMemo(() => {
     if (shipping.fee === 0) return 0
-    if (shipping.freeAbove !== null && total >= shipping.freeAbove) return 0
+    if (shipping.freeAbove !== null && discountedTotal >= shipping.freeAbove) return 0
     return shipping.fee
-  }, [shipping, total])
+  }, [shipping, discountedTotal])
 
-  const grandTotal = total + shippingCost
+  const grandTotal = discountedTotal + shippingCost
 
   useEffect(() => {
-    // Kargo ücretini çek
     fetch("/api/shipping").then(r => r.json()).then(d => setShipping(d)).catch(() => {})
   }, [])
+
+  // Sepet değişince koleksiyon indirimini kontrol et (ürün bazlı)
+  useEffect(() => {
+    if (cart.length === 0) {
+      void Promise.resolve().then(() => setDiscountMap({}))
+      return
+    }
+    const productIds = [...new Set(cart.map(item => item.productId))]
+    fetch("/api/collections/discount-map", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds }),
+    }).then(r => r.json()).then(d => setDiscountMap(d.discounts ?? {})).catch(() => {})
+  }, [cart])
 
   useEffect(() => {
     async function bootstrap() {
@@ -541,6 +567,12 @@ export default function CheckoutPage() {
                 <span className="text-gray-500">Ara Toplam</span>
                 <span>{formatPrice(total)}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Koleksiyon İndirimi</span>
+                  <span className="text-green-600 font-medium">−{formatPrice(discountAmount)}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">Kargo</span>
                 <span className={shippingCost === 0 ? "text-green-600 font-medium" : ""}>

@@ -31,21 +31,35 @@ type Order = {
 
 function getStatusLabel(status: string) {
   const map: Record<string, string> = {
-    PAID: "Sipariş Oluşturuldu", APPROVED: "Sipariş Onaylandı",
-    PENDING: "Beklemede", FAILED: "Ödeme Başarısız",
-    FAILED_PAYMENT: "Ödeme Alınamadı", SHIPPED: "Kargoya Verildi",
-    DELIVERED: "Teslim Edildi", CANCELLED: "İptal Edildi", REFUNDED: "İade Edildi",
+    // displayStatus değerleri (API'nin döndürdüğü)
+    CREATED: "Sipariş Oluşturuldu",
+    PENDING: "Beklemede",
+    FAILED_PAYMENT: "Ödeme Alınamadı",
+    APPROVED: "Sipariş Onaylandı",
+    SHIPPED: "Kargoya Verildi",
+    DELIVERED: "Teslim Edildi",
+    CANCELLED: "İptal Edildi",
+    REFUNDED: "İade Edildi",
+    // ham DB değerleri (geriye dönük uyumluluk)
+    PAID: "Sipariş Oluşturuldu",
+    FAILED: "Ödeme Başarısız",
   }
   return map[status] ?? status
 }
 
 function getStatusClass(status: string) {
   const map: Record<string, string> = {
-    PAID: "bg-green-100 text-green-700", APPROVED: "bg-indigo-100 text-indigo-700",
-    PENDING: "bg-yellow-100 text-yellow-700", FAILED: "bg-red-100 text-red-700",
-    FAILED_PAYMENT: "bg-red-100 text-red-700", SHIPPED: "bg-blue-100 text-blue-700",
-    DELIVERED: "bg-emerald-100 text-emerald-700", CANCELLED: "bg-gray-100 text-gray-600",
+    CREATED: "bg-green-100 text-green-700",
+    PENDING: "bg-yellow-100 text-yellow-700",
+    FAILED_PAYMENT: "bg-red-100 text-red-700",
+    APPROVED: "bg-indigo-100 text-indigo-700",
+    SHIPPED: "bg-blue-100 text-blue-700",
+    DELIVERED: "bg-emerald-100 text-emerald-700",
+    CANCELLED: "bg-gray-100 text-gray-600",
     REFUNDED: "bg-purple-100 text-purple-700",
+    // ham DB değerleri
+    PAID: "bg-green-100 text-green-700",
+    FAILED: "bg-red-100 text-red-700",
   }
   return map[status] ?? "bg-gray-100 text-gray-700"
 }
@@ -110,9 +124,10 @@ export default function AdminOrdersPage() {
             className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none sm:w-48"
           >
             <option value="">Tüm Durumlar</option>
-            <option value="PAID">Sipariş Oluşturuldu</option>
-            <option value="APPROVED">Sipariş Onaylandı</option>
+            <option value="CREATED">Sipariş Oluşturuldu</option>
             <option value="PENDING">Beklemede</option>
+            <option value="FAILED_PAYMENT">Ödeme Alınamadı</option>
+            <option value="APPROVED">Sipariş Onaylandı</option>
             <option value="SHIPPED">Kargoya Verildi</option>
             <option value="DELIVERED">Teslim Edildi</option>
             <option value="CANCELLED">İptal Edildi</option>

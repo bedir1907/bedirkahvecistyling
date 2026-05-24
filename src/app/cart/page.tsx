@@ -23,6 +23,7 @@ export default function CartPage() {
   const decreaseQuantity = useCartStore((state) => state.decreaseQuantity)
 
   const [shipping, setShipping] = useState<ShippingSettings>({ fee: 0, freeAbove: null })
+  const [discountMap, setDiscountMap] = useState<Record<number, number>>({})
 
   useEffect(() => {
     fetch("/api/shipping")
@@ -31,16 +32,40 @@ export default function CartPage() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (cart.length === 0) {
+      void Promise.resolve().then(() => setDiscountMap({}))
+      return
+    }
+    const productIds = [...new Set(cart.map(item => item.productId))]
+    fetch("/api/collections/discount-map", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds }),
+    }).then(r => r.json()).then(d => setDiscountMap(d.discounts ?? {})).catch(() => {})
+  }, [cart])
+
   const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart])
   const itemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart])
 
+  // Sadece koleksiyondaki ürünlere indirim, ürün bazlı hesap
+  const discountAmount = useMemo(() => {
+    return cart.reduce((sum, item) => {
+      const d = discountMap[item.productId] ?? 0
+      if (!d) return sum
+      return sum + Math.round(item.price * item.quantity * d / 100)
+    }, 0)
+  }, [cart, discountMap])
+
+  const discountedSubtotal = subtotal - discountAmount
+
   const shippingCost = useMemo(() => {
     if (shipping.fee === 0) return 0
-    if (shipping.freeAbove !== null && subtotal >= shipping.freeAbove) return 0
+    if (shipping.freeAbove !== null && discountedSubtotal >= shipping.freeAbove) return 0
     return shipping.fee
-  }, [shipping, subtotal])
+  }, [shipping, discountedSubtotal])
 
-  const total = subtotal + shippingCost
+  const total = discountedSubtotal + shippingCost
 
   const freeShippingRemaining = useMemo(() => {
     if (!shipping.freeAbove || shipping.fee === 0) return null
@@ -82,9 +107,23 @@ export default function CartPage() {
                           <p className="text-sm text-gray-500 mt-2">
                             Renk: {item.color} • Beden: {item.size}
                           </p>
+                          {discountMap[item.productId] && (
+                            <span className="inline-flex items-center mt-2 text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+                              Sepette %{discountMap[item.productId]} İndirim
+                            </span>
+                          )}
                         </div>
                         <div className="text-left md:text-right">
-                          <p className="text-lg font-semibold">{formatPrice(item.price * item.quantity)}</p>
+                          {discountMap[item.productId] ? (
+                            <>
+                              <p className="text-sm text-gray-400 line-through">{formatPrice(item.price * item.quantity)}</p>
+                              <p className="text-lg font-semibold text-green-700">
+                                {formatPrice(item.price * item.quantity - Math.round(item.price * item.quantity * discountMap[item.productId] / 100))}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-lg font-semibold">{formatPrice(item.price * item.quantity)}</p>
+                          )}
                         </div>
                       </div>
 
@@ -94,7 +133,7 @@ export default function CartPage() {
                             className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition">
                             -
                           </button>
-                          <span className="min-w-[28px] text-center font-medium">{item.quantity}</span>
+                          <span className="min-w-7 text-center font-medium">{item.quantity}</span>
                           <button type="button" onClick={() => increaseQuantity(item.productId, item.variantId)}
                             className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
                             disabled={item.quantity >= item.stock}>
@@ -131,6 +170,12 @@ export default function CartPage() {
                   <span>{formatPrice(subtotal)}</span>
                 </div>
 
+                {discountAmount > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Koleksiyon İndirimi</span>
+                    <span className="text-green-600 font-medium">−{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Kargo</span>
                   <span className={shippingCost === 0 ? "text-green-600 font-medium" : ""}>

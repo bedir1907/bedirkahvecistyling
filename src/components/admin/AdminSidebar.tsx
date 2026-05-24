@@ -129,6 +129,10 @@ export default function AdminSidebar({ user }: Props) {
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/categories") ? "#fff" : "#d1d5db" }} />
                 Kategoriler
               </Link>
+              <Link href="/bksy0net1mp4neli/collections" className={linkCls("/bksy0net1mp4neli/collections")}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isActive("/bksy0net1mp4neli/collections") ? "#fff" : "#d1d5db" }} />
+                Koleksiyonlar
+              </Link>
             </div>
 
             {/* Site Yönetimi */}

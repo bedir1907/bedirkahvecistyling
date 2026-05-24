@@ -100,6 +100,31 @@ export default async function ProductSection({
     return null
   }
 
+  const productIds = products.map((p) => p.id)
+  const discountCollections = await prisma.collection.findMany({
+    where: {
+      isActive: true,
+      discount: { not: null },
+      products: { some: { productId: { in: productIds } } },
+    },
+    select: {
+      discount: true,
+      products: {
+        where: { productId: { in: productIds } },
+        select: { productId: true },
+      },
+    },
+  })
+
+  const discountMap = new Map<number, number>()
+  for (const col of discountCollections) {
+    const d = col.discount ?? 0
+    for (const cp of col.products) {
+      const current = discountMap.get(cp.productId) ?? 0
+      if (d > current) discountMap.set(cp.productId, d)
+    }
+  }
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
       <SectionHeader
@@ -124,6 +149,7 @@ export default async function ProductSection({
             category: product.category,
             href: `/product/${product.id}`,
             colors,
+            collectionDiscount: discountMap.get(product.id) ?? null,
           }
         })}
       />

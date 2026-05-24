@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sepet boş" }, { status: 400 })
     }
 
-    const normalizedCart: CartItem[] = cart.map((item: any) => ({
+    const normalizedCart: CartItem[] = cart.map((item: Record<string, unknown>) => ({
       productId: Number(item.productId),
       variantId: Number(item.variantId),
       name: normalizeString(item.name),
@@ -217,13 +217,46 @@ export async function POST(request: Request) {
       })
     }
 
-    // Kargo maliyetini server-side hesapla
+    // Server-side koleksiyon indirimi — ürün bazlı, client'a güvenmeyiz
+    const productIds = validatedItems.map((item) => item.productId)
+    const discountCollections = await prisma.collection.findMany({
+      where: {
+        isActive: true,
+        discount: { not: null },
+        products: { some: { productId: { in: productIds } } },
+      },
+      select: {
+        discount: true,
+        products: {
+          where: { productId: { in: productIds } },
+          select: { productId: true },
+        },
+      },
+    })
+
+    const productDiscountMap = new Map<number, number>()
+    for (const col of discountCollections) {
+      const d = col.discount ?? 0
+      for (const cp of col.products) {
+        const current = productDiscountMap.get(cp.productId) ?? 0
+        if (d > current) productDiscountMap.set(cp.productId, d)
+      }
+    }
+
+    let discountAmount = 0
+    for (const item of validatedItems) {
+      const d = productDiscountMap.get(item.productId) ?? 0
+      if (d > 0) discountAmount += Math.round(item.price * item.quantity * d / 100)
+    }
+    const discountedPrice = totalPrice - discountAmount
+
+    // Kargo maliyetini server-side hesapla (indirim sonrası tutar üzerinden)
     const shippingFee = shippingSettings?.fee ?? 0
     const freeAbove = shippingSettings?.freeAbove ?? null
-    const shippingCost = (shippingFee > 0 && (freeAbove === null || totalPrice < freeAbove))
+    const shippingCost = (shippingFee > 0 && (freeAbove === null || discountedPrice < freeAbove))
       ? shippingFee
       : 0
-    const grandTotal = totalPrice + shippingCost
+    const grandTotal = discountedPrice + shippingCost
 
     const conversationId = `conv_${Date.now()}`
     const orderNumber = generateOrderNumber()
@@ -306,7 +339,7 @@ export async function POST(request: Request) {
     const initializeRequest = {
       locale: "tr",
       conversationId,
-      price: String(grandTotal),
+      price: String(totalPrice + shippingCost),
       paidPrice: String(grandTotal),
       currency: "TRY",
       basketId: order.orderNumber,

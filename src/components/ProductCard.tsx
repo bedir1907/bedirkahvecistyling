@@ -20,6 +20,7 @@ type Props = {
   colorName?: string | null
   category?: string
   colors?: CardColor[]
+  collectionDiscount?: number | null
 }
 
 const FALLBACK_IMAGE =
@@ -35,6 +36,7 @@ export default function ProductCard({
   colorName,
   category,
   colors = [],
+  collectionDiscount,
 }: Props) {
   const productHref = href || `/product/${id}`
   const safeImage = image && image.trim().length > 0 ? image : FALLBACK_IMAGE
@@ -129,6 +131,12 @@ export default function ProductCard({
             </span>
           ) : null}
         </div>
+
+        {collectionDiscount != null && (
+          <span className="inline-flex items-center text-[10px] md:text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+            Sepette %{collectionDiscount} İndirim
+          </span>
+        )}
       </div>
     </article>
   )

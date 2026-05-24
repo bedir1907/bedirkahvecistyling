@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import ProductCard from "@/components/ProductCard"
 
 type Product = {
@@ -23,6 +23,19 @@ type Props = {
 export default function DiscountedProducts({ title = "İndirimdekiler", initialProducts }: Props) {
   const [products] = useState<Product[]>(initialProducts)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [discountMap, setDiscountMap] = useState<Record<number, number>>({})
+
+  useEffect(() => {
+    if (initialProducts.length === 0) return
+    fetch("/api/collections/discount-map", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds: initialProducts.map((p) => p.id) }),
+    })
+      .then((r) => r.json())
+      .then((d) => setDiscountMap(d.discounts ?? {}))
+      .catch(() => {})
+  }, [initialProducts])
 
   const maxIndex = useMemo(() => {
     if (products.length <= 4) return 0
@@ -98,10 +111,10 @@ export default function DiscountedProducts({ title = "İndirimdekiler", initialP
                 price={product.price}
                 oldPrice={product.oldPrice}
                 image={product.image}
-                
                 colorName={product.colorName}
                 category={product.category}
                 href={product.href}
+                collectionDiscount={discountMap[product.id] ?? null}
               />
             </div>
           ))}

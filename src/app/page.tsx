@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import CategoryShowcase from "@/components/store/CategoryShowcase"
+import CollectionSection from "@/components/store/CollectionSection"
 import DiscountedProducts from "@/components/store/DiscountedProducts"
 import HeroSection from "@/components/store/HeroSection"
 import ProductSection from "@/components/store/ProductSection"
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
   },
 }
 export default async function Home() {
-  const [settings, rawDiscounted] = await Promise.all([
+  const [settings, rawDiscounted, rawCollections] = await Promise.all([
     prisma.homepageSettings.findFirst({
       where: { isActive: true },
       orderBy: { id: "asc" },
@@ -34,6 +35,19 @@ export default async function Home() {
         images: {
           orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
           take: 2,
+        },
+      },
+    }),
+    prisma.collection.findMany({
+      where: { isActive: true, showOnHome: true },
+      orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
+      include: {
+        products: {
+          include: {
+            product: {
+              select: { id: true, name: true, slug: true, image: true, price: true, oldPrice: true, category: true, isActive: true },
+            },
+          },
         },
       },
     }),
@@ -53,9 +67,28 @@ export default async function Home() {
       href: `/product/${p.id}`,
     }))
 
+  const collections = rawCollections.map((col) => ({
+    id: col.id,
+    name: col.name,
+    slug: col.slug,
+    eyebrow: col.eyebrow,
+    description: col.description,
+    image: col.image,
+    buttonText: col.buttonText,
+    buttonLink: col.buttonLink,
+    discount: col.discount,
+    products: col.products
+      .filter((cp: { product: { isActive: boolean } }) => cp.product.isActive)
+      .map((cp: { product: { id: number } }) => ({ id: cp.product.id })),
+  }))
+
   return (
     <main className="min-h-screen bg-white text-black">
       <HeroSection initialSettings={settings} />
+
+      {(settings?.collectionsEnabled ?? true) && collections.length > 0 && (
+        <CollectionSection collections={collections} />
+      )}
 
       {settings?.featuredCategoriesEnabled && (
         <CategoryShowcase title={settings.featuredCategoriesTitle} />

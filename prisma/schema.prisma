@@ -39,6 +39,7 @@ model Product {
   images          ProductImage[]
   colorGroups     ProductColorGroup[]
   productVariants ProductVariant[]
+  collections     CollectionProduct[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,6 +47,40 @@ model Product {
   @@index([groupCode])
   @@index([category])
   @@index([isActive])
+}
+
+model Collection {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  eyebrow      String?
+  description  String?
+  image        String?
+  buttonText   String?
+  buttonLink   String?
+  discount     Float?
+  isActive     Boolean  @default(true)
+  showOnHome   Boolean  @default(false)
+  displayOrder Int      @default(0)
+
+  products  CollectionProduct[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([showOnHome])
+}
+
+model CollectionProduct {
+  collectionId Int
+  productId    Int
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+  @@index([productId])
 }
 
 model ProductImage {
@@ -186,6 +221,9 @@ model HomepageSettings {
 
   discountedProductsEnabled Boolean @default(true)
   discountedProductsTitle   String  @default("İndirimdekiler")
+
+  collectionsEnabled Boolean @default(true)
+  collectionsTitle   String  @default("Koleksiyonlar")
 
   isActive Boolean @default(true)
 

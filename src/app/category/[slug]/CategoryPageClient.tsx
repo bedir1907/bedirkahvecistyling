@@ -36,6 +36,7 @@ export default function CategoryPageClient({ params }: Props) {
   const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(true)
   const [sort, setSort] = useState("new")
+  const [discountMap, setDiscountMap] = useState<Record<number, number>>({})
 
   const virtualSlug = VIRTUAL_SLUGS[slug]
 
@@ -46,7 +47,17 @@ export default function CategoryPageClient({ params }: Props) {
           setCategory({ id: -1, name: virtualSlug.name, slug })
           const res = await fetch(`/api/products?${virtualSlug.apiParam}`)
           const data = await res.json()
-          setProducts(Array.isArray(data) ? data : [])
+          const list = Array.isArray(data) ? data : []
+          setProducts(list)
+          if (list.length > 0) {
+            const dmRes = await fetch("/api/collections/discount-map", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productIds: list.map((p: Product) => p.id) }),
+            })
+            const dmData = await dmRes.json()
+            setDiscountMap(dmData.discounts ?? {})
+          }
           return
         }
 
@@ -63,6 +74,17 @@ export default function CategoryPageClient({ params }: Props) {
 
         setCategory(categoryData)
         setProducts(Array.isArray(productsData) ? productsData : [])
+
+        const allProducts = Array.isArray(productsData) ? productsData : []
+        if (allProducts.length > 0) {
+          const dmRes = await fetch("/api/collections/discount-map", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productIds: allProducts.map((p: Product) => p.id) }),
+          })
+          const dmData = await dmRes.json()
+          setDiscountMap(dmData.discounts ?? {})
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -145,6 +167,7 @@ export default function CategoryPageClient({ params }: Props) {
                 oldPrice={product.oldPrice}
                 image={product.image}
                 href={`/product/${product.id}?from=${slug}`}
+                collectionDiscount={discountMap[product.id] ?? null}
               />
             ))}
           </div>

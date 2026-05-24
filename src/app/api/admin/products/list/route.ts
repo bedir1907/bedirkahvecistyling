@@ -32,8 +32,12 @@ export async function GET() {
         isActive: true,
         displayOrder: true,
         productVariants: {
+          orderBy: [{ size: "asc" }],
           select: {
+            id: true,
+            size: true,
             stock: true,
+            sku: true,
           },
         },
       },
@@ -59,6 +63,12 @@ export async function GET() {
         (total, variant) => total + Number(variant.stock || 0),
         0
       ),
+      variants: product.productVariants.map((v) => ({
+        id: v.id,
+        size: v.size,
+        stock: Number(v.stock || 0),
+        sku: v.sku,
+      })),
     }))
 
     return NextResponse.json(normalizedProducts)

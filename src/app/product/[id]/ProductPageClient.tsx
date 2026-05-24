@@ -127,6 +127,7 @@ export default function ProductPageClient({ params }: Props) {
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [selectedImage, setSelectedImage] = useState<string>("")
   const [toastVisible, setToastVisible] = useState(false)
+  const [collectionDiscount, setCollectionDiscount] = useState<number | null>(null)
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -138,6 +139,15 @@ export default function ProductPageClient({ params }: Props) {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || "Ürün alınamadı")
         setProduct({ ...data, productVariants: sortVariants(data.productVariants || []) })
+
+        const dmRes = await fetch("/api/collections/discount-map", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productIds: [Number(id)] }),
+        })
+        const dmData = await dmRes.json()
+        const discount = dmData.discounts?.[Number(id)] ?? null
+        setCollectionDiscount(discount)
       } catch (error) {
         console.error(error)
       } finally {
@@ -395,11 +405,18 @@ export default function ProductPageClient({ params }: Props) {
             </div>
 
             {/* Fiyat — formatPrice ile */}
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl font-semibold">{formatPrice(product.price)}</span>
               {product.oldPrice && product.oldPrice > product.price && (
                 <span className="text-lg text-gray-400 line-through">
                   {formatPrice(product.oldPrice)}
+                </span>
+              )}
+            </div>
+            <div className="mb-8">
+              {collectionDiscount != null && (
+                <span className="inline-flex items-center text-sm font-medium text-orange-700 bg-orange-50 border border-orange-100 px-3 py-1.5 rounded-full">
+                  Sepette %{collectionDiscount} İndirim
                 </span>
               )}
             </div>

@@ -16,6 +16,7 @@ export type SliderProduct = {
   category: string
   href: string
   colors: CardColor[]
+  collectionDiscount?: number | null
 }
 
 // 4 visible items per view → 4 leading + 4 trailing clones
@@ -45,6 +46,7 @@ export default function ProductSlider({ products }: { products: SliderProduct[] 
               colorName={p.colorName}
               category={p.category}
               colors={p.colors}
+              collectionDiscount={p.collectionDiscount}
             />
           </div>
         ))}
@@ -146,6 +148,7 @@ function Slider({ products }: { products: SliderProduct[] }) {
                 colorName={product.colorName}
                 category={product.category}
                 colors={product.colors}
+                collectionDiscount={product.collectionDiscount}
               />
             </div>
           ))}

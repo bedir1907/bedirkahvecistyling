@@ -43,20 +43,31 @@ type Props = {
 
 function getStatusLabel(status: string) {
   const map: Record<string, string> = {
-    PAID: "Ödeme Alındı", APPROVED: "Sipariş Onaylandı",
-    PENDING: "Beklemede", FAILED: "Ödeme Başarısız",
-    FAILED_PAYMENT: "Ödeme Alınamadı", SHIPPED: "Kargoya Verildi",
-    DELIVERED: "Teslim Edildi", CANCELLED: "İptal Edildi", REFUNDED: "İade Edildi",
+    CREATED: "Sipariş Oluşturuldu",
+    PAID: "Sipariş Oluşturuldu",
+    PENDING: "Beklemede",
+    FAILED_PAYMENT: "Ödeme Alınamadı",
+    FAILED: "Ödeme Başarısız",
+    APPROVED: "Sipariş Onaylandı",
+    SHIPPED: "Kargoya Verildi",
+    DELIVERED: "Teslim Edildi",
+    CANCELLED: "İptal Edildi",
+    REFUNDED: "İade Edildi",
   }
   return map[status] ?? status
 }
 
 function getStatusClass(status: string) {
   const map: Record<string, string> = {
-    PAID: "bg-green-100 text-green-700", APPROVED: "bg-indigo-100 text-indigo-700",
-    PENDING: "bg-yellow-100 text-yellow-700", FAILED: "bg-red-100 text-red-700",
-    FAILED_PAYMENT: "bg-red-100 text-red-700", SHIPPED: "bg-blue-100 text-blue-700",
-    DELIVERED: "bg-emerald-100 text-emerald-700", CANCELLED: "bg-gray-100 text-gray-600",
+    CREATED: "bg-green-100 text-green-700",
+    PAID: "bg-green-100 text-green-700",
+    PENDING: "bg-yellow-100 text-yellow-700",
+    FAILED_PAYMENT: "bg-red-100 text-red-700",
+    FAILED: "bg-red-100 text-red-700",
+    APPROVED: "bg-indigo-100 text-indigo-700",
+    SHIPPED: "bg-blue-100 text-blue-700",
+    DELIVERED: "bg-emerald-100 text-emerald-700",
+    CANCELLED: "bg-gray-100 text-gray-600",
     REFUNDED: "bg-purple-100 text-purple-700",
   }
   return map[status] ?? "bg-gray-100 text-gray-700"
