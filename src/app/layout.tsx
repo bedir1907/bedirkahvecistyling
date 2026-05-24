@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://bedirkahvecistyling.com"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.bedirkahvecistyling.com"
   ),
   title: {
     default: "Bedir Kahveci Styling",

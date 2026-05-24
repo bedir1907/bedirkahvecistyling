@@ -2,6 +2,16 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["iyzipay"],
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "bedirkahvecistyling.com" }],
+        destination: "https://www.bedirkahvecistyling.com/:path*",
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {
