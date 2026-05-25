@@ -69,15 +69,6 @@ export default function ProductCard({
             </span>
           ) : null}
 
-          {collectionDiscount != null && (
-            <span className="absolute top-3 right-3 md:top-4 md:right-4 z-10 flex items-center gap-1 bg-orange-500 text-white text-[10px] md:text-xs font-semibold px-2.5 py-1.5 rounded-full shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 shrink-0">
-                <path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25 0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0 0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0 5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636 2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
-              </svg>
-              Sepette %{collectionDiscount} İndirim
-            </span>
-          )}
-
           <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 z-10 hidden md:block">
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
               <span className="block text-center text-sm font-medium tracking-wide">
@@ -95,7 +86,7 @@ export default function ProductCard({
           </p>
         ) : null}
 
-        <h3 className="text-[14px] sm:text-[15px] md:text-[17px] font-medium leading-[1.35] tracking-tight transition group-hover:text-gray-600 line-clamp-2 min-h-[38px] md:min-h-[46px]">
+        <h3 className="text-[14px] sm:text-[15px] md:text-[17px] font-medium leading-[1.35] tracking-tight transition group-hover:text-gray-600 line-clamp-2 min-h-9.5 md:min-h-11.5">
           {safeName}
         </h3>
 
@@ -140,6 +131,12 @@ export default function ProductCard({
             </span>
           ) : null}
         </div>
+
+        {collectionDiscount != null && (
+          <span className="inline-flex items-center text-[10px] md:text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+            Sepette %{collectionDiscount} İndirim
+          </span>
+        )}
 
       </div>
     </article>
