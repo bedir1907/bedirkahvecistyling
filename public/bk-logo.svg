@@ -10,5 +10,10 @@
   <path d="M210 276V164" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
   <path d="M210 235L281 88" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
   <path d="M235 184L292 276" stroke="#050505" stroke-width="6" stroke-linecap="square"/>
-  <text x="294" y="304" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#050505" transform="rotate(-68 294 304)">Bedir Kahveci Styling</text>
+  <defs>
+    <path id="bk-text-arc" d="M 200 342 A 163 163 0 0 0 340 214"/>
+  </defs>
+  <text font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#050505">
+    <textPath href="#bk-text-arc" startOffset="50%" text-anchor="middle">Bedir Kahveci Styling</textPath>
+  </text>
 </svg>

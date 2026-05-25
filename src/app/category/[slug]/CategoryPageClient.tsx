@@ -118,80 +118,67 @@ export default function CategoryPageClient({ params }: Props) {
 
   const hasBanner = !!(category?.video || category?.image)
 
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <img
+          src="/bk-logo.svg"
+          alt="Yükleniyor"
+          className="w-24 h-24 rounded-full animate-spin"
+          style={{ animationDuration: "1.5s" }}
+        />
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-white text-black">
 
       {/* Başlık bandı */}
-      {loading ? (
-        <section className="relative w-full border-b bg-gray-100 overflow-hidden animate-pulse">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-3 w-16 bg-gray-300 rounded" />
-              <div className="h-3 w-2 bg-gray-300 rounded" />
-              <div className="h-3 w-24 bg-gray-300 rounded" />
-            </div>
-            <div className="h-4 w-16 bg-gray-300 rounded mb-3" />
-            <div className="h-9 md:h-11 w-56 bg-gray-300 rounded" />
+      <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
+        {category?.video ? (
+          <AutoplayVideo
+            src={category.video}
+            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+          />
+        ) : category?.image ? (
+          <img
+            src={category.image}
+            alt={category.name ?? ""}
+            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+          />
+        ) : null}
+        {hasBanner && <div className="absolute inset-0 bg-black/50" />}
+        <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
+          <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
+            <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
+            <span>/</span>
+            <span>{category?.name || slug}</span>
           </div>
-        </section>
-      ) : (
-        <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
-          {category?.video ? (
-            <AutoplayVideo
-              src={category.video}
-              style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
-            />
-          ) : category?.image ? (
-            <img
-              src={category.image}
-              alt={category.name ?? ""}
-              style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
-            />
-          ) : null}
-          {hasBanner && <div className="absolute inset-0 bg-black/50" />}
-          <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
-            <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
-              <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
-              <span>/</span>
-              <span>{category?.name || slug}</span>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
+                Kategori
+              </p>
+              <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
+              <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>
             </div>
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
-                  Kategori
-                </p>
-                <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
-                <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>
-              </div>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
-              >
-                <option value="new">En Yeniler</option>
-                <option value="price-asc">Fiyat Artan</option>
-                <option value="price-desc">Fiyat Azalan</option>
-              </select>
-            </div>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
+            >
+              <option value="new">En Yeniler</option>
+              <option value="price-asc">Fiyat Artan</option>
+              <option value="price-desc">Fiyat Azalan</option>
+            </select>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <section className="max-w-7xl mx-auto px-4 py-10">
 
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 aspect-3/4" />
-                <div className="mt-3 space-y-2">
-                  <div className="h-3 bg-gray-200 rounded w-2/3" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : sortedProducts.length === 0 ? (
+        {sortedProducts.length === 0 ? (
           <div className="border border-dashed p-16 text-center">
             <p className="text-gray-400 text-lg mb-4">Bu kategoride henüz ürün yok.</p>
             <Link href="/" className="inline-flex px-6 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
