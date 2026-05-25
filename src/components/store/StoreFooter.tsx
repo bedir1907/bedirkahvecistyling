@@ -73,7 +73,7 @@ function FacebookIcon() {
 
 function SocialButton({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full border border-black/10 text-black/60 hover:bg-black hover:text-white hover:border-black transition" aria-label={label}>
+    <a href={href} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center border border-black/10 text-black/60 hover:bg-black hover:text-white hover:border-black transition" aria-label={label}>
       {children}
     </a>
   )
@@ -205,7 +205,7 @@ export default function StoreFooter() {
             { icon: "↩️", title: "Kolay İade", sub: "14 gün içinde" },
             { icon: "💳", title: "Iyzico ile Öde", sub: "3D Secure güvencesi" },
           ].map((badge) => (
-            <div key={badge.title} className="flex items-center gap-3 rounded-2xl border border-black/8 bg-white px-4 py-3">
+            <div key={badge.title} className="flex items-center gap-3 border border-black/8 bg-white px-4 py-3">
               <span className="text-2xl shrink-0">{badge.icon}</span>
               <div>
                 <p className="text-sm font-semibold leading-tight">{badge.title}</p>
@@ -225,7 +225,7 @@ export default function StoreFooter() {
           {/* Ödeme logoları */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Visa */}
-            <div className="h-9 px-3 bg-white border border-black/10 rounded-md flex items-center justify-center" aria-label="Visa ile ödeme">
+            <div className="h-9 px-3 bg-white border border-black/10 flex items-center justify-center" aria-label="Visa ile ödeme">
               <Image
                 src="/visa-logo.svg"
                 alt="Visa"
@@ -236,7 +236,7 @@ export default function StoreFooter() {
             </div>
 
             {/* Mastercard */}
-            <div className="h-9 px-2 bg-white border border-black/10 rounded-md flex items-center justify-center" aria-label="Mastercard ile ödeme">
+            <div className="h-9 px-2 bg-white border border-black/10 flex items-center justify-center" aria-label="Mastercard ile ödeme">
               <Image
                 src="/mastercard-logo.svg"
                 alt="Mastercard"

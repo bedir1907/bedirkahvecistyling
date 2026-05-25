@@ -36,7 +36,7 @@ export default function ResendVerificationButton() {
       type="button"
       onClick={handleResend}
       disabled={loading}
-      className="inline-flex items-center justify-center rounded-2xl bg-[#1C1C1E] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+      className="inline-flex items-center justify-center bg-[#1C1C1E] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
     >
       {loading ? "Gönderiliyor..." : "Tekrar Gönder"}
     </button>

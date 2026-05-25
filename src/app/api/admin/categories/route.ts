@@ -18,6 +18,7 @@ export async function POST(request: Request) {
         name: body.name,
         slug: body.slug,
         image: body.image || null,
+        video: body.video || null,
         isFeatured: Boolean(body.isFeatured),
         isActive: Boolean(body.isActive),
         displayOrder: Number(body.displayOrder || 0),

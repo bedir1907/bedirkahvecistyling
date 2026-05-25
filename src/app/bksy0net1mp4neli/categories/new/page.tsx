@@ -12,6 +12,7 @@ export default function NewCategoryPage() {
     name: "",
     slug: "",
     image: "",
+    video: "",
     isFeatured: false,
     isActive: true,
     displayOrder: "0",
@@ -106,46 +107,36 @@ export default function NewCategoryPage() {
 
           <div className="space-y-3">
             <label className="block font-medium">Kategori Görseli</label>
-
             <div className="flex flex-wrap items-center gap-3">
-              <CloudinaryUploadButton
-                buttonText="Bilgisayardan Görsel Seç"
-                onUploadSuccess={(url) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    image: url,
-                  }))
-                }
-              />
-
-              {form.image ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm((prev) => ({
-                      ...prev,
-                      image: "",
-                    }))
-                  }
-                  className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition"
-                >
-                  Görseli Kaldır
-                </button>
-              ) : null}
+              <CloudinaryUploadButton buttonText="Görsel Seç" onUploadSuccess={(url) => setForm((prev) => ({ ...prev, image: url }))} />
+              {form.image && (
+                <button type="button" onClick={() => setForm((prev) => ({ ...prev, image: "" }))} className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition">Görseli Kaldır</button>
+              )}
             </div>
-
             {form.image ? (
               <div className="rounded-xl border p-3 bg-gray-50">
-                <img
-                  src={form.image}
-                  alt="Kategori görsel önizleme"
-                  className="w-full max-w-sm h-48 object-cover rounded-lg border"
-                />
+                <img src={form.image} alt="" className="w-full max-w-sm h-48 object-cover rounded-lg border" />
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">
-                Henüz kategori görseli seçilmedi.
+              <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">Henüz görsel seçilmedi.</div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <label className="block font-medium">Kategori Videosu</label>
+            <p className="text-sm text-gray-500">Video varsa görsel yerine oynatılır.</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <CloudinaryUploadButton buttonText="Video Seç" resourceType="video" folder="categories" onUploadSuccess={(url) => setForm((prev) => ({ ...prev, video: url }))} />
+              {form.video && (
+                <button type="button" onClick={() => setForm((prev) => ({ ...prev, video: "" }))} className="border border-red-200 text-red-600 px-4 py-3 rounded-xl hover:bg-red-50 transition">Videoyu Kaldır</button>
+              )}
+            </div>
+            {form.video ? (
+              <div className="rounded-xl border p-3 bg-gray-50">
+                <video src={form.video} className="w-full max-w-sm h-48 object-cover rounded-lg border bg-black" muted playsInline />
               </div>
+            ) : (
+              <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">Henüz video seçilmedi.</div>
             )}
           </div>
 

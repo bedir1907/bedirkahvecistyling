@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, slug, eyebrow, description, image, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
+    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
 
     const collection = await prisma.collection.create({
       data: {
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
         eyebrow: eyebrow || null,
         description: description || null,
         image: image || null,
+        video: video || null,
         buttonText: buttonText || null,
         buttonLink: buttonLink || null,
         discount: discount != null ? Number(discount) : null,

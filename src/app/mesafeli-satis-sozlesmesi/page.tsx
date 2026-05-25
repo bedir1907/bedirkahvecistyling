@@ -16,7 +16,7 @@ export default function MesafeliSatisSozlesmesiPage() {
           <span className="text-black">Mesafeli Satış Sözleşmesi</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Yasal Belge</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Mesafeli Satış Sözleşmesi</h1>
           <p className="text-sm text-gray-500 mt-3">
@@ -28,7 +28,7 @@ export default function MesafeliSatisSozlesmesiPage() {
             <div>
               <h2 className="text-xl font-semibold text-black mb-4">Madde 1 — Taraflar</h2>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-white border border-black/8 rounded-2xl px-5 py-5 space-y-1 text-sm">
+                <div className="bg-white border border-black/8 px-5 py-5 space-y-1 text-sm">
                   <p className="font-semibold text-black text-base mb-2">SATICI</p>
                   <p><span className="text-gray-500 w-28 inline-block">Unvan</span> Bedir Kahveci Styling</p>
                   <p><span className="text-gray-500 w-28 inline-block">Adres</span> Yeniköy Mah. Amiral Şükrü Okan Cad. Altay Apartmanı No:26, Tirebolu / Giresun 28500</p>
@@ -38,7 +38,7 @@ export default function MesafeliSatisSozlesmesiPage() {
                   <p><span className="text-gray-500 w-28 inline-block">E-posta</span> info@bedirkahvecistyling.com</p>
                   <p><span className="text-gray-500 w-28 inline-block">Web Sitesi</span> www.bedirkahvecistyling.com</p>
                 </div>
-                <div className="bg-white border border-black/8 rounded-2xl px-5 py-5 space-y-1 text-sm">
+                <div className="bg-white border border-black/8 px-5 py-5 space-y-1 text-sm">
                   <p className="font-semibold text-black text-base mb-2">ALICI</p>
                   <p className="text-gray-600">Sipariş formunda belirtilen ad, soyad, teslimat adresi, e-posta ve telefon numarasına sahip tüketicidir.</p>
                 </div>
@@ -102,7 +102,7 @@ export default function MesafeliSatisSozlesmesiPage() {
                   "Kullanılmış, yıkanmış veya etiketi çıkarılmış ürünler",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+                    <span className="mt-2 w-1.5 h-1.5 bg-black shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}

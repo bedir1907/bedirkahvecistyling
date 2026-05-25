@@ -45,21 +45,23 @@ export async function PATCH(request: Request) {
 
     const body = await request.json()
 
-    const categories = await prisma.category.findMany({
-      where: {
-        isActive: true,
-      },
-      select: {
-        slug: true,
-      },
-    })
+    const [categories, collections] = await Promise.all([
+      prisma.category.findMany({
+        where: { isActive: true },
+        select: { slug: true },
+      }),
+      prisma.collection.findMany({
+        where: { isActive: true },
+        select: { slug: true },
+      }),
+    ])
 
     const allowedLinks = new Set<string>([
       "/category/new-season",
       "/category/indirimdekiler",
-      "/koleksiyon",
       "/",
       ...categories.map((category) => `/category/${category.slug}`),
+      ...collections.map((col) => `/collections/${col.slug}`),
     ])
 
     const announcementLink = normalizeString(body.announcementLink)
@@ -114,6 +116,10 @@ export async function PATCH(request: Request) {
       heroCard2Title: normalizeString(body.heroCard2Title) || null,
       heroCard2Image: normalizeString(body.heroCard2Image) || null,
       heroCard2Link: heroCard2Link || null,
+
+      collectionsEnabled: body.collectionsEnabled ?? true,
+      collectionsTitle:
+        normalizeString(body.collectionsTitle) || "Koleksiyonlar",
 
       featuredCategoriesEnabled: body.featuredCategoriesEnabled ?? true,
       featuredCategoriesTitle:

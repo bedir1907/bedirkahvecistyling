@@ -161,7 +161,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
             <div className="flex flex-wrap gap-4">
               <Link
                 href={heroButtonLink}
-                className="inline-flex items-center justify-center bg-black text-white px-8 py-4 rounded-xl hover:opacity-90 transition text-base md:text-lg font-medium tracking-wide"
+                className="inline-flex items-center justify-center bg-black text-white px-8 py-4 hover:opacity-90 transition text-base md:text-lg font-medium tracking-wide"
               >
                 {settings?.heroButtonText || "Alışverişe Başla"}
               </Link>
@@ -180,7 +180,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                     <button
                       type="button"
                       onClick={goPrevCard}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center hover:bg-white transition text-xl"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-12 md:h-12 bg-white/90 backdrop-blur shadow-md flex items-center justify-center hover:bg-white transition text-xl"
                       aria-label="Önceki kart"
                     >
                       ‹
@@ -189,7 +189,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                     <button
                       type="button"
                       onClick={goNextCard}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur shadow-md flex items-center justify-center hover:bg-white transition text-xl"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-12 md:h-12 bg-white/90 backdrop-blur shadow-md flex items-center justify-center hover:bg-white transition text-xl"
                       aria-label="Sonraki kart"
                     >
                       ›
@@ -197,7 +197,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                   </>
                 )}
 
-                <div className="relative overflow-hidden rounded-[28px] shadow-sm">
+                <div className="relative overflow-hidden shadow-sm">
                   <Link href={activeCard.link || "#"} className="group block">
                     <div
                       key={safeCardIndex}
@@ -228,7 +228,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                         key={index}
                         type="button"
                         onClick={() => safeSetCard(index)}
-                        className={`h-2.5 rounded-full transition-all ${
+                        className={`h-2.5 transition-all ${
                           safeCardIndex === index
                             ? "w-10 bg-black"
                             : "w-2.5 bg-gray-300"
@@ -240,7 +240,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                 )}
               </>
             ) : (
-              <div className="aspect-[4/5] rounded-[28px] border bg-gray-200" />
+              <div className="aspect-[4/5] border bg-gray-200" />
             )}
           </div>
         </div>

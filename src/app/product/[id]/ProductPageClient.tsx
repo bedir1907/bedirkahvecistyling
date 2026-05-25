@@ -16,7 +16,7 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       }`}
     >
-      <div className="flex items-center gap-3 bg-black text-white px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-medium whitespace-nowrap">
+      <div className="flex items-center gap-3 bg-black text-white px-5 py-3.5 shadow-2xl text-sm font-medium whitespace-nowrap">
         <span className="text-green-400">✓</span>
         {message}
       </div>
@@ -125,9 +125,11 @@ export default function ProductPageClient({ params }: Props) {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState<string>("")
-  const [selectedImage, setSelectedImage] = useState<string>("")
+  const [selectedIndex, setSelectedIndex] = useState<number>(0)
   const [toastVisible, setToastVisible] = useState(false)
   const [collectionDiscount, setCollectionDiscount] = useState<number | null>(null)
+  const [imageFading, setImageFading] = useState(false)
+  const [visibleImage, setVisibleImage] = useState<string>("")
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -180,28 +182,41 @@ export default function ProductPageClient({ params }: Props) {
       if (firstAvailable) initialSize = firstAvailable.size
     }
     setSelectedSize(initialSize)
-    const gallery = product.images.length > 0
-      ? product.images
-      : [{ id: 0, url: product.image || FALLBACK_IMAGE, alt: product.name, color: null, sortOrder: 0, isCover: true }]
-    setSelectedImage(gallery[0].url)
+    setSelectedIndex(0)
     updateUrl(initialSize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product])
-
-  // ESC ile lightbox kapat
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setLightboxOpen(false)
-    }
-    window.addEventListener("keydown", handleKey)
-    return () => window.removeEventListener("keydown", handleKey)
-  }, [])
 
   const galleryImages = useMemo(() => {
     if (!product) return [{ id: 0, url: FALLBACK_IMAGE, alt: "Ürün", color: null, sortOrder: 0, isCover: true }]
     if (product.images.length > 0) return product.images
     return [{ id: 0, url: product.image || FALLBACK_IMAGE, alt: product.name, color: null, sortOrder: 0, isCover: true }]
   }, [product])
+
+  const selectedImage = galleryImages[selectedIndex]?.url ?? galleryImages[0]?.url ?? FALLBACK_IMAGE
+
+  // Görsel değişince smooth fade geçişi
+  useEffect(() => {
+    if (!selectedImage || visibleImage === selectedImage) return
+    if (!visibleImage) { setVisibleImage(selectedImage); return }
+    setImageFading(true)
+    const t = setTimeout(() => {
+      setVisibleImage(selectedImage)
+      setImageFading(false)
+    }, 180)
+    return () => clearTimeout(t)
+  }, [selectedImage]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ESC ile lightbox kapat, ok tuşlarıyla gezin
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setLightboxOpen(false)
+      if (e.key === "ArrowRight") setSelectedIndex((i) => (i + 1) % galleryImages.length)
+      if (e.key === "ArrowLeft") setSelectedIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length)
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [galleryImages.length])
 
   const selectedVariant = useMemo(() => {
     if (!product || !selectedSize) return null
@@ -295,7 +310,7 @@ export default function ProductPageClient({ params }: Props) {
           <button
             type="button"
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+            className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition"
             aria-label="Kapat"
           >
             ✕
@@ -336,13 +351,13 @@ export default function ProductPageClient({ params }: Props) {
           <div className="grid md:grid-cols-[110px_1fr] gap-4">
             {/* Küçük görseller */}
             <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto">
-              {galleryImages.map((img) => (
+              {galleryImages.map((img, idx) => (
                 <button
                   key={img.id}
                   type="button"
-                  onClick={() => setSelectedImage(img.url)}
-                  className={`relative w-24 h-24 rounded-2xl overflow-hidden border shrink-0 transition ${
-                    selectedImage === img.url ? "border-black" : "border-gray-200"
+                  onClick={() => setSelectedIndex(idx)}
+                  className={`relative w-24 h-24 overflow-hidden border shrink-0 transition ${
+                    selectedIndex === idx ? "border-black" : "border-gray-200"
                   }`}
                 >
                   <Image src={img.url} alt={img.alt || product.name} fill className="object-cover" sizes="96px" />
@@ -353,31 +368,53 @@ export default function ProductPageClient({ params }: Props) {
             {/* Ana görsel — tıklanınca lightbox açılır */}
             <div className="order-1 md:order-2">
               <div
-                className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-gray-100 border cursor-zoom-in"
+                className="relative aspect-[4/5] overflow-hidden bg-gray-100 border cursor-zoom-in"
                 onClick={() => setLightboxOpen(true)}
                 title="Büyütmek için tıkla"
               >
                 <Image
-                  key={selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE}
-                  src={selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE}
+                  src={visibleImage || selectedImage}
                   alt={product.name}
                   fill
                   priority
-                  className="object-cover transition-opacity duration-300"
+                  className={`object-cover transition-opacity duration-200 ${imageFading ? "opacity-0" : "opacity-100"}`}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                   {product.isNew && (
-                    <span className="bg-black text-white text-xs px-3 py-2 rounded-full">Yeni</span>
+                    <span className="bg-black text-white text-xs px-3 py-2">Yeni</span>
                   )}
                   {discountRate && (
-                    <span className="bg-white text-black text-xs px-3 py-2 rounded-full border">
+                    <span className="bg-white text-black text-xs px-3 py-2 border">
                       %{discountRate} İndirim
                     </span>
                   )}
                 </div>
+
+                {/* Ok butonları */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setSelectedIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length) }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur flex items-center justify-center text-black hover:bg-white transition shadow"
+                      aria-label="Önceki fotoğraf"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setSelectedIndex((i) => (i + 1) % galleryImages.length) }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur flex items-center justify-center text-black hover:bg-white transition shadow"
+                      aria-label="Sonraki fotoğraf"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                  </>
+                )}
+
                 {/* Zoom hint */}
-                <div className="absolute bottom-4 right-4 w-9 h-9 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-black/60 shadow">
+                <div className="absolute bottom-4 right-4 w-9 h-9 bg-white/80 backdrop-blur flex items-center justify-center text-black/60 shadow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
@@ -415,7 +452,7 @@ export default function ProductPageClient({ params }: Props) {
             </div>
             <div className="mb-8">
               {collectionDiscount != null && (
-                <span className="inline-flex items-center text-sm font-medium text-orange-700 bg-orange-50 border border-orange-100 px-3 py-1.5 rounded-full">
+                <span className="inline-flex items-center text-sm font-medium text-orange-700 bg-orange-50 border border-orange-100 px-3 py-1.5">
                   Sepette %{collectionDiscount} İndirim
                 </span>
               )}
@@ -429,9 +466,9 @@ export default function ProductPageClient({ params }: Props) {
                   <div className="flex flex-wrap gap-3">
                     <Link
                       href={from ? `/product/${product.id}?from=${from}` : `/product/${product.id}`}
-                      className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-black bg-black text-white transition"
+                      className="flex items-center gap-3 px-3 py-3 border border-black bg-black text-white transition"
                     >
-                      <span className="relative w-12 h-12 rounded-xl overflow-hidden border bg-gray-100 shrink-0">
+                      <span className="relative w-12 h-12 overflow-hidden border bg-gray-100 shrink-0">
                         <Image src={product.image || FALLBACK_IMAGE} alt={product.color || product.name} fill className="object-cover" sizes="48px" />
                       </span>
                       <span className="text-sm font-medium">{product.color || "Mevcut Renk"}</span>
@@ -440,9 +477,9 @@ export default function ProductPageClient({ params }: Props) {
                       <Link
                         key={item.id}
                         href={from ? `/product/${item.id}?from=${from}` : `/product/${item.id}`}
-                        className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-gray-200 hover:border-black transition"
+                        className="flex items-center gap-3 px-3 py-3 border border-gray-200 hover:border-black transition"
                       >
-                        <span className="relative w-12 h-12 rounded-xl overflow-hidden border bg-gray-100 shrink-0">
+                        <span className="relative w-12 h-12 overflow-hidden border bg-gray-100 shrink-0">
                           <Image src={item.image || FALLBACK_IMAGE} alt={item.color || item.name} fill className="object-cover" sizes="48px" />
                         </span>
                         <span className="text-sm font-medium">{item.color || item.name}</span>
@@ -465,7 +502,7 @@ export default function ProductPageClient({ params }: Props) {
                         type="button"
                         disabled={isOut}
                         onClick={() => handleSelectSize(variant.size)}
-                        className={`min-w-[64px] px-4 py-3 rounded-2xl border text-sm font-medium transition ${
+                        className={`min-w-[64px] px-4 py-3 border text-sm font-medium transition ${
                           isSelected
                             ? "border-black bg-black text-white"
                             : isOut
@@ -481,11 +518,11 @@ export default function ProductPageClient({ params }: Props) {
               </div>
 
               {/* Stok durumu */}
-              <div className="rounded-2xl bg-gray-50 border p-4">
+              <div className="bg-gray-50 border p-4">
                 {!selectedSize ? (
                   <p className="text-sm text-gray-500">Beden seç.</p>
                 ) : selectedVariant?.stock && selectedVariant.stock > 0 ? (
-                  <span className={`inline-flex px-3 py-2 rounded-full text-sm font-medium ${
+                  <span className={`inline-flex px-3 py-2 text-sm font-medium ${
                     selectedVariant.stock <= 3
                       ? "bg-orange-100 text-orange-700"
                       : "bg-green-100 text-green-700"
@@ -495,7 +532,7 @@ export default function ProductPageClient({ params }: Props) {
                       : `${selectedVariant.stock} adet stokta`}
                   </span>
                 ) : (
-                  <span className="inline-flex px-3 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700">
+                  <span className="inline-flex px-3 py-2 text-sm font-medium bg-red-100 text-red-700">
                     Tükendi
                   </span>
                 )}
@@ -508,7 +545,7 @@ export default function ProductPageClient({ params }: Props) {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={!selectedVariant || selectedVariant.stock <= 0 || isSelectedVariantMaxInCart}
-                className={`w-full rounded-2xl px-6 py-4 text-base font-medium transition ${
+                className={`w-full px-6 py-4 text-base font-medium transition ${
                   !selectedSize
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : selectedVariant && selectedVariant.stock > 0 && !isSelectedVariantMaxInCart

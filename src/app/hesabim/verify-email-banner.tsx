@@ -32,7 +32,7 @@ export default function VerifyEmailBanner() {
   }
 
   return (
-    <div className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="border border-amber-200 bg-amber-50 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
         <div className="text-sm font-medium text-amber-900">
           E-posta adresin henüz doğrulanmadı
@@ -46,7 +46,7 @@ export default function VerifyEmailBanner() {
         type="button"
         onClick={handleResend}
         disabled={loading}
-        className="inline-flex items-center justify-center rounded-2xl bg-[#1C1C1E] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+        className="inline-flex items-center justify-center bg-[#1C1C1E] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
       >
         {loading ? "Gönderiliyor..." : "Doğrulama Mailini Gönder"}
       </button>

@@ -36,7 +36,7 @@ export default function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={loading}
-      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-black text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+      className="inline-flex items-center justify-center gap-2 bg-black text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
     >
       <LogOut size={16} />
       {loading ? "Çıkış Yapılıyor..." : "Çıkış Yap"}

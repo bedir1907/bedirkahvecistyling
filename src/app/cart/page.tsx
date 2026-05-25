@@ -82,9 +82,9 @@ export default function CartPage() {
         </div>
 
         {cart.length === 0 ? (
-          <div className="border rounded-3xl p-10 text-center bg-white">
+          <div className="border p-10 text-center bg-white">
             <p className="text-gray-600 mb-5">Sepetiniz boş.</p>
-            <Link href="/" className="inline-flex px-6 py-3 rounded-2xl bg-black text-white">
+            <Link href="/" className="inline-flex px-6 py-3 bg-black text-white">
               Alışverişe Dön
             </Link>
           </div>
@@ -93,22 +93,22 @@ export default function CartPage() {
             {/* Ürünler */}
             <div className="space-y-5">
               {cart.map((item) => (
-                <div key={`${item.productId}-${item.variantId}`} className="rounded-3xl border bg-white p-5 md:p-6">
+                <div key={`${item.productId}-${item.variantId}`} className="border bg-white p-5 md:p-6">
                   <div className="flex flex-col sm:flex-row gap-5">
-                    <div className="relative w-full sm:w-[130px] h-[160px] sm:h-[130px] shrink-0 rounded-2xl overflow-hidden bg-gray-100">
+                    <Link href={`/product/${item.productId}`} className="relative w-full sm:w-[130px] h-[160px] sm:h-[130px] shrink-0 overflow-hidden bg-gray-100 block">
                       <Image src={item.image || FALLBACK_IMAGE} alt={item.name} fill className="object-cover" />
-                    </div>
+                    </Link>
 
                     <div className="flex-1">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-semibold">{item.name}</h2>
+                          <Link href={`/product/${item.productId}`} className="text-lg font-semibold hover:underline">{item.name}</Link>
                           <p className="text-gray-600 mt-1">{formatPrice(item.price)}</p>
                           <p className="text-sm text-gray-500 mt-2">
                             Renk: {item.color} • Beden: {item.size}
                           </p>
                           {discountMap[item.productId] && (
-                            <span className="inline-flex items-center mt-2 text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center mt-2 text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1">
                               Sepette %{discountMap[item.productId]} İndirim
                             </span>
                           )}
@@ -130,19 +130,19 @@ export default function CartPage() {
                       <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                           <button type="button" onClick={() => decreaseQuantity(item.productId, item.variantId)}
-                            className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition">
+                            className="w-10 h-10 border hover:bg-black hover:text-white transition">
                             -
                           </button>
                           <span className="min-w-7 text-center font-medium">{item.quantity}</span>
                           <button type="button" onClick={() => increaseQuantity(item.productId, item.variantId)}
-                            className="w-10 h-10 rounded-xl border hover:bg-black hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-10 h-10 border hover:bg-black hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
                             disabled={item.quantity >= item.stock}>
                             +
                           </button>
                         </div>
 
                         <button type="button" onClick={() => removeFromCart(item.productId, item.variantId)}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-gray-600 hover:bg-black hover:text-white transition">
+                          className="inline-flex items-center gap-2 px-4 py-2 border text-gray-600 hover:bg-black hover:text-white transition">
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-7 0l1 12h6l1-12M10 11v6M14 11v6" />
                           </svg>
@@ -156,7 +156,7 @@ export default function CartPage() {
             </div>
 
             {/* Özet */}
-            <aside className="rounded-3xl border bg-gray-50 p-6 lg:sticky lg:top-24">
+            <aside className="border bg-gray-50 p-6 lg:sticky lg:top-24">
               <h2 className="text-xl font-semibold mb-6">Sipariş Özeti</h2>
 
               <div className="space-y-4 text-sm">
@@ -184,7 +184,7 @@ export default function CartPage() {
                 </div>
 
                 {freeShippingRemaining && (
-                  <div className="bg-green-50 border border-green-100 rounded-xl px-3 py-2.5 text-xs text-green-700">
+                  <div className="bg-green-50 border border-green-100 px-3 py-2.5 text-xs text-green-700">
                     {formatPrice(freeShippingRemaining)} daha ekle, ücretsiz kargo kazan!
                   </div>
                 )}
@@ -200,11 +200,11 @@ export default function CartPage() {
 
               <div className="mt-6 space-y-3">
                 <Link href="/checkout"
-                  className="block w-full text-center rounded-2xl bg-black text-white px-6 py-4 font-medium hover:opacity-90 transition">
+                  className="block w-full text-center bg-black text-white px-6 py-4 font-medium hover:opacity-90 transition">
                   Ödemeye Geç
                 </Link>
                 <button type="button" onClick={clearCart}
-                  className="block w-full text-center rounded-2xl border px-6 py-4 font-medium hover:bg-black hover:text-white transition">
+                  className="block w-full text-center border px-6 py-4 font-medium hover:bg-black hover:text-white transition">
                   Sepeti Temizle
                 </button>
               </div>

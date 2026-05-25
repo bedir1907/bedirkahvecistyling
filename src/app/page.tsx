@@ -1,11 +1,10 @@
 import type { Metadata } from "next"
 import CategoryShowcase from "@/components/store/CategoryShowcase"
 import CollectionSection from "@/components/store/CollectionSection"
-import DiscountedProducts from "@/components/store/DiscountedProducts"
 import HeroSection from "@/components/store/HeroSection"
 import ProductSection from "@/components/store/ProductSection"
+import DiscountedProducts from "@/components/store/DiscountedProducts"
 import StoreFooter from "@/components/store/StoreFooter"
-// AnnouncementBar kaldırıldı — layout.tsx → StoreNavbar içinde zaten render ediliyor
 import { prisma } from "@/lib/prisma"
 
 export const revalidate = 60
@@ -22,6 +21,7 @@ export const metadata: Metadata = {
       "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi. Ücretsiz kargo, kolay iade.",
   },
 }
+
 export default async function Home() {
   const [settings, rawCollections] = await Promise.all([
     prisma.homepageSettings.findFirst({
@@ -50,6 +50,7 @@ export default async function Home() {
     eyebrow: col.eyebrow,
     description: col.description,
     image: col.image,
+    video: col.video,
     buttonText: col.buttonText,
     buttonLink: col.buttonLink,
     discount: col.discount,
@@ -67,19 +68,30 @@ export default async function Home() {
       )}
 
       {settings?.featuredCategoriesEnabled && (
-        <CategoryShowcase title={settings.featuredCategoriesTitle} />
+        <CategoryShowcase />
       )}
 
       {settings?.featuredProductsEnabled && (
-        <ProductSection title={settings.featuredProductsTitle} featuredOnly />
+        <ProductSection
+          title={settings.featuredProductsTitle ?? "Haftanın Ürünleri"}
+          viewAllHref="/category/haftanin-urunleri"
+          featuredOnly
+        />
       )}
 
       {settings?.newProductsEnabled && (
-        <ProductSection title={settings.newProductsTitle} newOnly />
+        <ProductSection
+          title={settings.newProductsTitle ?? "En Yeniler"}
+          viewAllHref="/category/en-yeniler"
+          newOnly
+        />
       )}
 
       {settings?.discountedProductsEnabled && (
-        <DiscountedProducts title={settings.discountedProductsTitle} />
+        <DiscountedProducts
+          title={settings.discountedProductsTitle ?? "İndirimdekiler"}
+          viewAllHref="/category/indirimdekiler"
+        />
       )}
 
       <StoreFooter />

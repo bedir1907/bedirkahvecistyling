@@ -87,7 +87,7 @@ export default function StoreNavbar() {
     router.push(`/arama?q=${encodeURIComponent(q)}`)
   }
 
-  const iconBtn = "inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/10 bg-white text-black/70 hover:border-black hover:bg-black hover:text-white transition shrink-0"
+  const iconBtn = "inline-flex items-center justify-center w-10 h-10 border border-black/10 bg-white text-black/70 hover:border-black hover:bg-black hover:text-white transition shrink-0"
 
   return (
     <>
@@ -140,13 +140,13 @@ export default function StoreNavbar() {
               <Link href="/cart" className={`${iconBtn} relative`} aria-label="Sepet">
                 <ShoppingBag size={18} />
                 {mounted && cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-semibold flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-black text-white text-[10px] font-semibold flex items-center justify-center">
                     {cartCount}
                   </span>
                 )}
               </Link>
               {!customerLoading && (
-                <Link href={customer ? "/hesabim" : "/giris"} className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-full border border-black/10 text-[13px] font-medium text-black/70 hover:border-black hover:bg-black hover:text-white transition">
+                <Link href={customer ? "/hesabim" : "/giris"} className="hidden md:inline-flex items-center gap-2 h-10 px-4 border border-black/10 text-[13px] font-medium text-black/70 hover:border-black hover:bg-black hover:text-white transition">
                   <User size={15} />
                   {customer ? "Hesabım" : "Giriş"}
                 </Link>
@@ -157,14 +157,14 @@ export default function StoreNavbar() {
           {/* Mobil scroll tab */}
           <div className="lg:hidden pb-3 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-2 min-w-max">
-              <Link href="/category/new-season" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/new-season" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+              <Link href="/category/new-season" className={`whitespace-nowrap border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/new-season" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
                 Yeni Sezon
               </Link>
-              <Link href="/category/indirimdekiler" className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/indirimdekiler" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+              <Link href="/category/indirimdekiler" className={`whitespace-nowrap border px-3 py-1.5 text-xs font-medium transition ${pathname === "/category/indirimdekiler" ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
                 İndirimdekiler
               </Link>
               {realCategories.map((cat) => (
-                <Link key={cat.id} href={`/category/${cat.slug}`} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive(cat.slug) ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
+                <Link key={cat.id} href={`/category/${cat.slug}`} className={`whitespace-nowrap border px-3 py-1.5 text-xs font-medium transition ${isActive(cat.slug) ? "border-black bg-black text-white" : "border-black/10 bg-[#f5f3ee] text-black/70"}`}>
                   {cat.name}
                 </Link>
               ))}
@@ -187,7 +187,7 @@ export default function StoreNavbar() {
                   className="h-11 w-11 object-contain"
                 />
               </Link>
-              <button type="button" onClick={() => setMobileMenuOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full border border-black/10">
+              <button type="button" onClick={() => setMobileMenuOpen(false)} className="w-9 h-9 flex items-center justify-center border border-black/10">
                 <X size={17} />
               </button>
             </div>
@@ -208,15 +208,15 @@ export default function StoreNavbar() {
             </nav>
 
             <div className="px-4 pb-6 pt-3 border-t border-black/8 space-y-2 shrink-0">
-              <Link href={customer ? "/hesabim" : "/giris"} onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border border-black/10 text-sm font-medium hover:bg-gray-50 transition">
+              <Link href={customer ? "/hesabim" : "/giris"} onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full h-11 border border-black/10 text-sm font-medium hover:bg-gray-50 transition">
                 <User size={16} />
                 {customer ? "Hesabım" : "Giriş Yap"}
               </Link>
-              <Link href="/cart" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition">
+              <Link href="/cart" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full h-11 bg-black text-white text-sm font-medium hover:opacity-90 transition">
                 <ShoppingBag size={16} />
                 Sepetim
                 {mounted && cartCount > 0 && (
-                  <span className="bg-white text-black text-xs font-semibold px-1.5 py-0.5 rounded-full">{cartCount}</span>
+                  <span className="bg-white text-black text-xs font-semibold px-1.5 py-0.5">{cartCount}</span>
                 )}
               </Link>
             </div>
@@ -227,7 +227,7 @@ export default function StoreNavbar() {
       {/* Arama modal */}
       {searchOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-16 px-4" onClick={(e) => { if (e.target === e.currentTarget) setSearchOpen(false) }}>
-          <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="w-full max-w-xl bg-white shadow-2xl overflow-hidden">
             <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 px-4 py-3.5 border-b border-black/8">
               <Search size={18} className="text-black/30 shrink-0" />
               <input
@@ -238,7 +238,7 @@ export default function StoreNavbar() {
                 placeholder="Ürün ara..."
                 className="flex-1 text-base outline-none bg-transparent placeholder:text-black/30"
               />
-              <button type="button" onClick={() => setSearchOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition shrink-0">
+              <button type="button" onClick={() => setSearchOpen(false)} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition shrink-0">
                 <X size={16} />
               </button>
             </form>
@@ -262,7 +262,7 @@ function MobileLink({ href, label, active, onClick }: {
     <Link
       href={href}
       onClick={onClick}
-      className={`block px-3 py-3 rounded-xl text-sm font-medium transition ${
+      className={`block px-3 py-3 text-sm font-medium transition ${
         active ? "bg-black text-white" : "text-black/70 hover:bg-gray-50 hover:text-black"
       }`}
     >

@@ -18,6 +18,8 @@ type Category = {
   id: number
   name: string
   slug: string
+  image?: string | null
+  video?: string | null
 }
 
 type Props = {
@@ -27,6 +29,8 @@ type Props = {
 const VIRTUAL_SLUGS: Record<string, { name: string; apiParam: string }> = {
   "new-season": { name: "Yeni Sezon", apiParam: "isNew=true" },
   "indirimdekiler": { name: "İndirimdekiler", apiParam: "discounted=true" },
+  "haftanin-urunleri": { name: "Haftanın Ürünleri", apiParam: "featured=true" },
+  "en-yeniler": { name: "En Yeniler", apiParam: "isNew=true" },
 }
 
 export default function CategoryPageClient({ params }: Props) {
@@ -44,9 +48,19 @@ export default function CategoryPageClient({ params }: Props) {
     async function fetchData() {
       try {
         if (virtualSlug) {
-          setCategory({ id: -1, name: virtualSlug.name, slug })
-          const res = await fetch(`/api/products?${virtualSlug.apiParam}`)
-          const data = await res.json()
+          const [catRes, prodRes] = await Promise.all([
+            fetch(`/api/categories/${slug}`),
+            fetch(`/api/products?${virtualSlug.apiParam}`),
+          ])
+          const catData = catRes.ok ? await catRes.json() : null
+          setCategory({
+            id: catData?.id ?? -1,
+            name: virtualSlug.name,
+            slug,
+            image: catData?.image ?? null,
+            video: catData?.video ?? null,
+          })
+          const data = await prodRes.json()
           const list = Array.isArray(data) ? data : []
           setProducts(list)
           if (list.length > 0) {
@@ -101,47 +115,61 @@ export default function CategoryPageClient({ params }: Props) {
     return b.id - a.id
   })
 
+  const hasBanner = !!(category?.video || category?.image)
+
   return (
     <main className="min-h-screen bg-white text-black">
-      <section className="max-w-7xl mx-auto px-4 py-10">
 
-        <div className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
-          <Link href="/" className="hover:text-black transition">Anasayfa</Link>
-          <span>/</span>
-          <span className="text-black">{category?.name || slug}</span>
-        </div>
-
-        <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-gray-700 mb-3">
-              Kategori
-            </p>
-            <h1 className="text-3xl md:text-4xl font-bold">
-              {category?.name || slug}
-            </h1>
-            {!loading && (
-              <p className="text-gray-500 text-sm mt-1">
-                {sortedProducts.length} ürün bulundu
-              </p>
-            )}
+      {/* Başlık bandı */}
+      <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
+        {category?.video ? (
+          <video
+            src={category.video}
+            autoPlay muted loop playsInline
+            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+          />
+        ) : category?.image ? (
+          <img
+            src={category.image}
+            alt={category.name ?? ""}
+            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+          />
+        ) : null}
+        {hasBanner && <div className="absolute inset-0 bg-black/50" />}
+        <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
+          <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
+            <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
+            <span>/</span>
+            <span>{category?.name || slug}</span>
           </div>
-
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="border border-black/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none md:w-48"
-          >
-            <option value="new">En Yeniler</option>
-            <option value="price-asc">Fiyat Artan</option>
-            <option value="price-desc">Fiyat Azalan</option>
-          </select>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
+                Kategori
+              </p>
+              <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
+              {!loading && <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>}
+            </div>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
+            >
+              <option value="new">En Yeniler</option>
+              <option value="price-asc">Fiyat Artan</option>
+              <option value="price-desc">Fiyat Azalan</option>
+            </select>
+          </div>
         </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 py-10">
 
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 rounded-2xl aspect-[3/4]" />
+                <div className="bg-gray-200 aspect-3/4" />
                 <div className="mt-3 space-y-2">
                   <div className="h-3 bg-gray-200 rounded w-2/3" />
                   <div className="h-4 bg-gray-200 rounded w-1/2" />
@@ -150,9 +178,9 @@ export default function CategoryPageClient({ params }: Props) {
             ))}
           </div>
         ) : sortedProducts.length === 0 ? (
-          <div className="rounded-3xl border border-dashed p-16 text-center">
+          <div className="border border-dashed p-16 text-center">
             <p className="text-gray-400 text-lg mb-4">Bu kategoride henüz ürün yok.</p>
-            <Link href="/" className="inline-flex px-6 py-3 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition">
+            <Link href="/" className="inline-flex px-6 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
               Anasayfaya Dön
             </Link>
           </div>

@@ -5,6 +5,8 @@ import { CldUploadButton } from "next-cloudinary"
 type Props = {
   onUploadSuccess: (url: string) => void
   buttonText?: string
+  resourceType?: "image" | "video" | "auto"
+  folder?: string
 }
 
 type CloudinaryUploadResult = {
@@ -16,19 +18,20 @@ type CloudinaryUploadResult = {
 export default function CloudinaryUploadButton({
   onUploadSuccess,
   buttonText = "Görsel Seç",
+  resourceType = "image",
+  folder = "products",
 }: Props) {
   return (
     <CldUploadButton
       uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
       options={{
         multiple: false,
-        folder: "products",
-        resourceType: "image",
+        folder,
+        resourceType,
       }}
       onSuccess={(result) => {
         const data = result as CloudinaryUploadResult
         const url = data?.info?.secure_url
-
         if (url) {
           onUploadSuccess(url)
         }

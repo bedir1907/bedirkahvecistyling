@@ -27,13 +27,13 @@ export default function Error({
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={reset}
-            className="inline-flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-2xl text-sm font-medium hover:opacity-90 transition"
+            className="inline-flex items-center gap-2 bg-black text-white px-8 py-3.5 text-sm font-medium hover:opacity-90 transition"
           >
             Tekrar Dene
           </button>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 border border-gray-200 text-black px-8 py-3.5 rounded-2xl text-sm font-medium hover:border-black transition"
+            className="inline-flex items-center gap-2 border border-gray-200 text-black px-8 py-3.5 text-sm font-medium hover:border-black transition"
           >
             Anasayfa
           </Link>

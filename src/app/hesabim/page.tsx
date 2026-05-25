@@ -38,10 +38,10 @@ export default async function AccountPage() {
       <div className="grid md:grid-cols-3 gap-5 pt-2">
         <Link
           href="/siparislerim"
-          className="group rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
+          className="group border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
         >
           <div className="flex items-start justify-between mb-10">
-            <div className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center">
+            <div className="w-10 h-10 border border-black/10 flex items-center justify-center">
               <Package size={17} />
             </div>
             <ChevronRight
@@ -63,10 +63,10 @@ export default async function AccountPage() {
 
         <Link
           href="/hesabim/adreslerim"
-          className="group rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
+          className="group border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
         >
           <div className="flex items-start justify-between mb-10">
-            <div className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center">
+            <div className="w-10 h-10 border border-black/10 flex items-center justify-center">
               <MapPin size={17} />
             </div>
             <ChevronRight
@@ -90,10 +90,10 @@ export default async function AccountPage() {
 
         <Link
           href="/hesabim/ayarlar"
-          className="group rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
+          className="group border border-black/10 bg-[#fcfcfb] p-6 hover:border-black/20 hover:bg-white transition"
         >
           <div className="flex items-start justify-between mb-10">
-            <div className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center">
+            <div className="w-10 h-10 border border-black/10 flex items-center justify-center">
               <UserCircle size={17} />
             </div>
             <ChevronRight
@@ -117,7 +117,7 @@ export default async function AccountPage() {
       </div>
 
       <div className="pt-2">
-        <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 md:p-8">
+        <div className="border border-black/10 bg-[#fcfcfb] p-6 md:p-8">
           <div className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
             Müşteri Durumu
           </div>

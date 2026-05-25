@@ -52,25 +52,25 @@ export default function ProductCard({
   return (
     <article className="group">
       <Link href={productHref} className="block">
-        <div className="relative overflow-hidden rounded-[18px] md:rounded-[24px] bg-gray-100">
+        <div className="relative overflow-hidden bg-gray-100 aspect-3/4">
           <Image
             src={safeImage}
             alt={safeName}
-            width={500}
-            height={650}
-            className="w-full h-[240px] sm:h-[300px] md:h-[360px] object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            fill
+            sizes="(max-width: 640px) 73vw, (max-width: 768px) 46vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
 
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.03] transition duration-300" />
 
           {hasDiscount && discountRate ? (
-            <span className="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white text-[10px] md:text-xs px-2.5 py-1.5 rounded-full z-10 tracking-wide">
+            <span className="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white text-[10px] md:text-xs px-2.5 py-1.5 z-10 tracking-wide">
               %{discountRate} İndirim
             </span>
           ) : null}
 
           <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 z-10 hidden md:block">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
+            <div className="bg-white/95 backdrop-blur-sm px-4 py-3 shadow-lg">
               <span className="block text-center text-sm font-medium tracking-wide">
                 Ürünü İncele
               </span>
@@ -81,7 +81,7 @@ export default function ProductCard({
 
       <div className="mt-3 md:mt-4 space-y-1.5 md:space-y-2">
         {category ? (
-          <p className="inline-flex items-center rounded-full border border-black/10 bg-[#f3f1ec] px-2.5 py-1 text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-700">
+          <p className="inline-flex items-center border border-black/10 bg-[#f3f1ec] px-2.5 py-1 text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-700">
             {category}
           </p>
         ) : null}
@@ -133,7 +133,7 @@ export default function ProductCard({
         </div>
 
         {collectionDiscount != null && (
-          <span className="inline-flex items-center text-[10px] md:text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+          <span className="inline-flex items-center text-[10px] md:text-[11px] font-medium text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1">
             Sepette %{collectionDiscount} İndirim
           </span>
         )}

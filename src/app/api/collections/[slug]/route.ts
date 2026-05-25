@@ -40,6 +40,7 @@ export async function GET(_: Request, context: Context) {
         slug: collection.slug,
         description: collection.description,
         image: collection.image,
+        video: collection.video,
         discount: collection.discount,
       },
       products: collection.products.map((cp) => cp.product),

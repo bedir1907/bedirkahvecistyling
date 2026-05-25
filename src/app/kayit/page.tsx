@@ -78,11 +78,11 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        <div className="border border-black/10 rounded-3xl p-8 bg-white shadow-sm">
+        <div className="border border-black/10 p-8 bg-white shadow-sm">
 
           {success ? (
             <div className="text-center py-4">
-              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">✓</span>
               </div>
               <h2 className="text-xl font-medium mb-2">Hesabınız oluşturuldu!</h2>
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               </p>
               <Link
                 href="/giris"
-                className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90 transition"
+                className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
               >
                 Giriş Yap
               </Link>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                    className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                     placeholder="Adınız Soyadınız"
                     required
                   />
@@ -124,7 +124,7 @@ export default function RegisterPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                    className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                     placeholder="ornek@mail.com"
                     required
                   />
@@ -138,7 +138,7 @@ export default function RegisterPage() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                    className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                     placeholder="05xx xxx xx xx"
                   />
                 </div>
@@ -151,7 +151,7 @@ export default function RegisterPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                    className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                     placeholder="••••••••"
                     required
                   />
@@ -168,14 +168,14 @@ export default function RegisterPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                    className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                     placeholder="••••••••"
                     required
                   />
                 </div>
 
                 {error && (
-                  <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  <div className="bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                     {error}
                   </div>
                 )}
@@ -183,7 +183,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-black text-white rounded-xl px-4 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+                  className="w-full bg-black text-white px-4 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
                 >
                   {loading ? "Hesap oluşturuluyor..." : "Hesap Oluştur"}
                 </button>

@@ -57,7 +57,7 @@ export default function SikcaSorulanSorularPage() {
           <span className="text-black">Sık Sorulan Sorular</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Yardım Merkezi</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Sık Sorulan Sorular</h1>
           <p className="text-sm text-gray-500 mt-3">
@@ -70,12 +70,12 @@ export default function SikcaSorulanSorularPage() {
             {SSS.map((kategori) => (
               <div key={kategori.kategori}>
                 <h2 className="text-xl font-semibold text-black mb-4 flex items-center gap-2">
-                  <span className="w-1 h-6 bg-black rounded-full inline-block" />
+                  <span className="w-1 h-6 bg-black inline-block" />
                   {kategori.kategori}
                 </h2>
                 <div className="space-y-3">
                   {kategori.sorular.map((item, i) => (
-                    <details key={i} className="group bg-white border border-black/8 rounded-2xl overflow-hidden">
+                    <details key={i} className="group bg-white border border-black/8 overflow-hidden">
                       <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none font-medium text-black hover:bg-gray-50 transition select-none">
                         <span>{item.soru}</span>
                         <span className="shrink-0 text-gray-400 group-open:rotate-180 transition-transform duration-200">▾</span>
@@ -90,14 +90,14 @@ export default function SikcaSorulanSorularPage() {
             ))}
           </div>
 
-          <div className="mt-12 bg-black text-white rounded-2xl px-6 py-6 text-center">
+          <div className="mt-12 bg-black text-white px-6 py-6 text-center">
             <p className="font-semibold text-lg">Hâlâ sorunuz mu var?</p>
             <p className="text-white/70 text-sm mt-1 mb-4">Size yardımcı olmaktan memnuniyet duyarız.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/iletisim" className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition">
+              <Link href="/iletisim" className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 font-medium hover:bg-gray-100 transition">
                 Bize Ulaşın
               </Link>
-              <a href="tel:+905531361261" className="inline-flex items-center gap-2 border border-white/20 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10 transition">
+              <a href="tel:+905531361261" className="inline-flex items-center gap-2 border border-white/20 text-white px-6 py-3 font-medium hover:bg-white/10 transition">
                 +90 553 136 12 61
               </a>
             </div>

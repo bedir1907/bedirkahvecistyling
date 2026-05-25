@@ -66,8 +66,8 @@ export default async function OrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-10 text-center">
-          <div className="w-16 h-16 rounded-full border border-black/10 mx-auto flex items-center justify-center mb-5">
+        <div className="border border-black/10 bg-[#fcfcfb] p-10 text-center">
+          <div className="w-16 h-16 border border-black/10 mx-auto flex items-center justify-center mb-5">
             <ShoppingBag size={24} className="text-gray-500" />
           </div>
 
@@ -80,7 +80,7 @@ export default async function OrdersPage() {
 
           <Link
             href="/"
-            className="inline-flex mt-6 items-center justify-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium hover:bg-white transition"
+            className="inline-flex mt-6 items-center justify-center border border-black/10 px-5 py-3 text-sm font-medium hover:bg-white transition"
           >
             Alışverişe Başla
           </Link>
@@ -88,7 +88,7 @@ export default async function OrdersPage() {
       ) : (
         <>
           <div className="grid md:grid-cols-3 gap-5">
-            <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6">
+            <div className="border border-black/10 bg-[#fcfcfb] p-6">
               <div className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
                 Toplam Sipariş
               </div>
@@ -97,7 +97,7 @@ export default async function OrdersPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6">
+            <div className="border border-black/10 bg-[#fcfcfb] p-6">
               <div className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
                 Son Sipariş
               </div>
@@ -106,7 +106,7 @@ export default async function OrdersPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6">
+            <div className="border border-black/10 bg-[#fcfcfb] p-6">
               <div className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
                 Toplam Harcama
               </div>
@@ -128,7 +128,7 @@ export default async function OrdersPage() {
                 <Link
                   key={order.id}
                   href={`/siparislerim/${order.id}`}
-                  className="group block rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 hover:bg-white hover:border-black/20 transition"
+                  className="group block border border-black/10 bg-[#fcfcfb] p-6 hover:bg-white hover:border-black/20 transition"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
                     <div className="space-y-4 flex-1 min-w-0">
@@ -138,7 +138,7 @@ export default async function OrdersPage() {
                         </div>
 
                         <span
-                          className={`inline-flex w-fit px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(
+                          className={`inline-flex w-fit px-3 py-1 text-sm font-medium ${getStatusClass(
                             displayStatus
                           )}`}
                         >
@@ -169,7 +169,7 @@ export default async function OrdersPage() {
                         {order.items.slice(0, 3).map((item) => (
                           <div
                             key={item.id}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-white border border-black/5 px-3 py-2 text-sm"
+                            className="inline-flex items-center gap-2 bg-white border border-black/5 px-3 py-2 text-sm"
                           >
                             <Package size={14} />
                             <span>
@@ -180,7 +180,7 @@ export default async function OrdersPage() {
                         ))}
 
                         {order.items.length > 3 && (
-                          <div className="inline-flex items-center rounded-2xl bg-white border border-black/5 px-3 py-2 text-sm text-gray-600">
+                          <div className="inline-flex items-center bg-white border border-black/5 px-3 py-2 text-sm text-gray-600">
                             +{order.items.length - 3} ürün daha
                           </div>
                         )}

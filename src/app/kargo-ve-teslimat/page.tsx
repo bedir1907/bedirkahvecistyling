@@ -32,7 +32,7 @@ export default function KargoVeTeslimatPage() {
           <span className="text-black">Kargo ve Teslimat</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Müşteri Hizmetleri</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Kargo ve Teslimat</h1>
 
@@ -44,7 +44,7 @@ export default function KargoVeTeslimatPage() {
               { icon: "🔍", title: "Takip", sub: "SMS + E-posta" },
               { icon: "🇹🇷", title: "Türkiye Geneli", sub: "Her adrese teslimat" },
             ].map((item) => (
-              <div key={item.title} className="bg-white border border-black/8 rounded-2xl px-4 py-4 text-center">
+              <div key={item.title} className="bg-white border border-black/8 px-4 py-4 text-center">
                 <p className="text-2xl mb-1">{item.icon}</p>
                 <p className="font-semibold text-black text-sm">{item.title}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{item.sub}</p>
@@ -66,7 +66,7 @@ export default function KargoVeTeslimatPage() {
                     Sipariş başına kargo ücreti <strong className="text-black">{formatPrice(shipping.fee)}</strong>'dir.
                   </p>
                   {shipping.freeAbove && (
-                    <p className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800 text-sm">
+                    <p className="bg-green-50 border border-green-200 px-4 py-3 text-green-800 text-sm">
                       🎉 <strong>{formatPrice(shipping.freeAbove)}</strong> ve üzeri siparişlerde kargo ücretsizdir!
                     </p>
                   )}
@@ -88,9 +88,9 @@ export default function KargoVeTeslimatPage() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-black text-white">
-                      <th className="px-4 py-2.5 text-left rounded-tl-xl font-medium">Bölge</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Bölge</th>
                       <th className="px-4 py-2.5 text-left font-medium">Tahmini Süre</th>
-                      <th className="px-4 py-2.5 text-left rounded-tr-xl font-medium">Kargo Ücreti</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Kargo Ücreti</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/8">
@@ -130,14 +130,14 @@ export default function KargoVeTeslimatPage() {
                   "Birden fazla teslimat denemesine rağmen teslim edilemeyen paketler iade olarak döner.",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+                    <span className="mt-2 w-1.5 h-1.5 bg-black shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-black text-white rounded-2xl px-5 py-5">
+            <div className="bg-black text-white px-5 py-5">
               <p className="font-semibold mb-2">Kargo Sorunları İçin</p>
               <p className="text-sm text-white/80 leading-7">
                 <a href="mailto:info@bedirkahvecistyling.com" className="underline">info@bedirkahvecistyling.com</a>

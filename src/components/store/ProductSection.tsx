@@ -7,6 +7,7 @@ type Props = {
   eyebrow?: string
   featuredOnly?: boolean
   newOnly?: boolean
+  viewAllHref?: string
 }
 
 type SiblingColorItem = {
@@ -32,6 +33,7 @@ export default async function ProductSection({
   eyebrow,
   featuredOnly = false,
   newOnly = false,
+  viewAllHref,
 }: Props) {
   const products = await prisma.product.findMany({
     where: {
@@ -126,11 +128,12 @@ export default async function ProductSection({
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
+    <section className="py-10 md:py-16">
       <SectionHeader
         eyebrow={eyebrow}
         title={title}
         description={getSectionDescription(featuredOnly, newOnly)}
+        href={viewAllHref}
       />
 
       <ProductSlider

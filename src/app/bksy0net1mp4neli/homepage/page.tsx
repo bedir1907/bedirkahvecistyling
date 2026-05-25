@@ -35,6 +35,21 @@ export default function AdminHomepagePage() {
     announcementText: "",
     announcementLink: "",
     announcementLinkLabel: "",
+
+    collectionsEnabled: true,
+    collectionsTitle: "Koleksiyonlar",
+
+    featuredCategoriesEnabled: true,
+    featuredCategoriesTitle: "Öne Çıkan Kategoriler",
+
+    featuredProductsEnabled: true,
+    featuredProductsTitle: "Haftanın Ürünleri",
+
+    newProductsEnabled: true,
+    newProductsTitle: "En Yeniler",
+
+    discountedProductsEnabled: true,
+    discountedProductsTitle: "İndirimdekiler",
   })
 
   useEffect(() => {
@@ -80,6 +95,21 @@ export default function AdminHomepagePage() {
             announcementText: data.announcementText || "",
             announcementLink: data.announcementLink || "",
             announcementLinkLabel: data.announcementLinkLabel || "",
+
+            collectionsEnabled: data.collectionsEnabled ?? true,
+            collectionsTitle: data.collectionsTitle || "Koleksiyonlar",
+
+            featuredCategoriesEnabled: data.featuredCategoriesEnabled ?? true,
+            featuredCategoriesTitle: data.featuredCategoriesTitle || "Öne Çıkan Kategoriler",
+
+            featuredProductsEnabled: data.featuredProductsEnabled ?? true,
+            featuredProductsTitle: data.featuredProductsTitle || "Haftanın Ürünleri",
+
+            newProductsEnabled: data.newProductsEnabled ?? true,
+            newProductsTitle: data.newProductsTitle || "En Yeniler",
+
+            discountedProductsEnabled: data.discountedProductsEnabled ?? true,
+            discountedProductsTitle: data.discountedProductsTitle || "İndirimdekiler",
           })
         }
       } catch (error) {
@@ -385,6 +415,69 @@ export default function AdminHomepagePage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* ── Koleksiyonlar ── */}
+          <div className="space-y-4 border-t pt-6">
+            <h2 className="text-xl font-semibold">Koleksiyonlar</h2>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="collectionsEnabled" checked={form.collectionsEnabled} onChange={handleChange} />
+              <span>Bu bölümü göster</span>
+            </label>
+          </div>
+
+          {/* ── Öne Çıkan Kategoriler ── */}
+          <div className="space-y-4 border-t pt-6">
+            <h2 className="text-xl font-semibold">Öne Çıkan Kategoriler</h2>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="featuredCategoriesEnabled" checked={form.featuredCategoriesEnabled} onChange={handleChange} />
+              <span>Bu bölümü göster</span>
+            </label>
+          </div>
+
+          {/* ── Haftanın Ürünleri ── */}
+          <div className="space-y-4 border-t pt-6">
+            <h2 className="text-xl font-semibold">Haftanın Ürünleri</h2>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="featuredProductsEnabled" checked={form.featuredProductsEnabled} onChange={handleChange} />
+              <span>Bu bölümü göster</span>
+            </label>
+            {form.featuredProductsEnabled && (
+              <div>
+                <label className="block mb-2 font-medium">Bölüm Başlığı</label>
+                <input name="featuredProductsTitle" value={form.featuredProductsTitle} onChange={handleChange} className="w-full border rounded px-4 py-3" placeholder="Haftanın Ürünleri" />
+              </div>
+            )}
+          </div>
+
+          {/* ── En Yeniler ── */}
+          <div className="space-y-4 border-t pt-6">
+            <h2 className="text-xl font-semibold">En Yeniler</h2>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="newProductsEnabled" checked={form.newProductsEnabled} onChange={handleChange} />
+              <span>Bu bölümü göster</span>
+            </label>
+            {form.newProductsEnabled && (
+              <div>
+                <label className="block mb-2 font-medium">Bölüm Başlığı</label>
+                <input name="newProductsTitle" value={form.newProductsTitle} onChange={handleChange} className="w-full border rounded px-4 py-3" placeholder="En Yeniler" />
+              </div>
+            )}
+          </div>
+
+          {/* ── İndirimdekiler ── */}
+          <div className="space-y-4 border-t pt-6">
+            <h2 className="text-xl font-semibold">İndirimdekiler</h2>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="discountedProductsEnabled" checked={form.discountedProductsEnabled} onChange={handleChange} />
+              <span>Bu bölümü göster</span>
+            </label>
+            {form.discountedProductsEnabled && (
+              <div>
+                <label className="block mb-2 font-medium">Bölüm Başlığı</label>
+                <input name="discountedProductsTitle" value={form.discountedProductsTitle} onChange={handleChange} className="w-full border rounded px-4 py-3" placeholder="İndirimdekiler" />
+              </div>
+            )}
           </div>
 
           <div className="space-y-5 border-t pt-6">

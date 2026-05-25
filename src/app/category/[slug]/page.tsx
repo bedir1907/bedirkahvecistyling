@@ -17,6 +17,14 @@ const VIRTUAL_SLUGS: Record<string, { name: string; description: string }> = {
     name: "İndirimdekiler",
     description: "İndirimli erkek giyim ürünleri. Bedir Kahveci Styling kampanyalı ürün koleksiyonu.",
   },
+  "haftanin-urunleri": {
+    name: "Haftanın Ürünleri",
+    description: "Bu haftanın öne çıkan erkek giyim ürünleri. Bedir Kahveci Styling seçkisi.",
+  },
+  "en-yeniler": {
+    name: "En Yeniler",
+    description: "En yeni eklenen erkek giyim ürünleri. Bedir Kahveci Styling yeni ürünleri.",
+  },
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

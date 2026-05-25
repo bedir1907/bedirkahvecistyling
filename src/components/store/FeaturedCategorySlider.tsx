@@ -10,41 +10,15 @@ type Category = {
   name: string
   slug: string
   image: string | null
+  video?: string | null
 }
 
 type Props = {
   categories: Category[]
 }
 
-function CategoryCard({ cat, className }: { cat: Category; className?: string }) {
-  return (
-    <Link
-      href={`/category/${cat.slug}`}
-      className={`group relative rounded-[22px] overflow-hidden bg-gray-100 block ${className ?? ""}`}
-    >
-      {cat.image ? (
-        <Image
-          src={cat.image}
-          alt={cat.name}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-          sizes="(max-width: 768px) 90vw, 33vw"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300" />
-      )}
-      <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/15 to-transparent" />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-        <h3 className="text-white text-xl md:text-2xl font-bold leading-snug mb-1.5">
-          {cat.name}
-        </h3>
-        <span className="inline-flex items-center gap-1.5 text-white/75 text-sm font-medium group-hover:text-white group-hover:gap-3 transition-all duration-200">
-          İncele <span>→</span>
-        </span>
-      </div>
-    </Link>
-  )
+function wrap(i: number, n: number) {
+  return ((i % n) + n) % n
 }
 
 export default function FeaturedCategorySlider({ categories }: Props) {
@@ -54,63 +28,43 @@ export default function FeaturedCategorySlider({ categories }: Props) {
   if (n === 1) {
     const cat = categories[0]
     return (
-      <Link
-        href={`/category/${cat.slug}`}
-        className="group relative block rounded-3xl overflow-hidden bg-gray-100 h-95 md:h-120"
-      >
-        {cat.image && (
-          <Image
-            src={cat.image}
-            alt={cat.name}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            sizes="100vw"
+      <Link href={`/category/${cat.slug}`} className="group relative block w-full h-[60vh] md:h-[72vh] overflow-hidden bg-gray-100">
+        {cat.video ? (
+          <video
+            src={cat.video}
+            autoPlay muted loop playsInline
+            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
           />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-6 md:p-10">
-          <h3 className="text-white text-3xl md:text-4xl font-bold mb-2">{cat.name}</h3>
-          <span className="text-white/80 text-sm font-medium">İncele →</span>
+        ) : cat.image ? (
+          <Image src={cat.image} alt={cat.name} fill priority
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            sizes="100vw" />
+        ) : null}
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-8 md:p-12">
+          <p className="text-white/70 text-xs uppercase tracking-[0.2em] mb-2">Kategori</p>
+          <h3 className="text-white text-4xl md:text-6xl font-semibold tracking-tight mb-4">{cat.name}</h3>
+          <span className="inline-flex items-center gap-2 text-white text-sm font-medium border-b border-white/50 pb-0.5 group-hover:border-white transition-colors">
+            Koleksiyonu Keşfet →
+          </span>
         </div>
       </Link>
     )
   }
 
-  return (
-    <>
-      {/* Mobile: native snap scroll (1 card at a time, peek of next) */}
-      <div className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1">
-        {categories.map((cat) => (
-          <div key={cat.id} className="snap-start shrink-0 w-[82vw]">
-            <CategoryCard cat={cat} className="h-75" />
-          </div>
-        ))}
-      </div>
-
-      {/* Desktop: 3-wide infinite slider with arrows */}
-      <div className="hidden md:block">
-        <DesktopSlider categories={categories} />
-      </div>
-    </>
-  )
+  return <Slider categories={categories} />
 }
 
-// ─── Desktop Slider (md+) ─────────────────────────────────────────────────────
-
-function wrap(i: number, n: number) {
-  return ((i % n) + n) % n
-}
-
-function DesktopSlider({ categories }: { categories: Category[] }) {
+function Slider({ categories }: { categories: Category[] }) {
   const n = categories.length
 
+  // 2 leading + real items + 2 trailing clones
   const extended = [
     categories[wrap(n - 2, n)],
     categories[wrap(n - 1, n)],
     ...categories,
     categories[wrap(0, n)],
     categories[wrap(1, n)],
-    categories[wrap(2, n)],
   ]
   const total = extended.length
   const OFFSET = 2
@@ -118,6 +72,9 @@ function DesktopSlider({ categories }: { categories: Category[] }) {
   const [pos, setPos] = useState(OFFSET)
   const [animate, setAnimate] = useState(true)
   const busy = useRef(false)
+
+  const touchStartX = useRef<number | null>(null)
+  const wheelCooldown = useRef(false)
 
   useEffect(() => {
     if (!animate) {
@@ -135,66 +92,128 @@ function DesktopSlider({ categories }: { categories: Category[] }) {
 
   function onTransitionEnd() {
     busy.current = false
-    if (pos === OFFSET + n) { setAnimate(false); setPos(OFFSET) }
-    else if (pos === OFFSET + n + 1) { setAnimate(false); setPos(OFFSET + 1) }
-    else if (pos === 1) { setAnimate(false); setPos(OFFSET + n - 1) }
-    else if (pos === 0) { setAnimate(false); setPos(OFFSET + n - 2) }
+    if (pos >= OFFSET + n) { setAnimate(false); setPos(pos - n) }
+    else if (pos < OFFSET) { setAnimate(false); setPos(pos + n) }
   }
 
   function next() { goTo(pos + 1) }
   function prev() { goTo(pos - 1) }
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(delta) > 50) { if (delta < 0) next(); else prev() }
+  }
+
+  function onWheel(e: React.WheelEvent) {
+    if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
+    if (wheelCooldown.current) return
+    wheelCooldown.current = true
+    setTimeout(() => { wheelCooldown.current = false }, 650)
+    if (e.deltaX > 30) next()
+    else if (e.deltaX < -30) prev()
+  }
+
   const activeIndex = wrap(pos - OFFSET, n)
   const translateX = -(pos / total) * 100
 
   return (
-    <div className="relative">
+    <div
+      className="relative w-full h-[60vh] md:h-[72vh] overflow-hidden bg-gray-100 select-none"
+      onWheel={onWheel}
+    >
+
+      {/* Track */}
+      <div
+        className="flex h-full"
+        style={{
+          width: `${total * 100}%`,
+          transform: `translateX(${translateX}%)`,
+          transition: animate ? "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)" : "none",
+        }}
+        onTransitionEnd={onTransitionEnd}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {extended.map((cat, i) => (
+          <div key={i} style={{ width: `${100 / total}%` }} className="relative h-full shrink-0 overflow-hidden">
+            {cat.video ? (
+              <video
+                src={cat.video}
+                autoPlay muted loop playsInline
+                style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
+              />
+            ) : cat.image ? (
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                fill
+                priority={i === OFFSET}
+                className="object-cover"
+                sizes="100vw"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300" />
+            )}
+
+            {/* Gradient */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/15 to-transparent" />
+
+            {/* Metin — tıklama sadece active slide'da çalışsın */}
+            <Link
+              href={`/category/${cat.slug}`}
+              className="absolute inset-0 flex flex-col justify-end p-7 md:p-12 group"
+              tabIndex={i - OFFSET === activeIndex ? 0 : -1}
+            >
+              <p className="text-white/60 text-[10px] md:text-xs uppercase tracking-[0.22em] mb-2 md:mb-3">
+                Kategori
+              </p>
+              <h3 className="text-white text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tight leading-none mb-4 md:mb-6">
+                {cat.name}
+              </h3>
+              <span className="inline-flex items-center gap-2 text-white/80 text-sm font-medium border-b border-white/40 pb-0.5 w-fit group-hover:text-white group-hover:border-white transition-colors duration-200">
+                Koleksiyonu Keşfet →
+              </span>
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* Sol ok */}
       <button
         type="button"
         onClick={prev}
-        className="absolute left-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg flex items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
+        className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center text-white hover:bg-white/30 transition-colors duration-200"
         aria-label="Önceki"
       >
-        <ChevronLeft size={19} strokeWidth={2.2} />
+        <ChevronLeft size={20} strokeWidth={2} />
       </button>
 
+      {/* Sağ ok */}
       <button
         type="button"
         onClick={next}
-        className="absolute right-3 top-1/2 -translate-y-6 z-10 w-11 h-11 rounded-full bg-white/95 backdrop-blur border border-black/10 shadow-lg flex items-center justify-center transition hover:bg-black hover:text-white hover:border-black"
+        className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center text-white hover:bg-white/30 transition-colors duration-200"
         aria-label="Sonraki"
       >
-        <ChevronRight size={19} strokeWidth={2.2} />
+        <ChevronRight size={20} strokeWidth={2} />
       </button>
 
-      <div className="overflow-hidden">
-        <div
-          className="flex"
-          style={{
-            width: `${(total / 3) * 100}%`,
-            transform: `translateX(${translateX}%)`,
-            transition: animate ? "transform 0.45s ease" : "none",
-          }}
-          onTransitionEnd={onTransitionEnd}
-        >
-          {extended.map((cat, i) => (
-            <div key={i} style={{ width: `${100 / total}%` }} className="px-2">
-              <CategoryCard cat={cat} className="h-105 lg:h-115" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center gap-2 mt-5">
+      {/* Dot indikatörler */}
+      <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
         {categories.map((_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => goTo(i + OFFSET)}
-            className={`rounded-full transition-all duration-300 ${
+            className={`transition-all duration-300 ${
               activeIndex === i
-                ? "w-7 h-2 bg-black"
-                : "w-2 h-2 bg-black/20 hover:bg-black/40"
+                ? "w-6 md:w-8 h-1.5 bg-white"
+                : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
             }`}
             aria-label={`${i + 1}. kategori`}
           />

@@ -53,7 +53,7 @@ export default function ResetPasswordClient() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fafaf8]">
-      <div className="w-full max-w-md border border-black/10 rounded-3xl p-8 bg-white">
+      <div className="w-full max-w-md border border-black/10 p-8 bg-white">
         <h1 className="text-3xl font-medium tracking-tight mb-2">
           Şifre Sıfırla
         </h1>
@@ -71,7 +71,7 @@ export default function ResetPasswordClient() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-black/10 rounded-2xl px-4 py-3"
+                className="w-full border border-black/10 px-4 py-3"
                 placeholder="Yeni şifre"
               />
             </div>
@@ -84,7 +84,7 @@ export default function ResetPasswordClient() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border border-black/10 rounded-2xl px-4 py-3"
+                className="w-full border border-black/10 px-4 py-3"
                 placeholder="Yeni şifre tekrar"
               />
             </div>
@@ -97,20 +97,20 @@ export default function ResetPasswordClient() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white rounded-2xl px-4 py-3 disabled:opacity-50"
+              className="w-full bg-black text-white px-4 py-3 disabled:opacity-50"
             >
               {loading ? "Güncelleniyor..." : "Şifreyi Güncelle"}
             </button>
           </form>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-black/10 bg-[#fafaf8] px-4 py-3 text-sm text-gray-700">
+            <div className="border border-black/10 bg-[#fafaf8] px-4 py-3 text-sm text-gray-700">
               {message}
             </div>
 
             <Link
               href="/giris"
-              className="w-full inline-flex items-center justify-center bg-black text-white rounded-2xl px-4 py-3"
+              className="w-full inline-flex items-center justify-center bg-black text-white px-4 py-3"
             >
               Giriş Yap
             </Link>
@@ -118,7 +118,7 @@ export default function ResetPasswordClient() {
         )}
 
         {!success && message ? (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {message}
           </div>
         ) : null}

@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fafaf8]">
-      <div className="w-full max-w-md border border-black/10 rounded-3xl p-8 bg-white">
+      <div className="w-full max-w-md border border-black/10 p-8 bg-white">
         <h1 className="text-3xl font-medium tracking-tight mb-2">
           Şifremi Unuttum
         </h1>
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-black/10 rounded-2xl px-4 py-3"
+              className="w-full border border-black/10 px-4 py-3"
               placeholder="ornek@mail.com"
             />
           </div>
@@ -67,14 +67,14 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white rounded-2xl px-4 py-3 disabled:opacity-50"
+            className="w-full bg-black text-white px-4 py-3 disabled:opacity-50"
           >
             {loading ? "Gönderiliyor..." : "Şifre Sıfırlama Bağlantısı Gönder"}
           </button>
         </form>
 
         {message ? (
-          <div className="mt-4 rounded-2xl border border-black/10 bg-[#fafaf8] px-4 py-3 text-sm text-gray-700">
+          <div className="mt-4 border border-black/10 bg-[#fafaf8] px-4 py-3 text-sm text-gray-700">
             {message}
           </div>
         ) : null}

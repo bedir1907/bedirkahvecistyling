@@ -8,12 +8,13 @@ type Category = {
   name: string
   slug: string
   image: string | null
+  video: string | null
   isFeatured: boolean
   isActive: boolean
   displayOrder: number
 }
 
-const emptyForm = { name: "", slug: "", image: "", isFeatured: false, isActive: true, displayOrder: "0" }
+const emptyForm = { name: "", slug: "", image: "", video: "", isFeatured: false, isActive: true, displayOrder: "0" }
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -42,7 +43,7 @@ export default function AdminCategoriesPage() {
 
   function startEdit(category: Category) {
     setEditingId(category.id)
-    setEditForm({ name: category.name, slug: category.slug, image: category.image || "", isFeatured: category.isFeatured, isActive: category.isActive, displayOrder: String(category.displayOrder) })
+    setEditForm({ name: category.name, slug: category.slug, image: category.image || "", video: category.video || "", isFeatured: category.isFeatured, isActive: category.isActive, displayOrder: String(category.displayOrder) })
   }
 
   function handleChange(setter: React.Dispatch<React.SetStateAction<typeof emptyForm>>) {
@@ -138,6 +139,16 @@ export default function AdminCategoriesPage() {
               </div>
             )}
           </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Video <span className="text-gray-400 font-normal">(varsa görsel yerine oynatılır)</span></label>
+            <CloudinaryUploadButton buttonText="Video Seç" resourceType="video" folder="categories" onUploadSuccess={(url) => setNewCategory(p => ({ ...p, video: url }))} />
+            {newCategory.video && (
+              <div className="mt-2 flex items-center gap-3">
+                <video src={newCategory.video} className="w-20 h-14 rounded-lg object-cover border bg-black" muted playsInline />
+                <button type="button" onClick={() => setNewCategory(p => ({ ...p, video: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
+              </div>
+            )}
+          </div>
           <div className="flex gap-5">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" name="isFeatured" checked={newCategory.isFeatured} onChange={handleChange(setNewCategory)} className="w-4 h-4" />
@@ -189,6 +200,16 @@ export default function AdminCategoriesPage() {
                         <div className="mt-2 flex items-center gap-3">
                           <img src={editForm.image} alt="" className="w-20 h-14 rounded-lg object-cover border" />
                           <button type="button" onClick={() => setEditForm(p => ({ ...p, image: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 block mb-1">Video <span className="text-gray-400 font-normal">(varsa görsel yerine oynatılır)</span></label>
+                      <CloudinaryUploadButton buttonText="Video Seç" resourceType="video" folder="categories" onUploadSuccess={(url) => setEditForm(p => ({ ...p, video: url }))} />
+                      {editForm.video && (
+                        <div className="mt-2 flex items-center gap-3">
+                          <video src={editForm.video} className="w-20 h-14 rounded-lg object-cover border bg-black" muted playsInline />
+                          <button type="button" onClick={() => setEditForm(p => ({ ...p, video: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
                         </div>
                       )}
                     </div>
@@ -277,12 +298,32 @@ export default function AdminCategoriesPage() {
                     <td className="px-5 py-4">
                       {isEditing ? (
                         <div className="space-y-2">
-                          <CloudinaryUploadButton buttonText="Görsel Seç" onUploadSuccess={(url) => setEditForm(p => ({ ...p, image: url }))} />
-                          {editForm.image && <img src={editForm.image} alt="" className="w-24 h-16 rounded-lg object-cover border mt-2" />}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Görsel</p>
+                            <CloudinaryUploadButton buttonText="Görsel Seç" onUploadSuccess={(url) => setEditForm(p => ({ ...p, image: url }))} />
+                            {editForm.image && (
+                              <div className="mt-1 flex items-center gap-2">
+                                <img src={editForm.image} alt="" className="w-20 h-14 rounded-lg object-cover border" />
+                                <button type="button" onClick={() => setEditForm(p => ({ ...p, image: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Video</p>
+                            <CloudinaryUploadButton buttonText="Video Seç" resourceType="video" folder="categories" onUploadSuccess={(url) => setEditForm(p => ({ ...p, video: url }))} />
+                            {editForm.video && (
+                              <div className="mt-1 flex items-center gap-2">
+                                <video src={editForm.video} className="w-20 h-14 rounded-lg object-cover border bg-black" muted playsInline />
+                                <button type="button" onClick={() => setEditForm(p => ({ ...p, video: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ) : cat.image ? (
-                        <img src={cat.image} alt={cat.name} className="w-24 h-16 rounded-lg object-cover border" />
-                      ) : <span className="text-gray-400">—</span>}
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          {cat.video ? <video src={cat.video} className="w-24 h-16 rounded-lg object-cover border bg-black" muted playsInline /> : cat.image ? <img src={cat.image} alt={cat.name} className="w-24 h-16 rounded-lg object-cover border" /> : <span className="text-gray-400">—</span>}
+                        </div>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       {isEditing ? (

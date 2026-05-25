@@ -123,14 +123,14 @@ export default function AddressManager({ initialAddresses }: Props) {
     <div className="grid lg:grid-cols-[1fr_420px] gap-6">
       <div className="space-y-4">
         {addresses.length === 0 ? (
-          <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8 text-gray-500">
+          <div className="border border-black/10 bg-[#fcfcfb] p-8 text-gray-500">
             Henüz kayıtlı adres yok.
           </div>
         ) : (
           addresses.map((item) => (
             <div
               key={item.id}
-              className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6"
+              className="border border-black/10 bg-[#fcfcfb] p-6"
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -174,7 +174,7 @@ export default function AddressManager({ initialAddresses }: Props) {
 
       <form
         onSubmit={handleSubmit}
-        className="rounded-3xl border border-black/10 bg-white p-6 space-y-4"
+        className="border border-black/10 bg-white p-6 space-y-4"
       >
         <h3 className="text-xl font-medium">
           {editingId ? "Adresi Düzenle" : "Yeni Adres"}
@@ -184,43 +184,43 @@ export default function AddressManager({ initialAddresses }: Props) {
           value={form.title}
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
           placeholder="Adres Başlığı (Ev / İş)"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3"
+          className="w-full border border-black/10 px-4 py-3"
         />
         <input
           value={form.fullName}
           onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
           placeholder="Ad Soyad"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3"
+          className="w-full border border-black/10 px-4 py-3"
         />
         <input
           value={form.phone}
           onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
           placeholder="Telefon"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3"
+          className="w-full border border-black/10 px-4 py-3"
         />
         <input
           value={form.city}
           onChange={(e) => setForm((prev) => ({ ...prev, city: e.target.value }))}
           placeholder="Şehir"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3"
+          className="w-full border border-black/10 px-4 py-3"
         />
         <input
           value={form.district}
           onChange={(e) => setForm((prev) => ({ ...prev, district: e.target.value }))}
           placeholder="İlçe"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3"
+          className="w-full border border-black/10 px-4 py-3"
         />
         <textarea
           value={form.address}
           onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
           placeholder="Açık adres"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3 min-h-[110px]"
+          className="w-full border border-black/10 px-4 py-3 min-h-[110px]"
         />
         <textarea
           value={form.note}
           onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
           placeholder="Adres notu"
-          className="w-full rounded-2xl border border-black/10 px-4 py-3 min-h-[90px]"
+          className="w-full border border-black/10 px-4 py-3 min-h-[90px]"
         />
 
         <label className="flex items-center gap-2 text-sm">
@@ -238,7 +238,7 @@ export default function AddressManager({ initialAddresses }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-2xl bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
+            className="bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
           >
             {loading
               ? "Kaydediliyor..."
@@ -251,7 +251,7 @@ export default function AddressManager({ initialAddresses }: Props) {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
+              className="border border-black/10 px-5 py-3 text-sm font-medium"
             >
               Vazgeç
             </button>

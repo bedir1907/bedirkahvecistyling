@@ -16,7 +16,7 @@ export default function KvkkPage() {
           <span className="text-black">KVKK Aydınlatma Metni</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Yasal Bildirim</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">
             Kişisel Verilerin Korunması<br />Aydınlatma Metni
@@ -35,7 +35,7 @@ export default function KvkkPage() {
 
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">1. Veri Sorumlusunun Kimliği</h2>
-              <div className="bg-white border border-black/8 rounded-2xl px-5 py-4 space-y-1 text-sm">
+              <div className="bg-white border border-black/8 px-5 py-4 space-y-1 text-sm">
                 <p><span className="font-medium text-black w-40 inline-block">Unvan</span> Bedir Kahveci Styling</p>
                 <p><span className="font-medium text-black w-40 inline-block">Adres</span> Yeniköy Mah. Amiral Şükrü Okan Cad. Altay Apartmanı No:26, Tirebolu / Giresun 28500</p>
                 <p><span className="font-medium text-black w-40 inline-block">Vergi Dairesi</span> Tirebolu Vergi Dairesi</p>
@@ -53,8 +53,8 @@ export default function KvkkPage() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-black text-white">
-                      <th className="px-4 py-2.5 text-left rounded-tl-xl font-medium">Kategori</th>
-                      <th className="px-4 py-2.5 text-left rounded-tr-xl font-medium">Veri Türleri</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Kategori</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Veri Türleri</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/8">
@@ -94,7 +94,7 @@ export default function KvkkPage() {
                   "Açık rıza verilmesi halinde: e-bülten, kampanya ve kişiselleştirilmiş pazarlama iletişimi",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+                    <span className="mt-1.5 w-1.5 h-1.5 bg-black shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -110,7 +110,7 @@ export default function KvkkPage() {
                   ["Meşru menfaat", "Site güvenliği, dolandırıcılıkla mücadele, hizmet kalitesinin artırılması"],
                   ["Açık rıza", "Pazarlama iletişimi, çerez analitiği (yalnızca rıza verilen durumlarda)"],
                 ].map(([sebep, aciklama]) => (
-                  <div key={sebep} className="bg-white border border-black/8 rounded-2xl px-5 py-4">
+                  <div key={sebep} className="bg-white border border-black/8 px-5 py-4">
                     <p className="font-semibold text-black text-sm">{sebep}</p>
                     <p className="text-sm text-gray-600 mt-1">{aciklama}</p>
                   </div>
@@ -134,7 +134,7 @@ export default function KvkkPage() {
                   </div>
                 ))}
               </div>
-              <p className="mt-4 text-sm bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-amber-800">
+              <p className="mt-4 text-sm bg-amber-50 border border-amber-200 px-4 py-3 text-amber-800">
                 Kişisel verileriniz, yukarıda sayılanlar dışında üçüncü kişilerle ticari amaçla paylaşılmaz ve satılmaz.
               </p>
             </div>
@@ -145,8 +145,8 @@ export default function KvkkPage() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-black text-white">
-                      <th className="px-4 py-2.5 text-left rounded-tl-xl font-medium">Veri Kategorisi</th>
-                      <th className="px-4 py-2.5 text-left rounded-tr-xl font-medium">Saklama Süresi</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Veri Kategorisi</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Saklama Süresi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/8">
@@ -181,7 +181,7 @@ export default function KvkkPage() {
                   ["❌ İtiraz", "Otomatik sistemler aracılığıyla aleyhine sonuç doğurmasına itiraz"],
                   ["⚖️ Tazminat", "Kanuna aykırı işleme nedeniyle zararın giderilmesini talep etme"],
                 ].map(([hak, aciklama]) => (
-                  <div key={hak} className="bg-white border border-black/8 rounded-xl px-4 py-3">
+                  <div key={hak} className="bg-white border border-black/8 px-4 py-3">
                     <p className="font-semibold text-sm text-black">{hak}</p>
                     <p className="text-xs text-gray-500 mt-0.5 leading-5">{aciklama}</p>
                   </div>
@@ -195,7 +195,7 @@ export default function KvkkPage() {
                 KVKK kapsamındaki haklarınızı kullanmak için aşağıdaki kanallardan bize ulaşabilirsiniz.
                 Başvurular yasal süre olan <strong className="text-black">30 gün</strong> içinde yanıtlanır.
               </p>
-              <div className="bg-white border border-black/8 rounded-2xl px-5 py-5 space-y-2 text-sm">
+              <div className="bg-white border border-black/8 px-5 py-5 space-y-2 text-sm">
                 <p>
                   <span className="font-semibold text-black">E-posta:</span>{" "}
                   <a href="mailto:info@bedirkahvecistyling.com" className="underline hover:text-black transition">

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 
 type Props = {
   title?: string
+  viewAllHref?: string
 }
 
 type SiblingColorItem = {
@@ -12,7 +13,7 @@ type SiblingColorItem = {
   image: string
 }
 
-export default async function DiscountedProducts({ title = "İndirimdekiler" }: Props) {
+export default async function DiscountedProducts({ title = "İndirimdekiler", viewAllHref }: Props) {
   const rawProducts = await prisma.product.findMany({
     where: { isActive: true, oldPrice: { not: null } },
     orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
@@ -84,10 +85,11 @@ export default async function DiscountedProducts({ title = "İndirimdekiler" }: 
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
+    <section className="py-10 md:py-16">
       <SectionHeader
         title={title}
         description="Fiyat avantajı sunan seçili ürünleri keşfet."
+        href={viewAllHref}
       />
       <ProductSlider
         products={products.map((product): SliderProduct => {

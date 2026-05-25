@@ -16,7 +16,7 @@ export default function IadeVeDegisimPage() {
           <span className="text-black">İade ve Değişim</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Müşteri Hizmetleri</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">İade ve Değişim</h1>
 
@@ -26,7 +26,7 @@ export default function IadeVeDegisimPage() {
               { icon: "📦", title: "Ücretsiz Değişim", sub: "Beden / renk değişiminde" },
               { icon: "💳", title: "14 Gün İade", sub: "Ödeme yöntemine iade" },
             ].map((item) => (
-              <div key={item.title} className="bg-white border border-black/8 rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div key={item.title} className="bg-white border border-black/8 px-5 py-4 flex items-center gap-4">
                 <span className="text-3xl">{item.icon}</span>
                 <div>
                   <p className="font-semibold text-black">{item.title}</p>
@@ -48,7 +48,7 @@ export default function IadeVeDegisimPage() {
                   "Fatura veya sipariş numarasının iade paketiyle gönderilmesi işlemleri hızlandırır.",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+                    <span className="mt-2 w-1.5 h-1.5 bg-black shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -65,7 +65,7 @@ export default function IadeVeDegisimPage() {
                   ["4. Kontrol", "Ürün bize ulaştıktan sonra 2 iş günü içinde uygunluk kontrolü yapılır."],
                   ["5. Para İadesi", "Onaylanan iade, en geç 14 gün içinde ödeme yönteminize yapılır."],
                 ].map(([adim, aciklama]) => (
-                  <div key={adim} className="flex gap-4 bg-white border border-black/8 rounded-2xl px-5 py-4">
+                  <div key={adim} className="flex gap-4 bg-white border border-black/8 px-5 py-4">
                     <span className="font-bold text-black shrink-0 w-24">{adim}</span>
                     <span className="text-sm">{aciklama}</span>
                   </div>
@@ -91,8 +91,8 @@ export default function IadeVeDegisimPage() {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-black text-white">
-                      <th className="px-4 py-2.5 text-left rounded-tl-xl font-medium">Ödeme Yöntemi</th>
-                      <th className="px-4 py-2.5 text-left rounded-tr-xl font-medium">İade Süresi</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">Ödeme Yöntemi</th>
+                      <th className="px-4 py-2.5 text-left-xl font-medium">İade Süresi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/8">
@@ -111,7 +111,7 @@ export default function IadeVeDegisimPage() {
               </div>
             </div>
 
-            <div className="bg-black text-white rounded-2xl px-5 py-5">
+            <div className="bg-black text-white px-5 py-5">
               <p className="font-semibold mb-2">İletişim</p>
               <p className="text-sm text-white/80 leading-7">
                 İade veya değişim talepleriniz için:{" "}

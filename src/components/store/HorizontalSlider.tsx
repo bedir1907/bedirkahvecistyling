@@ -47,7 +47,7 @@ export default function HorizontalSlider({ children }: Props) {
       <button
         type="button"
         onClick={scrollLeft}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white border shadow rounded-full w-12 h-12 flex items-center justify-center hover:bg-gray-50 text-lg"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white border shadow w-12 h-12 flex items-center justify-center hover:bg-gray-50 text-lg"
       >
         ←
       </button>
@@ -62,7 +62,7 @@ export default function HorizontalSlider({ children }: Props) {
       <button
         type="button"
         onClick={scrollRight}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white border shadow rounded-full w-12 h-12 flex items-center justify-center hover:bg-gray-50 text-lg"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white border shadow w-12 h-12 flex items-center justify-center hover:bg-gray-50 text-lg"
       >
         →
       </button>

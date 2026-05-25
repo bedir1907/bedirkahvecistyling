@@ -16,18 +16,18 @@ export async function GET() {
       return NextResponse.json({ error: "Yetkisiz" }, { status: 403 })
     }
 
-    const categories = await prisma.category.findMany({
-      where: {
-        isActive: true,
-      },
-      orderBy: {
-        displayOrder: "asc",
-      },
-      select: {
-        name: true,
-        slug: true,
-      },
-    })
+    const [categories, collections] = await Promise.all([
+      prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: "asc" },
+        select: { name: true, slug: true },
+      }),
+      prisma.collection.findMany({
+        where: { isActive: true },
+        orderBy: { displayOrder: "asc" },
+        select: { name: true, slug: true },
+      }),
+    ])
 
     const categoryOptions: LinkOption[] = categories.map((category) => ({
       label: category.name,
@@ -35,25 +35,19 @@ export async function GET() {
       group: "Kategoriler",
     }))
 
+    const collectionOptions: LinkOption[] = collections.map((col) => ({
+      label: col.name,
+      value: `/collections/${col.slug}`,
+      group: "Koleksiyonlar",
+    }))
+
     const staticOptions: LinkOption[] = [
-      {
-        label: "Anasayfa",
-        value: "/",
-        group: "Sabit Sayfalar",
-      },
-      {
-        label: "Yeni Sezon",
-        value: "/category/new-season",
-        group: "Koleksiyonlar",
-      },
-      {
-        label: "İndirimdekiler",
-        value: "/category/indirimdekiler",
-        group: "Koleksiyonlar",
-      },
+      { label: "Anasayfa", value: "/", group: "Sabit Sayfalar" },
+      { label: "Yeni Sezon", value: "/category/new-season", group: "Sabit Sayfalar" },
+      { label: "İndirimdekiler", value: "/category/indirimdekiler", group: "Sabit Sayfalar" },
     ]
 
-    const allOptions = [...staticOptions, ...categoryOptions]
+    const allOptions = [...staticOptions, ...collectionOptions, ...categoryOptions]
 
     const uniqueMap = new Map<string, LinkOption>()
 
