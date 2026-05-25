@@ -76,15 +76,12 @@ export default function CollectionPage({ params }: Props) {
       {/* Başlık bandı */}
       <section className="relative w-full bg-[#f7f7f5] border-b overflow-hidden">
         {collection?.video ? (
-          <AutoplayVideo
-            src={collection.video}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
-          />
+          <AutoplayVideo src={collection.video} />
         ) : collection?.image ? (
           <img
             src={collection.image}
             alt={collection.name ?? ""}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
           />
         ) : null}
         {(collection?.video || collection?.image) && <div className="absolute inset-0 bg-black/50" />}

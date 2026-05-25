@@ -1,15 +1,17 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 type Props = {
   src: string
-  style?: React.CSSProperties
   className?: string
+  fit?: "cover" | "contain"
+  desktopFit?: "cover" | "contain" | "auto"
 }
 
-export default function AutoplayVideo({ src, style, className }: Props) {
+export default function AutoplayVideo({ src, className = "", fit = "cover", desktopFit }: Props) {
   const ref = useRef<HTMLVideoElement>(null)
+  const [autoDesktopFit, setAutoDesktopFit] = useState<"cover" | "contain">("cover")
 
   useEffect(() => {
     const el = ref.current
@@ -20,16 +22,12 @@ export default function AutoplayVideo({ src, style, className }: Props) {
     const tryPlay = () => el.play().catch(() => {})
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) tryPlay()
-        else el.pause()
-      },
+      ([entry]) => { if (entry.isIntersecting) tryPlay() },
       { threshold: 0.1 }
     )
 
     observer.observe(el)
 
-    // iOS: ilk dokunuşta unlock et
     const unlock = () => { tryPlay(); document.removeEventListener("touchstart", unlock) }
     document.addEventListener("touchstart", unlock, { passive: true })
 
@@ -39,6 +37,15 @@ export default function AutoplayVideo({ src, style, className }: Props) {
     }
   }, [src])
 
+  const resolvedDesktopFit = desktopFit === "auto" ? autoDesktopFit : desktopFit
+  const fitClass = [
+    fit === "contain" ? "object-contain" : "object-cover",
+    resolvedDesktopFit ? (resolvedDesktopFit === "contain" ? "md:object-contain" : "md:object-cover") : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ")
+
   return (
     <video
       ref={ref}
@@ -47,8 +54,14 @@ export default function AutoplayVideo({ src, style, className }: Props) {
       muted
       loop
       playsInline
-      style={{ pointerEvents: "none", ...style }}
-      className={className}
+      className={`absolute inset-0 h-full w-full ${fitClass}`}
+      onLoadedMetadata={(event) => {
+        const video = event.currentTarget
+        setAutoDesktopFit(video.videoWidth >= video.videoHeight ? "cover" : "contain")
+      }}
+      style={{
+        pointerEvents: "none",
+      }}
     />
   )
 }

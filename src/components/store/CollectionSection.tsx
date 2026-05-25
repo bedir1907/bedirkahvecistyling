@@ -23,6 +23,55 @@ type Props = {
   collections: Collection[]
 }
 
+function AutoFitImg({
+  src,
+  alt,
+  hovered,
+}: {
+  src: string
+  alt: string
+  hovered: boolean
+}) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [desktopFit, setDesktopFit] = useState<"cover" | "contain">("cover")
+  const imageRatioRef = useRef<number | null>(null)
+
+  function updateFit() {
+    const imageRatio = imageRatioRef.current
+    const wrapper = wrapperRef.current
+    if (!imageRatio || !wrapper) return
+
+    const rect = wrapper.getBoundingClientRect()
+    const containerRatio = rect.width / rect.height
+
+    setDesktopFit(imageRatio >= containerRatio ? "cover" : "contain")
+  }
+
+  useEffect(() => {
+    window.addEventListener("resize", updateFit)
+    return () => window.removeEventListener("resize", updateFit)
+  }, [])
+
+  return (
+    <div ref={wrapperRef} className="absolute inset-0">
+      <img
+        src={src}
+        alt={alt}
+        className={`h-full w-full object-cover ${desktopFit === "contain" ? "md:object-contain" : "md:object-cover"}`}
+        onLoad={(event) => {
+          const image = event.currentTarget
+          imageRatioRef.current = image.naturalWidth / image.naturalHeight
+          updateFit()
+        }}
+        style={{
+          transform: hovered ? "scale(1.04)" : "scale(1)",
+          transition: "transform 0.7s ease",
+        }}
+      />
+    </div>
+  )
+}
+
 function wrap(i: number, n: number) {
   return ((i % n) + n) % n
 }
@@ -59,23 +108,12 @@ function CollectionSlide({ collection }: { collection: Collection }) {
       onMouseLeave={() => setHovered(false)}
     >
       {collection.video ? (
-        <AutoplayVideo
-          src={collection.video}
-          style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
-        />
+        <AutoplayVideo src={collection.video} />
       ) : collection.image ? (
-        <img
+        <AutoFitImg
           src={collection.image}
           alt={collection.name}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "50%",
-            transform: `translateY(-50%) ${hovered ? "scale(1.04)" : "scale(1)"}`,
-            width: "100%",
-            height: "auto",
-            transition: "transform 0.7s ease",
-          }}
+          hovered={hovered}
         />
       ) : (
         <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300" />
@@ -206,30 +244,12 @@ function Slider({ collections }: { collections: Collection[] }) {
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {col.video ? (
-                <AutoplayVideo
-                  src={col.video}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "100%",
-                    height: "auto",
-                  }}
-                />
+                <AutoplayVideo src={col.video} />
               ) : col.image ? (
-                <img
+                <AutoFitImg
                   src={col.image}
                   alt={col.name}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: "50%",
-                    transform: `translateY(-50%) ${isHovered ? "scale(1.04)" : "scale(1)"}`,
-                    width: "100%",
-                    height: "auto",
-                    transition: "transform 0.7s ease",
-                  }}
+                  hovered={isHovered}
                 />
               ) : (
                 <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300" />

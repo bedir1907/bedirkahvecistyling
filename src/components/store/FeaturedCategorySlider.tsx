@@ -18,6 +18,56 @@ type Props = {
   categories: Category[]
 }
 
+function AutoFitImage({
+  src,
+  alt,
+  priority = false,
+  className = "",
+}: {
+  src: string
+  alt: string
+  priority?: boolean
+  className?: string
+}) {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [desktopFit, setDesktopFit] = useState<"cover" | "contain">("cover")
+  const imageRatioRef = useRef<number | null>(null)
+
+  function updateFit() {
+    const imageRatio = imageRatioRef.current
+    const wrapper = wrapperRef.current
+    if (!imageRatio || !wrapper) return
+
+    const rect = wrapper.getBoundingClientRect()
+    const containerRatio = rect.width / rect.height
+
+    setDesktopFit(imageRatio >= containerRatio ? "cover" : "contain")
+  }
+
+  useEffect(() => {
+    window.addEventListener("resize", updateFit)
+    return () => window.removeEventListener("resize", updateFit)
+  }, [])
+
+  return (
+    <div ref={wrapperRef} className="absolute inset-0">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        priority={priority}
+        onLoad={(event) => {
+          const image = event.currentTarget
+          imageRatioRef.current = image.naturalWidth / image.naturalHeight
+          updateFit()
+        }}
+        className={`object-cover ${desktopFit === "contain" ? "md:object-contain" : "md:object-cover"} ${className}`}
+        sizes="100vw"
+      />
+    </div>
+  )
+}
+
 function wrap(i: number, n: number) {
   return ((i % n) + n) % n
 }
@@ -33,12 +83,14 @@ export default function FeaturedCategorySlider({ categories }: Props) {
         {cat.video ? (
           <AutoplayVideo
             src={cat.video}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
           />
         ) : cat.image ? (
-          <Image src={cat.image} alt={cat.name} fill priority
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            sizes="100vw" />
+          <AutoFitImage
+            src={cat.image}
+            alt={cat.name}
+            priority
+            className="transition-transform duration-700 group-hover:scale-[1.03]"
+          />
         ) : null}
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 md:p-12">
@@ -144,16 +196,12 @@ function Slider({ categories }: { categories: Category[] }) {
             {cat.video ? (
               <AutoplayVideo
                 src={cat.video}
-                style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
               />
             ) : cat.image ? (
-              <Image
+              <AutoFitImage
                 src={cat.image}
                 alt={cat.name}
-                fill
                 priority={i === OFFSET}
-                className="object-cover"
-                sizes="100vw"
               />
             ) : (
               <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300" />

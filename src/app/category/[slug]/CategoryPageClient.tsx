@@ -137,15 +137,12 @@ export default function CategoryPageClient({ params }: Props) {
       {/* Başlık bandı */}
       <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
         {category?.video ? (
-          <AutoplayVideo
-            src={category.video}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
-          />
+          <AutoplayVideo src={category.video} />
         ) : category?.image ? (
           <img
             src={category.image}
             alt={category.name ?? ""}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
           />
         ) : null}
         {hasBanner && <div className="absolute inset-0 bg-black/50" />}
