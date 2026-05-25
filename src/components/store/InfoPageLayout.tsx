@@ -26,7 +26,7 @@ export default function InfoPageLayout({
           <span className="text-black">{title}</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-10">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-10">
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">
             {title}
           </h1>

@@ -56,6 +56,7 @@ model Collection {
   eyebrow      String?
   description  String?
   image        String?
+  video        String?
   buttonText   String?
   buttonLink   String?
   discount     Float?
@@ -158,6 +159,7 @@ model Category {
   name         String  @unique
   slug         String  @unique
   image        String?
+  video        String?
   isFeatured   Boolean @default(false)
   isActive     Boolean @default(true)
   displayOrder Int     @default(0)

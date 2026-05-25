@@ -93,7 +93,7 @@ export default function SettingsForms({ customer }: Props) {
     <div className="grid lg:grid-cols-2 gap-6">
       <form
         onSubmit={saveProfile}
-        className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8 space-y-4"
+        className="border border-black/10 bg-[#fcfcfb] p-8 space-y-4"
       >
         <h3 className="text-xl font-medium">Profil Bilgileri</h3>
 
@@ -101,25 +101,25 @@ export default function SettingsForms({ customer }: Props) {
           value={profile.name}
           onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Ad Soyad"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
         <input
           value={profile.email}
           onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))}
           placeholder="E-posta"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
         <input
           value={profile.phone}
           onChange={(e) => setProfile((prev) => ({ ...prev, phone: e.target.value }))}
           placeholder="Telefon"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
 
         <button
           type="submit"
           disabled={savingProfile}
-          className="rounded-2xl bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
+          className="bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
         >
           {savingProfile ? "Kaydediliyor..." : "Profili Kaydet"}
         </button>
@@ -127,7 +127,7 @@ export default function SettingsForms({ customer }: Props) {
 
       <form
         onSubmit={savePassword}
-        className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8 space-y-4"
+        className="border border-black/10 bg-[#fcfcfb] p-8 space-y-4"
       >
         <h3 className="text-xl font-medium">Şifre Değiştir</h3>
 
@@ -138,7 +138,7 @@ export default function SettingsForms({ customer }: Props) {
             setPassword((prev) => ({ ...prev, currentPassword: e.target.value }))
           }
           placeholder="Mevcut şifre"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
         <input
           type="password"
@@ -147,7 +147,7 @@ export default function SettingsForms({ customer }: Props) {
             setPassword((prev) => ({ ...prev, newPassword: e.target.value }))
           }
           placeholder="Yeni şifre"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
         <input
           type="password"
@@ -156,13 +156,13 @@ export default function SettingsForms({ customer }: Props) {
             setPassword((prev) => ({ ...prev, confirmPassword: e.target.value }))
           }
           placeholder="Yeni şifre tekrar"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3"
+          className="w-full border border-black/10 bg-white px-4 py-3"
         />
 
         <button
           type="submit"
           disabled={savingPassword}
-          className="rounded-2xl bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
+          className="bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium"
         >
           {savingPassword ? "Güncelleniyor..." : "Şifreyi Güncelle"}
         </button>

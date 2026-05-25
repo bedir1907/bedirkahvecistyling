@@ -16,7 +16,7 @@ export default function CerezPolitikasiPage() {
           <span className="text-black">Çerez Politikası</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Yasal Belge</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Çerez Politikası</h1>
           <p className="text-sm text-gray-500 mt-3">Son güncelleme: Mayıs 2025</p>
@@ -61,7 +61,7 @@ export default function CerezPolitikasiPage() {
                     sure: "2 yıla kadar",
                   },
                 ].map((item) => (
-                  <div key={item.tur} className="border border-black/8 rounded-2xl overflow-hidden">
+                  <div key={item.tur} className="border border-black/8 overflow-hidden">
                     <div className={`px-5 py-3 ${item.renk}`}>
                       <p className="font-semibold">{item.tur}</p>
                     </div>
@@ -85,7 +85,7 @@ export default function CerezPolitikasiPage() {
                   "Chrome, Firefox, Safari gibi tarayıcıların ayarlarından çerezleri yönetebilirsiniz.",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full bg-black shrink-0" />
+                    <span className="mt-2 w-1.5 h-1.5 bg-black shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}

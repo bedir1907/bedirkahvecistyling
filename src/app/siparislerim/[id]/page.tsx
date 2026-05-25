@@ -81,7 +81,7 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
 
         <span
-          className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(
+          className={`inline-flex px-3 py-1 text-sm font-medium ${getStatusClass(
             displayStatus
           )}`}
         >
@@ -89,7 +89,7 @@ export default async function OrderDetailPage({ params }: Props) {
         </span>
       </div>
 
-      <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8">
+      <div className="border border-black/10 bg-[#fcfcfb] p-8">
         <div className="grid md:grid-cols-3 gap-4 text-sm">
           <div>
             <div className="text-gray-400 mb-1">Tarih</div>
@@ -112,17 +112,17 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8">
+      <div className="border border-black/10 bg-[#fcfcfb] p-8">
         <h3 className="text-xl font-medium mb-6">Ürünler</h3>
 
         <div className="space-y-4">
           {order.items.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-black/10 bg-white p-4 flex items-start justify-between gap-4"
+              className="border border-black/10 bg-white p-4 flex items-start justify-between gap-4"
             >
               <div>
-                <div className="font-medium">{item.productName}</div>
+                <Link href={`/product/${item.productId}`} className="font-medium hover:underline">{item.productName}</Link>
                 <div className="text-sm text-gray-500 mt-1">
                   Renk: {item.color || "-"} • Beden: {item.size || "-"}
                 </div>
@@ -137,7 +137,7 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-8">
+      <div className="border border-black/10 bg-[#fcfcfb] p-8">
         <h3 className="text-xl font-medium mb-6">Teslimat Bilgileri</h3>
 
         <div className="grid md:grid-cols-2 gap-4 text-sm">

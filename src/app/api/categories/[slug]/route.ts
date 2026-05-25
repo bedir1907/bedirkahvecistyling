@@ -20,6 +20,8 @@ export async function GET(_: Request, context: Context) {
         id: true,
         name: true,
         slug: true,
+        image: true,
+        video: true,
       },
     })
 

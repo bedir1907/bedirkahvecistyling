@@ -37,11 +37,10 @@ export async function PATCH(request: Request, context: Context) {
 
     const { id } = await context.params
     const body = await request.json()
-    const { name, slug, eyebrow, description, image, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
+    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
 
     const safeProductIds: number[] = Array.isArray(productIds) ? productIds.map(Number).filter(Number.isFinite) : []
 
-    // Tek atomik işlem: deleteMany + create aynı transaction içinde
     const collection = await prisma.collection.update({
       where: { id: Number(id) },
       data: {
@@ -50,6 +49,7 @@ export async function PATCH(request: Request, context: Context) {
         eyebrow: eyebrow || null,
         description: description || null,
         image: image || null,
+        video: video || null,
         buttonText: buttonText || null,
         buttonLink: buttonLink || null,
         discount: discount != null && discount !== "" ? Number(discount) : null,

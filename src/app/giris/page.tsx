@@ -57,7 +57,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="border border-black/10 rounded-3xl p-8 bg-white shadow-sm">
+        <div className="border border-black/10 p-8 bg-white shadow-sm">
           <h1 className="text-2xl font-medium tracking-tight mb-1">Giriş Yap</h1>
           <p className="text-gray-500 text-sm mb-7">Müşteri hesabınla giriş yap.</p>
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                 placeholder="ornek@mail.com"
                 required
               />
@@ -80,14 +80,14 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-black/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
+                className="w-full border border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black/30 transition"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             {error && (
-              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div className="bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -95,7 +95,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white rounded-xl px-4 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-black text-white px-4 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
             >
               {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
             </button>

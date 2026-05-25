@@ -36,7 +36,7 @@ export default function CookieBanner() {
 
   return (
     <div className="cookie-banner-enter fixed bottom-0 inset-x-0 z-50 p-4 md:p-6">
-      <div className="max-w-3xl mx-auto bg-white border border-black/10 rounded-3xl shadow-2xl px-5 py-5 md:px-7 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+      <div className="max-w-3xl mx-auto bg-white border border-black/10 shadow-2xl px-5 py-5 md:px-7 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
         <div className="flex-1 text-sm text-gray-700 leading-6">
           <span className="font-semibold text-black">Çerez Politikası</span>{" "}
           — Sitemizi daha iyi bir deneyim sunmak için çerezler kullanıyoruz.
@@ -53,14 +53,14 @@ export default function CookieBanner() {
           <button
             type="button"
             onClick={decline}
-            className="h-10 px-4 rounded-2xl border border-black/10 text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+            className="h-10 px-4 border border-black/10 text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
           >
             Reddet
           </button>
           <button
             type="button"
             onClick={accept}
-            className="h-10 px-5 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition"
+            className="h-10 px-5 bg-black text-white text-sm font-medium hover:opacity-90 transition"
           >
             Kabul Et
           </button>

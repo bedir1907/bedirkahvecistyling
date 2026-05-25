@@ -29,10 +29,10 @@ export default function CheckoutFailClient() {
   return (
     <main className="min-h-screen bg-[#fafaf8] text-black flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-lg">
-        <div className="bg-white border border-black/10 rounded-[28px] p-8 md:p-10 text-center">
+        <div className="bg-white border border-black/10 p-8 md:p-10 text-center">
 
           {/* Hata ikonu */}
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-red-100 flex items-center justify-center mx-auto mb-6">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -52,7 +52,7 @@ export default function CheckoutFailClient() {
           </p>
 
           {orderNumber && (
-            <div className="inline-flex items-center gap-2 bg-gray-50 border border-black/8 rounded-2xl px-4 py-2.5 mb-6">
+            <div className="inline-flex items-center gap-2 bg-gray-50 border border-black/8 px-4 py-2.5 mb-6">
               <span className="text-xs text-gray-500 uppercase tracking-wide">Sipariş No</span>
               <span className="font-semibold text-black text-sm">{orderNumber}</span>
             </div>
@@ -61,13 +61,13 @@ export default function CheckoutFailClient() {
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <Link
               href="/checkout"
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl bg-black text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-black text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
             >
               Tekrar Dene
             </Link>
             <Link
               href="/cart"
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl border border-black/10 px-6 py-3 text-sm font-medium hover:bg-gray-50 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center border border-black/10 px-6 py-3 text-sm font-medium hover:bg-gray-50 transition"
             >
               Sepete Dön
             </Link>

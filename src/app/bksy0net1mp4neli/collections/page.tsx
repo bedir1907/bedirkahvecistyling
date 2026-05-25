@@ -18,6 +18,7 @@ type Collection = {
   eyebrow: string | null
   description: string | null
   image: string | null
+  video: string | null
   buttonText: string | null
   buttonLink: string | null
   discount: number | null
@@ -33,6 +34,7 @@ type FormState = {
   eyebrow: string
   description: string
   image: string
+  video: string
   buttonText: string
   buttonLink: string
   discount: string
@@ -43,7 +45,7 @@ type FormState = {
 }
 
 const emptyForm: FormState = {
-  name: "", slug: "", eyebrow: "", description: "", image: "",
+  name: "", slug: "", eyebrow: "", description: "", image: "", video: "",
   buttonText: "", buttonLink: "",
   discount: "", isActive: true, showOnHome: false,
   displayOrder: "0", productIds: [],
@@ -183,6 +185,19 @@ function CollectionForm({ form, setForm, allProducts, saving, onSave, onCancel }
         )}
       </div>
 
+      {/* Video */}
+      <div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kapak Videosu</p>
+        <p className="text-xs text-gray-400 mb-3">Video varsa görsel yerine oynatılır. MP4 önerilir.</p>
+        <CloudinaryUploadButton buttonText="Video Seç" resourceType="video" folder="collections" onUploadSuccess={url => setForm(p => ({ ...p, video: url }))} />
+        {form.video && (
+          <div className="mt-2 flex items-center gap-3">
+            <video src={form.video} className="w-32 h-20 rounded-xl object-cover border bg-black" muted playsInline />
+            <button type="button" onClick={() => setForm(p => ({ ...p, video: "" }))} className="text-xs text-red-500 hover:underline">Kaldır</button>
+          </div>
+        )}
+      </div>
+
       {/* Ürünler */}
       <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Ürünler</p>
@@ -218,6 +233,8 @@ function toPayload(form: FormState) {
     ...form,
     eyebrow: form.eyebrow || null,
     description: form.description || null,
+    image: form.image || null,
+    video: form.video || null,
     buttonText: form.buttonText || null,
     buttonLink: form.buttonLink || null,
     discount: form.discount !== "" ? Number(form.discount) : null,
@@ -263,6 +280,7 @@ export default function AdminCollectionsPage() {
       eyebrow: col.eyebrow || "",
       description: col.description || "",
       image: col.image || "",
+      video: col.video || "",
       buttonText: col.buttonText || "",
       buttonLink: col.buttonLink || "",
       discount: col.discount != null ? String(col.discount) : "",

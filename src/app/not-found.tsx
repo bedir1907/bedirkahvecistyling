@@ -14,7 +14,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-2xl text-sm font-medium hover:opacity-90 transition"
+          className="inline-flex items-center gap-2 bg-black text-white px-8 py-3.5 text-sm font-medium hover:opacity-90 transition"
         >
           Anasayfaya Dön
         </Link>

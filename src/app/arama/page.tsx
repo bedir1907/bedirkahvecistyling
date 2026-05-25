@@ -67,7 +67,7 @@ function SearchContent() {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 rounded-3xl aspect-[5/6]" />
+                <div className="bg-gray-200 aspect-[5/6]" />
                 <div className="mt-3 space-y-2">
                   <div className="h-3 bg-gray-200 rounded w-1/2" />
                   <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -76,11 +76,11 @@ function SearchContent() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="rounded-3xl border p-12 text-center">
+          <div className="border p-12 text-center">
             <p className="text-gray-500 mb-4">
               <strong>&quot;{q}&quot;</strong> için sonuç bulunamadı.
             </p>
-            <Link href="/" className="inline-flex px-6 py-3 rounded-2xl bg-black text-white text-sm font-medium hover:opacity-90 transition">
+            <Link href="/" className="inline-flex px-6 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
               Anasayfaya Dön
             </Link>
           </div>

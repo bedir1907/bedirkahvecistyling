@@ -45,7 +45,7 @@ export default function AccountShell({
     <main className="min-h-screen bg-white text-[#111]">
       <section className="max-w-6xl mx-auto px-4 py-10">
         {emailVerified === false && (
-          <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="mb-8 border border-amber-200 bg-amber-50 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="text-sm font-medium text-amber-900">
                 E-posta adresin henüz doğrulanmadı

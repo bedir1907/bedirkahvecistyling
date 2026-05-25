@@ -332,7 +332,7 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-[1.15fr_420px] gap-8 items-start">
           <form
             onSubmit={handleSubmit}
-            className="bg-white border border-black/10 rounded-[28px] p-6 md:p-8 space-y-8"
+            className="bg-white border border-black/10 p-6 md:p-8 space-y-8"
           >
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Teslimat ve ödeme</p>
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
             ) : null}
 
             {customer ? (
-              <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] px-5 py-4">
+              <div className="border border-black/10 bg-[#fcfcfb] px-5 py-4">
                 <div className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-2">Giriş yapan müşteri</div>
                 <div className="font-medium">{customer.email}</div>
                 <div className="text-sm text-gray-500 mt-1">
@@ -362,7 +362,7 @@ export default function CheckoutPage() {
                     <div className="text-xl font-medium">Teslimat adresi seç</div>
                   </div>
                   <button type="button" onClick={() => setShowNewAddressForm((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-black/10 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition">
+                    className="inline-flex items-center gap-2 border border-black/10 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition">
                     <Plus size={16} />
                     Yeni Adres
                   </button>
@@ -373,7 +373,7 @@ export default function CheckoutPage() {
                     const active = String(item.id) === selectedAddressId
                     return (
                       <button key={item.id} type="button" onClick={() => handleSelectAddress(String(item.id))}
-                        className={`w-full text-left rounded-3xl border px-5 py-5 transition ${active ? "border-black bg-[#fafaf8]" : "border-black/10 bg-white hover:bg-gray-50"}`}>
+                        className={`w-full text-left border px-5 py-5 transition ${active ? "border-black bg-[#fafaf8]" : "border-black/10 bg-white hover:bg-gray-50"}`}>
                         <div className="flex items-start justify-between gap-4">
                           <div className="space-y-1">
                             <div className="font-medium">{item.title}{item.isDefault ? " • Varsayılan" : ""}</div>
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
                             <div className="text-sm text-gray-500">{item.city} / {item.district}</div>
                             <div className="text-sm text-gray-500">{item.address}</div>
                           </div>
-                          <div className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 ${active ? "border-black bg-black text-white" : "border-black/20"}`}>
+                          <div className={`w-6 h-6 border flex items-center justify-center shrink-0 ${active ? "border-black bg-black text-white" : "border-black/20"}`}>
                             {active ? <Check size={14} /> : null}
                           </div>
                         </div>
@@ -391,14 +391,14 @@ export default function CheckoutPage() {
                 </div>
               </div>
             ) : customer ? (
-              <div className="rounded-3xl border border-dashed border-black/10 bg-[#fcfcfb] px-5 py-5">
+              <div className="border border-dashed border-black/10 bg-[#fcfcfb] px-5 py-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <div className="text-xl font-medium">Kayıtlı adres yok</div>
                     <div className="text-sm text-gray-500 mt-1">Yeni adres ekleyebilir ya da aşağıdaki alanları elle doldurabilirsin.</div>
                   </div>
                   <button type="button" onClick={() => setShowNewAddressForm((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-black/10 px-4 py-2 text-sm font-medium hover:bg-white transition">
+                    className="inline-flex items-center gap-2 border border-black/10 px-4 py-2 text-sm font-medium hover:bg-white transition">
                     <Plus size={16} />
                     Adres Ekle
                   </button>
@@ -407,16 +407,16 @@ export default function CheckoutPage() {
             ) : null}
 
             {showNewAddressForm && customer ? (
-              <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 space-y-4">
+              <div className="border border-black/10 bg-[#fcfcfb] p-6 space-y-4">
                 <div className="text-xl font-medium">Yeni adres ekle</div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <input name="title" value={addressForm.title} onChange={handleAddressFormChange} placeholder="Adres Başlığı (Ev / İş)" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3" />
-                  <input name="fullName" value={addressForm.fullName} onChange={handleAddressFormChange} placeholder="Ad Soyad" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3" />
-                  <input name="phone" value={addressForm.phone} onChange={handleAddressFormChange} placeholder="Telefon" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3" />
-                  <input name="city" value={addressForm.city} onChange={handleAddressFormChange} placeholder="Şehir" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3" />
-                  <input name="district" value={addressForm.district} onChange={handleAddressFormChange} placeholder="İlçe" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 md:col-span-2" />
-                  <textarea name="address" value={addressForm.address} onChange={handleAddressFormChange} placeholder="Açık adres" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 min-h-[110px] md:col-span-2" />
-                  <textarea name="note" value={addressForm.note} onChange={handleAddressFormChange} placeholder="Adres notu" className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 min-h-[90px] md:col-span-2" />
+                  <input name="title" value={addressForm.title} onChange={handleAddressFormChange} placeholder="Adres Başlığı (Ev / İş)" className="w-full border border-black/10 bg-white px-4 py-3" />
+                  <input name="fullName" value={addressForm.fullName} onChange={handleAddressFormChange} placeholder="Ad Soyad" className="w-full border border-black/10 bg-white px-4 py-3" />
+                  <input name="phone" value={addressForm.phone} onChange={handleAddressFormChange} placeholder="Telefon" className="w-full border border-black/10 bg-white px-4 py-3" />
+                  <input name="city" value={addressForm.city} onChange={handleAddressFormChange} placeholder="Şehir" className="w-full border border-black/10 bg-white px-4 py-3" />
+                  <input name="district" value={addressForm.district} onChange={handleAddressFormChange} placeholder="İlçe" className="w-full border border-black/10 bg-white px-4 py-3 md:col-span-2" />
+                  <textarea name="address" value={addressForm.address} onChange={handleAddressFormChange} placeholder="Açık adres" className="w-full border border-black/10 bg-white px-4 py-3 min-h-[110px] md:col-span-2" />
+                  <textarea name="note" value={addressForm.note} onChange={handleAddressFormChange} placeholder="Adres notu" className="w-full border border-black/10 bg-white px-4 py-3 min-h-[90px] md:col-span-2" />
                 </div>
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input type="checkbox" name="isDefault" checked={addressForm.isDefault} onChange={handleAddressFormChange} />
@@ -424,11 +424,11 @@ export default function CheckoutPage() {
                 </label>
                 <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={handleCreateAddress} disabled={savingAddress}
-                    className="rounded-2xl bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50">
+                    className="bg-[#1C1C1E] text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50">
                     {savingAddress ? "Kaydediliyor..." : "Adresi Kaydet"}
                   </button>
                   <button type="button" onClick={() => { setShowNewAddressForm(false); setAddressForm(emptyAddressForm) }}
-                    className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium hover:bg-white transition">
+                    className="border border-black/10 px-5 py-3 text-sm font-medium hover:bg-white transition">
                     Vazgeç
                   </button>
                 </div>
@@ -441,37 +441,37 @@ export default function CheckoutPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Ad Soyad</label>
-                    <input type="text" name="name" value={form.name} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="Ad Soyad" readOnly={hasSavedAddresses} />
+                    <input type="text" name="name" value={form.name} onChange={handleChange} className="w-full border border-black/10 px-4 py-3" placeholder="Ad Soyad" readOnly={hasSavedAddresses} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">E-posta</label>
-                    <input type="email" name="email" value={form.email} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="mail@ornek.com" readOnly={Boolean(customer)} />
+                    <input type="email" name="email" value={form.email} onChange={handleChange} className="w-full border border-black/10 px-4 py-3" placeholder="mail@ornek.com" readOnly={Boolean(customer)} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Telefon</label>
-                    <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="05xx xxx xx xx" readOnly={hasSavedAddresses} />
+                    <input type="text" name="phone" value={form.phone} onChange={handleChange} className="w-full border border-black/10 px-4 py-3" placeholder="05xx xxx xx xx" readOnly={hasSavedAddresses} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Şehir</label>
-                    <input type="text" name="city" value={form.city} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="Şehir" readOnly={hasSavedAddresses} />
+                    <input type="text" name="city" value={form.city} onChange={handleChange} className="w-full border border-black/10 px-4 py-3" placeholder="Şehir" readOnly={hasSavedAddresses} />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">İlçe</label>
-                    <input type="text" name="district" value={form.district} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="İlçe" readOnly={hasSavedAddresses} />
+                    <input type="text" name="district" value={form.district} onChange={handleChange} className="w-full border border-black/10 px-4 py-3" placeholder="İlçe" readOnly={hasSavedAddresses} />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">Adres</label>
-                    <textarea name="address" value={form.address} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3 min-h-[120px]" placeholder="Mahalle, sokak, bina no, daire no..." readOnly={hasSavedAddresses} />
+                    <textarea name="address" value={form.address} onChange={handleChange} className="w-full border border-black/10 px-4 py-3 min-h-[120px]" placeholder="Mahalle, sokak, bina no, daire no..." readOnly={hasSavedAddresses} />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">Sipariş Notu</label>
-                    <textarea name="note" value={form.note} onChange={handleChange} className="w-full border border-black/10 rounded-2xl px-4 py-3 min-h-[100px]" placeholder="Varsa sipariş notunuzu yazın" readOnly={hasSavedAddresses} />
+                    <textarea name="note" value={form.note} onChange={handleChange} className="w-full border border-black/10 px-4 py-3 min-h-[100px]" placeholder="Varsa sipariş notunuzu yazın" readOnly={hasSavedAddresses} />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-black/10 bg-[#fcfcfb] p-6 space-y-5">
+            <div className="border border-black/10 bg-[#fcfcfb] p-6 space-y-5">
               <div className="flex items-center gap-3">
                 <Receipt size={20} />
                 <div>
@@ -487,34 +487,34 @@ export default function CheckoutPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Fatura Ad Soyad</label>
-                    <input type="text" name="billingName" value={billingForm.billingName} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="Ad Soyad / Ünvan" />
+                    <input type="text" name="billingName" value={billingForm.billingName} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3" placeholder="Ad Soyad / Ünvan" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Fatura Telefon</label>
-                    <input type="text" name="billingPhone" value={billingForm.billingPhone} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="Telefon" />
+                    <input type="text" name="billingPhone" value={billingForm.billingPhone} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3" placeholder="Telefon" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Fatura Şehir</label>
-                    <input type="text" name="billingCity" value={billingForm.billingCity} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="Şehir" />
+                    <input type="text" name="billingCity" value={billingForm.billingCity} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3" placeholder="Şehir" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Fatura İlçe</label>
-                    <input type="text" name="billingDistrict" value={billingForm.billingDistrict} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3" placeholder="İlçe" />
+                    <input type="text" name="billingDistrict" value={billingForm.billingDistrict} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3" placeholder="İlçe" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">Fatura Adresi</label>
-                    <textarea name="billingAddress" value={billingForm.billingAddress} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3 min-h-[120px]" placeholder="Fatura adresi" />
+                    <textarea name="billingAddress" value={billingForm.billingAddress} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3 min-h-[120px]" placeholder="Fatura adresi" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">Fatura Notu</label>
-                    <textarea name="billingNote" value={billingForm.billingNote} onChange={handleBillingChange} className="w-full border border-black/10 rounded-2xl px-4 py-3 min-h-[100px]" placeholder="Varsa fatura notu" />
+                    <textarea name="billingNote" value={billingForm.billingNote} onChange={handleBillingChange} className="w-full border border-black/10 px-4 py-3 min-h-[100px]" placeholder="Varsa fatura notu" />
                   </div>
                 </div>
               )}
             </div>
 
             {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+              <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
             ) : null}
 
             <p className="text-xs text-gray-500 leading-6">
@@ -530,15 +530,15 @@ export default function CheckoutPage() {
             </p>
 
             <button type="submit" disabled={loading}
-              className="w-full rounded-2xl bg-[#1C1C1E] text-white px-6 py-4 text-base font-medium hover:opacity-90 transition disabled:opacity-50">
+              className="w-full bg-[#1C1C1E] text-white px-6 py-4 text-base font-medium hover:opacity-90 transition disabled:opacity-50">
               {loading ? "Ödeme Başlatılıyor..." : "Ödemeye Geç"}
             </button>
           </form>
 
           {/* Sipariş özeti */}
-          <aside className="bg-white border border-black/10 rounded-[28px] p-6 md:p-8 lg:sticky lg:top-24">
+          <aside className="bg-white border border-black/10 p-6 md:p-8 lg:sticky lg:top-24">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-full border border-black/10 flex items-center justify-center">
+              <div className="w-11 h-11 border border-black/10 flex items-center justify-center">
                 <ShoppingBag size={18} />
               </div>
               <div>

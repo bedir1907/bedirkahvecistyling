@@ -16,7 +16,7 @@ export default function OnBilgilendirmePage() {
           <span className="text-black">Ön Bilgilendirme Formu</span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-12">
           <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">Yasal Belge</p>
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight">
             Mesafeli Satış Ön Bilgilendirme Formu
@@ -29,7 +29,7 @@ export default function OnBilgilendirmePage() {
 
             <div>
               <h2 className="text-xl font-semibold text-black mb-4">1. Satıcı Bilgileri</h2>
-              <div className="bg-white border border-black/8 rounded-2xl px-5 py-5 text-sm space-y-2">
+              <div className="bg-white border border-black/8 px-5 py-5 text-sm space-y-2">
                 {[
                   ["Unvan", "Bedir Kahveci Styling"],
                   ["Adres", "Yeniköy Mah. Amiral Şükrü Okan Cad. Altay Apartmanı No:26, Tirebolu / Giresun 28500"],
@@ -87,7 +87,7 @@ export default function OnBilgilendirmePage() {
 
             <div>
               <h2 className="text-xl font-semibold text-black mb-3">6. Cayma Hakkı</h2>
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-amber-900 text-sm mb-4">
+              <div className="bg-amber-50 border border-amber-200 px-5 py-4 text-amber-900 text-sm mb-4">
                 <strong>Önemli:</strong> Alıcı, malı teslim aldığı tarihten itibaren{" "}
                 <strong>14 (on dört) gün</strong> içinde herhangi bir gerekçe göstermeksizin
                 sözleşmeden cayma hakkına sahiptir.
@@ -123,7 +123,7 @@ export default function OnBilgilendirmePage() {
               </p>
             </div>
 
-            <div className="bg-black text-white rounded-2xl px-5 py-5 text-sm leading-7">
+            <div className="bg-black text-white px-5 py-5 text-sm leading-7">
               <p className="font-semibold text-base mb-2">Alıcı Onayı</p>
               <p>
                 Alıcı, ödeme adımında "Siparişi Tamamla" butonuna tıklamadan önce bu formu okuduğunu

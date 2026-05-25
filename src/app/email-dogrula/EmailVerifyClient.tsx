@@ -56,7 +56,7 @@ export default function EmailVerifyClient() {
   return (
     <main className="min-h-screen bg-[#fafaf8] text-black">
       <section className="max-w-3xl mx-auto px-4 py-16">
-        <div className="bg-white border border-black/10 rounded-[28px] p-8 md:p-10">
+        <div className="bg-white border border-black/10 p-8 md:p-10">
           <p className="text-xs uppercase tracking-[0.18em] text-gray-400 mb-3">
             Hesap İşlemleri
           </p>
@@ -82,14 +82,14 @@ export default function EmailVerifyClient() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/giris"
-              className="inline-flex items-center justify-center rounded-2xl bg-black text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition"
+              className="inline-flex items-center justify-center bg-black text-white px-5 py-3 text-sm font-medium hover:opacity-90 transition"
             >
               Giriş Yap
             </Link>
 
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium hover:bg-gray-50 transition"
+              className="inline-flex items-center justify-center border border-black/10 px-5 py-3 text-sm font-medium hover:bg-gray-50 transition"
             >
               Anasayfaya Dön
             </Link>

@@ -59,7 +59,7 @@ export default function DynamicInfoPage({ pageKey }: Props) {
           </span>
         </div>
 
-        <div className="border border-black/10 rounded-[28px] bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-10">
+        <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-10">
           {loading ? (
             <p className="text-gray-500">İçerik yükleniyor...</p>
           ) : !page ? (
