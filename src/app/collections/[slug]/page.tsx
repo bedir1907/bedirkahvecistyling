@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react"
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import StoreFooter from "@/components/store/StoreFooter"
+import AutoplayVideo from "@/components/store/AutoplayVideo"
 
 type Product = {
   id: number
@@ -75,9 +76,8 @@ export default function CollectionPage({ params }: Props) {
       {/* Başlık bandı */}
       <section className="relative w-full bg-[#f7f7f5] border-b overflow-hidden">
         {collection?.video ? (
-          <video
+          <AutoplayVideo
             src={collection.video}
-            autoPlay muted loop playsInline
             style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
           />
         ) : collection?.image ? (

@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import AutoplayVideo from "@/components/store/AutoplayVideo"
 
 type Category = {
   id: number
@@ -30,9 +31,8 @@ export default function FeaturedCategorySlider({ categories }: Props) {
     return (
       <Link href={`/category/${cat.slug}`} className="group relative block w-full h-[60vh] md:h-[72vh] overflow-hidden bg-gray-100">
         {cat.video ? (
-          <video
+          <AutoplayVideo
             src={cat.video}
-            autoPlay muted loop playsInline
             style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
           />
         ) : cat.image ? (
@@ -142,9 +142,8 @@ function Slider({ categories }: { categories: Category[] }) {
         {extended.map((cat, i) => (
           <div key={i} style={{ width: `${100 / total}%` }} className="relative h-full shrink-0 overflow-hidden">
             {cat.video ? (
-              <video
+              <AutoplayVideo
                 src={cat.video}
-                autoPlay muted loop playsInline
                 style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
               />
             ) : cat.image ? (

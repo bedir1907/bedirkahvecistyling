@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react"
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import StoreFooter from "@/components/store/StoreFooter"
+import AutoplayVideo from "@/components/store/AutoplayVideo"
 
 type Product = {
   id: number
@@ -121,47 +122,60 @@ export default function CategoryPageClient({ params }: Props) {
     <main className="min-h-screen bg-white text-black">
 
       {/* Başlık bandı */}
-      <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
-        {category?.video ? (
-          <video
-            src={category.video}
-            autoPlay muted loop playsInline
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
-          />
-        ) : category?.image ? (
-          <img
-            src={category.image}
-            alt={category.name ?? ""}
-            style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
-          />
-        ) : null}
-        {hasBanner && <div className="absolute inset-0 bg-black/50" />}
-        <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
-          <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
-            <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
-            <span>/</span>
-            <span>{category?.name || slug}</span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
-                Kategori
-              </p>
-              <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
-              {!loading && <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>}
+      {loading ? (
+        <section className="relative w-full border-b bg-gray-100 overflow-hidden animate-pulse">
+          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-3 w-16 bg-gray-300 rounded" />
+              <div className="h-3 w-2 bg-gray-300 rounded" />
+              <div className="h-3 w-24 bg-gray-300 rounded" />
             </div>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
-            >
-              <option value="new">En Yeniler</option>
-              <option value="price-asc">Fiyat Artan</option>
-              <option value="price-desc">Fiyat Azalan</option>
-            </select>
+            <div className="h-4 w-16 bg-gray-300 rounded mb-3" />
+            <div className="h-9 md:h-11 w-56 bg-gray-300 rounded" />
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
+          {category?.video ? (
+            <AutoplayVideo
+              src={category.video}
+              style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+            />
+          ) : category?.image ? (
+            <img
+              src={category.image}
+              alt={category.name ?? ""}
+              style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto", minHeight: "100%" }}
+            />
+          ) : null}
+          {hasBanner && <div className="absolute inset-0 bg-black/50" />}
+          <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
+            <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
+              <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
+              <span>/</span>
+              <span>{category?.name || slug}</span>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
+                  Kategori
+                </p>
+                <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
+                <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>
+              </div>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
+              >
+                <option value="new">En Yeniler</option>
+                <option value="price-asc">Fiyat Artan</option>
+                <option value="price-desc">Fiyat Azalan</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="max-w-7xl mx-auto px-4 py-10">
 

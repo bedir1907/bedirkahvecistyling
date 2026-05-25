@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import AutoplayVideo from "@/components/store/AutoplayVideo"
 
 type Collection = {
   id: number
@@ -58,17 +59,9 @@ function CollectionSlide({ collection }: { collection: Collection }) {
       onMouseLeave={() => setHovered(false)}
     >
       {collection.video ? (
-        <video
+        <AutoplayVideo
           src={collection.video}
-          autoPlay muted loop playsInline
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: "100%",
-            height: "auto",
-          }}
+          style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: "100%", height: "auto" }}
         />
       ) : collection.image ? (
         <img
@@ -213,9 +206,8 @@ function Slider({ collections }: { collections: Collection[] }) {
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {col.video ? (
-                <video
+                <AutoplayVideo
                   src={col.video}
-                  autoPlay muted loop playsInline
                   style={{
                     position: "absolute",
                     left: 0,
