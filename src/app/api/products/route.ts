@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+function normalizeSearch(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
+    .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+    .replace(/İ/g, "i").replace(/Ğ/g, "g").replace(/Ü/g, "u")
+    .replace(/Ş/g, "s").replace(/Ö/g, "o").replace(/Ç/g, "c")
+}
+
+// PostgreSQL'de translate() ile her iki yönde de Türkçe karakter normalize eden ID sorgusu
+async function getSearchMatchingIds(q: string): Promise<number[]> {
+  const normalized = `%${normalizeSearch(q)}%`
+  const rows = await prisma.$queryRaw<{ id: number }[]>`
+    SELECT id FROM "Product"
+    WHERE
+      translate(lower("name"),     'ğüşıöç', 'gusioc') ILIKE ${normalized}
+      OR translate(lower("color"), 'ğüşıöç', 'gusioc') ILIKE ${normalized}
+      OR translate(lower("category"), 'ğüşıöç', 'gusioc') ILIKE ${normalized}
+      OR lower("slug") ILIKE ${normalized}
+  `
+  return rows.map((r) => r.id)
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -23,6 +46,8 @@ export async function GET(request: Request) {
       categoryName = cat?.name ?? null
     }
 
+    const searchIds = q ? await getSearchMatchingIds(q) : null
+
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
@@ -30,12 +55,7 @@ export async function GET(request: Request) {
         ...(isNew === "true" ? { isNew: true } : {}),
         ...(featured === "true" ? { featured: true } : {}),
         ...(discounted === "true" ? { oldPrice: { not: null } } : {}),
-        ...(q ? {
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { category: { contains: q, mode: "insensitive" } },
-          ],
-        } : {}),
+        ...(searchIds !== null ? { id: { in: searchIds } } : {}),
       },
       orderBy: [
         { displayOrder: "asc" },
