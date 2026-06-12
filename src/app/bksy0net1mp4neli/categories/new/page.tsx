@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
+import { slugify } from "@/lib/slugify"
 
 export default function NewCategoryPage() {
   const router = useRouter()
@@ -26,6 +27,11 @@ export default function NewCategoryPage() {
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked
       setForm((prev) => ({ ...prev, [name]: checked }))
+      return
+    }
+
+    if (name === "name") {
+      setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
       return
     }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { slugify } from "@/lib/slugify"
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
     const category = await prisma.category.create({
       data: {
         name: body.name,
-        slug: body.slug,
+        slug: slugify(body.slug || body.name),
         image: body.image || null,
         video: body.video || null,
         isFeatured: Boolean(body.isFeatured),

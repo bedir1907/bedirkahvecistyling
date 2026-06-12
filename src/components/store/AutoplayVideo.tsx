@@ -59,9 +59,7 @@ export default function AutoplayVideo({ src, className = "", fit = "cover", desk
         const video = event.currentTarget
         setAutoDesktopFit(video.videoWidth >= video.videoHeight ? "cover" : "contain")
       }}
-      style={{
-        pointerEvents: "none",
-      }}
+      style={{ pointerEvents: "none" }}
     />
   )
 }

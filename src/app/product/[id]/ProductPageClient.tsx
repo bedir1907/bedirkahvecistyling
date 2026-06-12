@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { use, useEffect, useMemo, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
 import { formatPrice } from "@/lib/format"
@@ -116,7 +116,6 @@ function sortVariants(variants: ProductVariant[]) {
 // ── Sayfa bileşeni ────────────────────────────────────────────────────────────
 export default function ProductPageClient({ params }: Props) {
   const { id } = use(params)
-  const router = useRouter()
   const searchParams = useSearchParams()
   const from = searchParams.get("from")
   const addToCart = useCartStore((state) => state.addToCart)
@@ -164,7 +163,8 @@ export default function ProductPageClient({ params }: Props) {
     if (size) p.set("size", size)
     else p.delete("size")
     const query = p.toString()
-    router.replace(query ? `/product/${id}?${query}` : `/product/${id}`)
+    const url = query ? `/product/${id}?${query}` : `/product/${id}`
+    window.history.replaceState(null, "", url)
   }
 
   useEffect(() => {
@@ -275,11 +275,13 @@ export default function ProductPageClient({ params }: Props) {
   // ── Yükleniyor / bulunamadı ─────────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="min-h-screen bg-white text-black">
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <p className="text-gray-500">Yükleniyor...</p>
-        </section>
-        <StoreFooter />
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <img
+          src="/bk-logo.svg"
+          alt="Yükleniyor"
+          className="w-24 h-24 rounded-full animate-spin"
+          style={{ animationDuration: "1.5s" }}
+        />
       </main>
     )
   }
@@ -463,27 +465,28 @@ export default function ProductPageClient({ params }: Props) {
               {product.siblingProducts.length > 0 && (
                 <div>
                   <h2 className="text-sm font-medium tracking-wide mb-3">Diğer Renkler</h2>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={from ? `/product/${product.id}?from=${from}` : `/product/${product.id}`}
-                      className="flex items-center gap-3 px-3 py-3 border border-black bg-black text-white transition"
-                    >
-                      <span className="relative w-12 h-12 overflow-hidden border bg-gray-100 shrink-0">
-                        <Image src={product.image || FALLBACK_IMAGE} alt={product.color || product.name} fill className="object-cover" sizes="48px" />
-                      </span>
-                      <span className="text-sm font-medium">{product.color || "Mevcut Renk"}</span>
-                    </Link>
-                    {product.siblingProducts.map((item) => (
+                  <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col items-center gap-1">
                       <Link
-                        key={item.id}
-                        href={from ? `/product/${item.id}?from=${from}` : `/product/${item.id}`}
-                        className="flex items-center gap-3 px-3 py-3 border border-gray-200 hover:border-black transition"
+                        href={from ? `/product/${product.id}?from=${from}` : `/product/${product.id}`}
+                        className="relative w-14 h-14 overflow-hidden border-2 border-black bg-gray-100 shrink-0"
+                        title={product.color || "Mevcut Renk"}
                       >
-                        <span className="relative w-12 h-12 overflow-hidden border bg-gray-100 shrink-0">
-                          <Image src={item.image || FALLBACK_IMAGE} alt={item.color || item.name} fill className="object-cover" sizes="48px" />
-                        </span>
-                        <span className="text-sm font-medium">{item.color || item.name}</span>
+                        <Image src={product.image || FALLBACK_IMAGE} alt={product.color || product.name} fill className="object-cover" sizes="56px" />
                       </Link>
+                      <span className="text-[10px] text-center text-black font-medium leading-tight max-w-14 truncate">{product.color || "Renk"}</span>
+                    </div>
+                    {product.siblingProducts.map((item) => (
+                      <div key={item.id} className="flex flex-col items-center gap-1">
+                        <Link
+                          href={from ? `/product/${item.id}?from=${from}` : `/product/${item.id}`}
+                          className="relative w-14 h-14 overflow-hidden border-2 border-transparent hover:border-black transition bg-gray-100 shrink-0"
+                          title={item.color || item.name}
+                        >
+                          <Image src={item.image || FALLBACK_IMAGE} alt={item.color || item.name} fill className="object-cover" sizes="56px" />
+                        </Link>
+                        <span className="text-[10px] text-center text-gray-600 leading-tight max-w-14 truncate">{item.color || item.name}</span>
+                      </div>
                     ))}
                   </div>
                 </div>

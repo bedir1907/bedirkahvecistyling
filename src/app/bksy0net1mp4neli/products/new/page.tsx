@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
+import { slugify } from "@/lib/slugify"
 
 type Category = {
   id: number
@@ -51,18 +52,9 @@ export default function NewProductPage() {
     fetchCategories()
   }, [])
 
-  // İsimden otomatik slug üret
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value
-    const slug = value
-      .toLowerCase()
-      .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
-      .replace(/ı/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim()
-    setForm((prev) => ({ ...prev, name: value, slug }))
+    setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
   }
 
   function handleChange(

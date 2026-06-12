@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { slugify } from "@/lib/slugify"
 
 function isValidProductCode(value: string) {
   return /^\d{8,}$/.test(value)
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
 
     const productCode = normalizeString(body.productCode)
     const name = normalizeString(body.name)
-    const slug = normalizeString(body.slug)
+    const slug = slugify(normalizeString(body.slug) || normalizeString(body.name))
     const color = normalizeString(body.color)
     const groupCode = normalizeString(body.groupCode)
     const category = normalizeString(body.category)
