@@ -7,6 +7,7 @@ type Props = {
   eyebrow?: string
   featuredOnly?: boolean
   newOnly?: boolean
+  weeklyMode?: boolean
   viewAllHref?: string
 }
 
@@ -16,16 +17,18 @@ type SiblingColorItem = {
   image: string
 }
 
-function getSectionDescription(featuredOnly: boolean, newOnly: boolean) {
-  if (featuredOnly) {
-    return "Öne çıkan ürünleri keşfet."
-  }
-
-  if (newOnly) {
-    return "Yeni sezona eklenen parçaları incele."
-  }
-
+function getSectionDescription(featuredOnly: boolean, newOnly: boolean, weeklyMode: boolean) {
+  if (weeklyMode) return "Bu hafta eklenen yeni parçaları keşfet."
+  if (featuredOnly) return "Öne çıkan ürünleri keşfet."
+  if (newOnly) return "Yeni sezona eklenen parçaları incele."
   return "Sezonun öne çıkan parçalarını keşfet."
+}
+
+const imageInclude = {
+  images: {
+    orderBy: [{ isCover: "desc" as const }, { sortOrder: "asc" as const }],
+    take: 2,
+  },
 }
 
 export default async function ProductSection({
@@ -33,23 +36,52 @@ export default async function ProductSection({
   eyebrow,
   featuredOnly = false,
   newOnly = false,
+  weeklyMode = false,
   viewAllHref,
 }: Props) {
-  const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      ...(featuredOnly ? { featured: true } : {}),
-      ...(newOnly ? { isNew: true } : {}),
-    },
-    orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
-    take: 12,
-    include: {
-      images: {
-        orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
-        take: 2,
+  let products
+
+  if (weeklyMode) {
+    const oneWeekAgo = new Date()
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+
+    const weeklyProducts = await prisma.product.findMany({
+      where: { isActive: true, createdAt: { gte: oneWeekAgo } },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      include: imageInclude,
+    })
+
+    if (weeklyProducts.length >= 20) {
+      products = weeklyProducts
+    } else {
+      const weeklyIds = weeklyProducts.map((p) => p.id)
+      const needed = 20 - weeklyProducts.length
+      const olderProducts = await prisma.product.findMany({
+        where: {
+          isActive: true,
+          id: weeklyIds.length > 0 ? { notIn: weeklyIds } : undefined,
+          createdAt: { lt: oneWeekAgo },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: needed,
+        include: imageInclude,
+      })
+      products = [...weeklyProducts, ...olderProducts]
+    }
+  } else {
+    products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        ...(featuredOnly ? { featured: true } : {}),
+        ...(newOnly ? { isNew: true } : {}),
       },
-    },
-  })
+      orderBy: newOnly
+        ? [{ createdAt: "desc" }, { id: "desc" }]
+        : [{ displayOrder: "asc" }, { id: "desc" }],
+      take: newOnly ? 30 : 12,
+      include: imageInclude,
+    })
+  }
 
   const groupCodes = Array.from(
     new Set(
@@ -66,9 +98,7 @@ export default async function ProductSection({
     ? await prisma.product.findMany({
         where: {
           isActive: true,
-          groupCode: {
-            in: groupCodes,
-          },
+          groupCode: { in: groupCodes },
         },
         select: {
           id: true,
@@ -81,26 +111,15 @@ export default async function ProductSection({
     : []
 
   const siblingMap = new Map<string, SiblingColorItem[]>()
-
   for (const sibling of siblingProducts) {
     const key = sibling.groupCode?.trim()
-
     if (!key) continue
-
     const current = siblingMap.get(key) || []
-
-    current.push({
-      id: sibling.id,
-      color: sibling.color,
-      image: sibling.image,
-    })
-
+    current.push({ id: sibling.id, color: sibling.color, image: sibling.image })
     siblingMap.set(key, current)
   }
 
-  if (products.length === 0) {
-    return null
-  }
+  if (products.length === 0) return null
 
   const productIds = products.map((p) => p.id)
   const discountCollections = await prisma.collection.findMany({
@@ -132,7 +151,7 @@ export default async function ProductSection({
       <SectionHeader
         eyebrow={eyebrow}
         title={title}
-        description={getSectionDescription(featuredOnly, newOnly)}
+        description={getSectionDescription(featuredOnly, newOnly, weeklyMode)}
         href={viewAllHref}
       />
 

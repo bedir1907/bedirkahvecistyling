@@ -74,8 +74,7 @@ export default async function Home() {
       {settings?.featuredProductsEnabled && (
         <ProductSection
           title={settings.featuredProductsTitle ?? "Haftanın Ürünleri"}
-          viewAllHref="/category/haftanin-urunleri"
-          featuredOnly
+          weeklyMode
         />
       )}
 

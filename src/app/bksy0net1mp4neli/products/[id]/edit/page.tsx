@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
+import { slugify } from "@/lib/slugify"
 
 type Category = { id: number; name: string; slug: string }
 type ProductVariant = { id: number | string; size: string; stock: number; sku?: string | null }
@@ -125,6 +126,10 @@ export default function EditProductPage({ params }: Props) {
     }
     if (name === "productCode") {
       setForm((prev) => ({ ...prev, productCode: value.replace(/\D/g, "") }))
+      return
+    }
+    if (name === "name") {
+      setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
       return
     }
     setForm((prev) => ({ ...prev, [name]: value }))

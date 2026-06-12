@@ -6,7 +6,64 @@ import { use, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
+import { useWishlistStore } from "@/store/wishlistStore"
+import { useRecentlyViewedStore } from "@/store/recentlyViewedStore"
 import { formatPrice } from "@/lib/format"
+
+// ── Beden rehberi modalı ──────────────────────────────────────────────────────
+const SIZE_GUIDE_ROWS = [
+  { size: "XS", chest: "80-84", waist: "60-64", hip: "87-91" },
+  { size: "S",  chest: "84-88", waist: "64-68", hip: "91-95" },
+  { size: "M",  chest: "88-92", waist: "68-72", hip: "95-99" },
+  { size: "L",  chest: "92-96", waist: "72-76", hip: "99-103" },
+  { size: "XL", chest: "96-100", waist: "76-80", hip: "103-107" },
+  { size: "XXL", chest: "100-104", waist: "80-84", hip: "107-111" },
+]
+
+function SizeGuideModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-lg shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h2 className="text-base font-semibold tracking-wide">Beden Rehberi</h2>
+          <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition text-gray-500">✕</button>
+        </div>
+        <div className="p-6">
+          <p className="text-xs text-gray-500 mb-4">Ölçüler santimetre (cm) cinsindendir. Beden seçerken vücut ölçülerinizi kullanın.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b">
+                  <th className="px-4 py-3 font-semibold text-gray-700">Beden</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Göğüs</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Bel</th>
+                  <th className="px-4 py-3 font-semibold text-gray-700">Kalça</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SIZE_GUIDE_ROWS.map((row, i) => (
+                  <tr key={row.size} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="px-4 py-3 font-semibold">{row.size}</td>
+                    <td className="px-4 py-3 text-gray-600">{row.chest}</td>
+                    <td className="px-4 py-3 text-gray-600">{row.waist}</td>
+                    <td className="px-4 py-3 text-gray-600">{row.hip}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-4">* Ölçüler standart beden tablosuna göre belirlenmiştir. Ürüne göre farklılık gösterebilir.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ── Toast bildirimi (harici kütüphane gerektirmez) ────────────────────────────
 function Toast({ message, visible }: { message: string; visible: boolean }) {
@@ -120,6 +177,10 @@ export default function ProductPageClient({ params }: Props) {
   const from = searchParams.get("from")
   const addToCart = useCartStore((state) => state.addToCart)
   const cart = useCartStore((state) => state.cart)
+  const toggleWishlist = useWishlistStore((state) => state.toggleWishlist)
+  const isWishlisted = useWishlistStore((state) => state.isWishlisted)
+  const addRecentlyViewed = useRecentlyViewedStore((state) => state.addItem)
+  const getRecentOthers = useRecentlyViewedStore((state) => state.getOthers)
 
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
@@ -132,6 +193,7 @@ export default function ProductPageClient({ params }: Props) {
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
 
   useEffect(() => {
     async function fetchProduct() {
@@ -139,7 +201,16 @@ export default function ProductPageClient({ params }: Props) {
         const res = await fetch(`/api/products/${id}`)
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || "Ürün alınamadı")
-        setProduct({ ...data, productVariants: sortVariants(data.productVariants || []) })
+        const productData = { ...data, productVariants: sortVariants(data.productVariants || []) }
+        setProduct(productData)
+        addRecentlyViewed({
+          productId: productData.id,
+          name: productData.name,
+          price: productData.price,
+          oldPrice: productData.oldPrice,
+          image: productData.image || FALLBACK_IMAGE,
+          category: productData.category,
+        })
 
         const dmRes = await fetch("/api/collections/discount-map", {
           method: "POST",
@@ -302,6 +373,9 @@ export default function ProductPageClient({ params }: Props) {
     <main className="min-h-screen bg-white text-black">
       {/* Toast bildirimi */}
       <Toast message={`${product.name} sepete eklendi`} visible={toastVisible} />
+
+      {/* Beden rehberi */}
+      {sizeGuideOpen && <SizeGuideModal onClose={() => setSizeGuideOpen(false)} />}
 
       {/* Lightbox */}
       {lightboxOpen && (
@@ -494,7 +568,16 @@ export default function ProductPageClient({ params }: Props) {
 
               {/* Beden seçimi */}
               <div>
-                <h2 className="text-sm font-medium tracking-wide mb-3">Beden</h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-medium tracking-wide">Beden</h2>
+                  <button
+                    type="button"
+                    onClick={() => setSizeGuideOpen(true)}
+                    className="text-xs text-gray-500 underline underline-offset-2 hover:text-black transition"
+                  >
+                    Beden Rehberi
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {product.productVariants.map((variant) => {
                     const isSelected = selectedSize === variant.size
@@ -544,26 +627,49 @@ export default function ProductPageClient({ params }: Props) {
 
             {/* Sepete ekle */}
             <div className="mt-8 space-y-4">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={!selectedVariant || selectedVariant.stock <= 0 || isSelectedVariantMaxInCart}
-                className={`w-full px-6 py-4 text-base font-medium transition ${
-                  !selectedSize
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : selectedVariant && selectedVariant.stock > 0 && !isSelectedVariantMaxInCart
-                      ? "bg-black text-white hover:opacity-90"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                {!selectedSize
-                  ? "Beden Seç"
-                  : !selectedVariant || selectedVariant.stock <= 0
-                    ? "Bu Beden Tükendi"
-                    : isSelectedVariantMaxInCart
-                      ? "Sepette Maksimum Adet"
-                      : "Sepete Ekle"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={!selectedVariant || selectedVariant.stock <= 0 || isSelectedVariantMaxInCart}
+                  className={`flex-1 px-6 py-4 text-base font-medium transition ${
+                    !selectedSize
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : selectedVariant && selectedVariant.stock > 0 && !isSelectedVariantMaxInCart
+                        ? "bg-black text-white hover:opacity-90"
+                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  {!selectedSize
+                    ? "Beden Seç"
+                    : !selectedVariant || selectedVariant.stock <= 0
+                      ? "Bu Beden Tükendi"
+                      : isSelectedVariantMaxInCart
+                        ? "Sepette Maksimum Adet"
+                        : "Sepete Ekle"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleWishlist({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    oldPrice: product.oldPrice,
+                    image: product.image || FALLBACK_IMAGE,
+                    category: product.category,
+                  })}
+                  className={`w-14 h-14 border flex items-center justify-center transition shrink-0 ${
+                    isWishlisted(product.id)
+                      ? "border-red-400 bg-red-50 text-red-500"
+                      : "border-gray-200 text-gray-400 hover:border-black hover:text-black"
+                  }`}
+                  title={isWishlisted(product.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={isWishlisted(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              </div>
 
               {selectedVariant && isSelectedVariantMaxInCart && (
                 <p className="text-sm text-orange-600">Bu beden için sepette stok kadar ürün var.</p>
@@ -583,6 +689,37 @@ export default function ProductPageClient({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Son görüntülenen ürünler */}
+      {(() => {
+        const recent = getRecentOthers(product.id)
+        if (recent.length === 0) return null
+        return (
+          <section className="max-w-7xl mx-auto px-4 pb-16">
+            <h2 className="text-xl font-semibold mb-6 tracking-tight">Son Görüntülenenler</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {recent.map((item) => (
+                <Link key={item.productId} href={`/product/${item.productId}`} className="group">
+                  <div className="relative aspect-4/5 overflow-hidden bg-gray-100 border">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-400 truncate">{item.category}</p>
+                    <p className="text-sm font-medium text-gray-900 line-clamp-1">{item.name}</p>
+                    <p className="text-sm text-gray-700 mt-0.5">{formatPrice(item.price)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )
+      })()}
 
       <StoreFooter />
     </main>

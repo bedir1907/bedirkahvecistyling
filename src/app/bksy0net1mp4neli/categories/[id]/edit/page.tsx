@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
+import { slugify } from "@/lib/slugify"
 
 type Props = {
   params: Promise<{
@@ -63,6 +64,11 @@ export default function EditCategoryPage({ params }: Props) {
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked
       setForm((prev) => ({ ...prev, [name]: checked }))
+      return
+    }
+
+    if (name === "name") {
+      setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
       return
     }
 

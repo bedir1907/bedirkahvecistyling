@@ -82,11 +82,28 @@ export default function CartPage() {
         </div>
 
         {cart.length === 0 ? (
-          <div className="border p-10 text-center bg-white">
-            <p className="text-gray-600 mb-5">Sepetiniz boş.</p>
-            <Link href="/" className="inline-flex px-6 py-3 bg-black text-white">
-              Alışverişe Dön
-            </Link>
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-24 h-24 mb-6 text-gray-200">
+              <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="48" cy="48" r="48" fill="#f3f4f6"/>
+                <path d="M28 32h4.5l6.5 24h23l5-16H36" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="44" cy="62" r="2.5" fill="#9ca3af"/>
+                <circle cx="58" cy="62" r="2.5" fill="#9ca3af"/>
+                <path d="M32 36h34" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sepetiniz boş</h2>
+            <p className="text-gray-500 text-sm mb-8 max-w-xs">
+              Beğendiğiniz ürünleri sepetinize ekleyerek alışverişe başlayın.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/" className="inline-flex items-center justify-center px-8 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
+                Alışverişe Başla
+              </Link>
+              <Link href="/kategoriler" className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-sm font-medium hover:bg-gray-50 transition">
+                Kategorilere Bak
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8 items-start">
