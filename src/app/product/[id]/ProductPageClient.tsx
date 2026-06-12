@@ -198,11 +198,22 @@ export default function ProductPageClient({ params }: Props) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/${id}`)
-        const data = await res.json()
+        const [res, dmRes] = await Promise.all([
+          fetch(`/api/products/${id}`),
+          fetch("/api/collections/discount-map", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productIds: [Number(id)] }),
+          }),
+        ])
+
+        const [data, dmData] = await Promise.all([res.json(), dmRes.json()])
+
         if (!res.ok) throw new Error(data.error || "Ürün alınamadı")
+
         const productData = { ...data, productVariants: sortVariants(data.productVariants || []) }
         setProduct(productData)
+        setCollectionDiscount(dmData.discounts?.[Number(id)] ?? null)
         addRecentlyViewed({
           productId: productData.id,
           name: productData.name,
@@ -211,15 +222,6 @@ export default function ProductPageClient({ params }: Props) {
           image: productData.image || FALLBACK_IMAGE,
           category: productData.category,
         })
-
-        const dmRes = await fetch("/api/collections/discount-map", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productIds: [Number(id)] }),
-        })
-        const dmData = await dmRes.json()
-        const discount = dmData.discounts?.[Number(id)] ?? null
-        setCollectionDiscount(discount)
       } catch (error) {
         console.error(error)
       } finally {
@@ -391,7 +393,7 @@ export default function ProductPageClient({ params }: Props) {
           >
             ✕
           </button>
-          <div className="relative max-w-3xl w-full max-h-[90vh] aspect-[4/5]" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-3xl w-full max-h-[90vh] aspect-4/5" onClick={(e) => e.stopPropagation()}>
             <Image
               src={selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE}
               alt={product.name}
@@ -444,7 +446,7 @@ export default function ProductPageClient({ params }: Props) {
             {/* Ana görsel — tıklanınca lightbox açılır */}
             <div className="order-1 md:order-2">
               <div
-                className="relative aspect-[4/5] overflow-hidden bg-gray-100 border cursor-zoom-in"
+                className="relative aspect-4/5 overflow-hidden bg-gray-100 border cursor-zoom-in"
                 onClick={() => setLightboxOpen(true)}
                 title="Büyütmek için tıkla"
               >
@@ -588,7 +590,7 @@ export default function ProductPageClient({ params }: Props) {
                         type="button"
                         disabled={isOut}
                         onClick={() => handleSelectSize(variant.size)}
-                        className={`min-w-[64px] px-4 py-3 border text-sm font-medium transition ${
+                        className={`min-w-16 px-4 py-3 border text-sm font-medium transition ${
                           isSelected
                             ? "border-black bg-black text-white"
                             : isOut

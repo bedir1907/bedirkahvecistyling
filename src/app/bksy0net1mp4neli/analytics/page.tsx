@@ -12,42 +12,21 @@ export default async function AdminAnalyticsPage() {
     outOfStockVariants,
     recentOrders,
     topProducts,
+    revenueData,
   ] = await Promise.all([
-    // Toplam sipariş sayısı
     prisma.order.count().catch(() => 0),
-
-    // Ödenen siparişler
     prisma.order.count({ where: { status: "PAID" } }).catch(() => 0),
-
-    // Bekleyen siparişler
     prisma.order.count({ where: { status: "PENDING" } }).catch(() => 0),
-
-    // İptal edilen siparişler
     prisma.order.count({ where: { status: "CANCELLED" } }).catch(() => 0),
-
-    // Aktif ürün sayısı
     prisma.product.count({ where: { isActive: true } }).catch(() => 0),
-
-    // Stokta olmayan varyantlar
     prisma.productVariant.count({ where: { stock: 0 } }).catch(() => 0),
-
-    // Son 10 sipariş
     prisma.order
       .findMany({
         orderBy: { createdAt: "desc" },
         take: 10,
-        select: {
-                  id: true,
-                  orderNumber: true,
-                  name: true,
-                  totalPrice: true,
-                  status: true,
-                  createdAt: true,
-                },
+        select: { id: true, orderNumber: true, name: true, totalPrice: true, status: true, createdAt: true },
       })
       .catch(() => []),
-
-    // En çok satan ürünler (order items üzerinden)
     prisma.orderItem
       .groupBy({
         by: ["productName"],
@@ -56,14 +35,12 @@ export default async function AdminAnalyticsPage() {
         take: 5,
       })
       .catch(() => []),
+    prisma.order
+      .aggregate({ where: { status: "PAID" }, _sum: { totalPrice: true } })
+      .catch(() => ({ _sum: { totalPrice: 0 } })),
   ])
 
-  // Toplam ciro hesapla (sadece PAID siparişler)
-  const revenueData = await prisma.order
-.aggregate({ where: { status: "PAID" }, _sum: { totalPrice: true } })
-.catch(() => ({ _sum: { totalPrice: 0 } }))
-
-const totalRevenue = revenueData._sum.totalPrice ?? 0
+  const totalRevenue = revenueData._sum.totalPrice ?? 0
 
   const statusLabel: Record<string, string> = {
     PAID: "Ödendi",

@@ -61,36 +61,31 @@ export async function GET(_: Request, context: Context) {
       )
     }
 
-    const categoryRecord = await prisma.category.findFirst({
-      where: {
-        name: product.category,
-      },
-      select: {
-        slug: true,
-      },
-    })
-
-    const siblingProducts = product.groupCode
-      ? await prisma.product.findMany({
-          where: {
-            groupCode: product.groupCode,
-            isActive: true,
-            NOT: {
-              id: productId,
+    const [categoryRecord, siblingProducts] = await Promise.all([
+      prisma.category.findFirst({
+        where: { name: product.category },
+        select: { slug: true },
+      }),
+      product.groupCode
+        ? prisma.product.findMany({
+            where: {
+              groupCode: product.groupCode,
+              isActive: true,
+              NOT: { id: productId },
             },
-          },
-          orderBy: [{ color: "asc" }, { id: "asc" }],
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            color: true,
-            image: true,
-            price: true,
-            oldPrice: true,
-          },
-        })
-      : []
+            orderBy: [{ color: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
+              image: true,
+              price: true,
+              oldPrice: true,
+            },
+          })
+        : Promise.resolve([]),
+    ])
 
     return NextResponse.json({
       ...product,

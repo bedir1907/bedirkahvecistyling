@@ -64,19 +64,20 @@ export default function CategoryPageClient({ params }: Props) {
           const data = await prodRes.json()
           const list = Array.isArray(data) ? data : []
           setProducts(list)
+          setLoading(false)
           if (list.length > 0) {
-            const dmRes = await fetch("/api/collections/discount-map", {
+            fetch("/api/collections/discount-map", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ productIds: list.map((p: Product) => p.id) }),
             })
-            const dmData = await dmRes.json()
-            setDiscountMap(dmData.discounts ?? {})
+              .then((r) => r.json())
+              .then((dmData) => setDiscountMap(dmData.discounts ?? {}))
+              .catch(() => {})
           }
           return
         }
 
-        // Slug ile filtrele — API içinde kategori adını bulup eşleştiriyor
         const [categoryRes, productsRes] = await Promise.all([
           fetch(`/api/categories/${slug}`),
           fetch(`/api/products?categorySlug=${encodeURIComponent(slug)}`),
@@ -86,23 +87,24 @@ export default function CategoryPageClient({ params }: Props) {
         if (!categoryRes.ok) throw new Error(categoryData.error || "Kategori bulunamadı")
 
         const productsData = await productsRes.json()
+        const allProducts = Array.isArray(productsData) ? productsData : []
 
         setCategory(categoryData)
-        setProducts(Array.isArray(productsData) ? productsData : [])
+        setProducts(allProducts)
+        setLoading(false)
 
-        const allProducts = Array.isArray(productsData) ? productsData : []
         if (allProducts.length > 0) {
-          const dmRes = await fetch("/api/collections/discount-map", {
+          fetch("/api/collections/discount-map", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ productIds: allProducts.map((p: Product) => p.id) }),
           })
-          const dmData = await dmRes.json()
-          setDiscountMap(dmData.discounts ?? {})
+            .then((r) => r.json())
+            .then((dmData) => setDiscountMap(dmData.discounts ?? {}))
+            .catch(() => {})
         }
       } catch (error) {
         console.error(error)
-      } finally {
         setLoading(false)
       }
     }

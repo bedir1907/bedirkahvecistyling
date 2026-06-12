@@ -94,21 +94,33 @@ export default async function ProductSection({
     )
   )
 
-  const siblingProducts = groupCodes.length
-    ? await prisma.product.findMany({
-        where: {
-          isActive: true,
-          groupCode: { in: groupCodes },
+  if (products.length === 0) return null
+
+  const productIds = products.map((p) => p.id)
+
+  const [siblingProducts, discountCollections] = await Promise.all([
+    groupCodes.length
+      ? prisma.product.findMany({
+          where: { isActive: true, groupCode: { in: groupCodes } },
+          select: { id: true, groupCode: true, color: true, image: true },
+          orderBy: [{ color: "asc" }, { id: "asc" }],
+        })
+      : Promise.resolve([]),
+    prisma.collection.findMany({
+      where: {
+        isActive: true,
+        discount: { not: null },
+        products: { some: { productId: { in: productIds } } },
+      },
+      select: {
+        discount: true,
+        products: {
+          where: { productId: { in: productIds } },
+          select: { productId: true },
         },
-        select: {
-          id: true,
-          groupCode: true,
-          color: true,
-          image: true,
-        },
-        orderBy: [{ color: "asc" }, { id: "asc" }],
-      })
-    : []
+      },
+    }),
+  ])
 
   const siblingMap = new Map<string, SiblingColorItem[]>()
   for (const sibling of siblingProducts) {
@@ -118,24 +130,6 @@ export default async function ProductSection({
     current.push({ id: sibling.id, color: sibling.color, image: sibling.image })
     siblingMap.set(key, current)
   }
-
-  if (products.length === 0) return null
-
-  const productIds = products.map((p) => p.id)
-  const discountCollections = await prisma.collection.findMany({
-    where: {
-      isActive: true,
-      discount: { not: null },
-      products: { some: { productId: { in: productIds } } },
-    },
-    select: {
-      discount: true,
-      products: {
-        where: { productId: { in: productIds } },
-        select: { productId: true },
-      },
-    },
-  })
 
   const discountMap = new Map<number, number>()
   for (const col of discountCollections) {
