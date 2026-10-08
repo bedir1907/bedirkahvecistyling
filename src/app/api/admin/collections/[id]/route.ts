@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { cleanSeoText } from "@/lib/seo"
 
 type Context = { params: Promise<{ id: string }> }
 
@@ -37,7 +38,7 @@ export async function PATCH(request: Request, context: Context) {
 
     const { id } = await context.params
     const body = await request.json()
-    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
+    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds, metaTitle, metaDescription } = body
 
     const safeProductIds: number[] = Array.isArray(productIds) ? productIds.map(Number).filter(Number.isFinite) : []
 
@@ -56,6 +57,8 @@ export async function PATCH(request: Request, context: Context) {
         isActive: Boolean(isActive),
         showOnHome: Boolean(showOnHome),
         displayOrder: Number(displayOrder || 0),
+        metaTitle: metaTitle !== undefined ? cleanSeoText(metaTitle, 200) : undefined,
+        metaDescription: metaDescription !== undefined ? cleanSeoText(metaDescription, 500) : undefined,
         products: {
           deleteMany: {},
           create: safeProductIds.map((productId) => ({ productId })),
@@ -67,6 +70,7 @@ export async function PATCH(request: Request, context: Context) {
     })
 
     revalidatePath("/")
+    revalidatePath("/collections/[slug]", "page")
     return NextResponse.json(collection)
   } catch (error) {
     console.error("Koleksiyon güncelleme hatası:", error)
@@ -85,6 +89,7 @@ export async function DELETE(_: Request, context: Context) {
     await prisma.collection.delete({ where: { id: Number(id) } })
 
     revalidatePath("/")
+    revalidatePath("/collections/[slug]", "page")
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Koleksiyon silme hatası:", error)

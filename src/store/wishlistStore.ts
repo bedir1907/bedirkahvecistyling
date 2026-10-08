@@ -5,6 +5,8 @@ import { persist } from "zustand/middleware"
 
 export type WishlistItem = {
   productId: number
+  /** Ürün URL slug'ı (eski kayıtlarda yok → /product/{id} yönlendirmesiyle açılır) */
+  slug?: string
   name: string
   price: number
   oldPrice: number | null
@@ -50,6 +52,16 @@ export const useWishlistStore = create<WishlistState>()(
     }),
     {
       name: "wishlist-storage",
+      version: 1,
+      // Eski/yabancı kayıtlar: yalnızca geçerli productId'li öğeleri koru
+      migrate: (persisted) => {
+        const items = (persisted as { wishlist?: unknown } | null)?.wishlist
+        return {
+          wishlist: Array.isArray(items)
+            ? items.filter((i): i is WishlistItem => typeof i?.productId === "number")
+            : [],
+        } as { wishlist: WishlistItem[] }
+      },
     }
   )
 )

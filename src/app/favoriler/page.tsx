@@ -5,6 +5,7 @@ import Image from "next/image"
 import StoreFooter from "@/components/store/StoreFooter"
 import { useWishlistStore } from "@/store/wishlistStore"
 import { formatPrice } from "@/lib/format"
+import { productPath } from "@/lib/product-url"
 
 export default function FavoritesPage() {
   const wishlist = useWishlistStore((state) => state.wishlist)
@@ -39,7 +40,7 @@ export default function FavoritesPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {wishlist.map((item) => (
               <div key={item.productId} className="group relative">
-                <Link href={`/product/${item.productId}`} className="block">
+                <Link href={productPath(item.slug, item.productId)} className="block">
                   <div className="relative aspect-[4/5] overflow-hidden bg-gray-100 border">
                     <Image
                       src={item.image}

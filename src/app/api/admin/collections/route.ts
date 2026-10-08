@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { cleanSeoText } from "@/lib/seo"
 
 export async function GET() {
   try {
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds } = body
+    const { name, slug, eyebrow, description, image, video, buttonText, buttonLink, discount, isActive, showOnHome, displayOrder, productIds, metaTitle, metaDescription } = body
 
     const collection = await prisma.collection.create({
       data: {
@@ -54,6 +55,8 @@ export async function POST(request: Request) {
         isActive: Boolean(isActive ?? true),
         showOnHome: Boolean(showOnHome ?? false),
         displayOrder: Number(displayOrder || 0),
+        metaTitle: metaTitle !== undefined ? cleanSeoText(metaTitle, 200) : undefined,
+        metaDescription: metaDescription !== undefined ? cleanSeoText(metaDescription, 500) : undefined,
         products: {
           create: (productIds as number[]).map((productId) => ({ productId })),
         },
@@ -64,6 +67,7 @@ export async function POST(request: Request) {
     })
 
     revalidatePath("/")
+    revalidatePath("/collections/[slug]", "page")
     return NextResponse.json(collection, { status: 201 })
   } catch (error) {
     console.error("Koleksiyon oluşturma hatası:", error)

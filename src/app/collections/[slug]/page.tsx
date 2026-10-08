@@ -1,169 +1,94 @@
-"use client"
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import JsonLd from "@/components/seo/JsonLd"
+import { getCollectionProducts, getCollectionRecord } from "@/lib/catalog"
+import { sortListingProducts } from "@/lib/listing-sort"
+import {
+  breadcrumbJsonLd,
+  collectionPageJsonLd,
+  collectionPath,
+  customTitle,
+  pageMetadata,
+  SITE_NAME,
+  truncateDescription,
+} from "@/lib/seo"
+import CollectionPageClient from "./CollectionPageClient"
 
-import { use, useEffect, useState } from "react"
-import Link from "next/link"
-import ProductCard from "@/components/ProductCard"
-import StoreFooter from "@/components/store/StoreFooter"
-import AutoplayVideo from "@/components/store/AutoplayVideo"
+export const revalidate = 60
 
-type Product = {
-  id: number
-  name: string
-  price: number
-  oldPrice: number | null
-  image: string
-  category: string
-  isActive: boolean
+// Build'de sayfa üretilmez (DB gerekmez); ilk istekte render edilip 60 sn ISR önbelleğinde tutulur.
+export function generateStaticParams() {
+  return []
 }
 
-type Collection = {
-  id: number
-  name: string
-  slug: string
-  description: string | null
-  image: string | null
-  video: string | null
-  discount: number | null
+type Props = {
+  params: Promise<{ slug: string }>
 }
 
-type Props = { params: Promise<{ slug: string }> }
+function autoTitle(name: string) {
+  return /koleksiyon/i.test(name) ? name : `${name} Koleksiyonu`
+}
 
-export default function CollectionPage({ params }: Props) {
-  const { slug } = use(params)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const [collection, products] = await Promise.all([getCollectionRecord(slug), getCollectionProducts(slug)])
 
-  const [collection, setCollection] = useState<Collection | null>(null)
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
-  const [sort, setSort] = useState("new")
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch(`/api/collections/${slug}`)
-        if (!res.ok) { setNotFound(true); return }
-        const data = await res.json()
-        setCollection(data.collection)
-        setProducts(data.products.filter((p: Product) => p.isActive))
-      } catch {
-        setNotFound(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [slug])
-
-  const sorted = [...products].sort((a, b) => {
-    if (sort === "price-asc") return a.price - b.price
-    if (sort === "price-desc") return b.price - a.price
-    return b.id - a.id
-  })
-
-  if (notFound) {
-    return (
-      <main className="min-h-screen bg-white text-black flex flex-col items-center justify-center gap-4">
-        <p className="text-2xl font-semibold">Koleksiyon bulunamadı</p>
-        <Link href="/" className="px-6 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
-          Anasayfaya Dön
-        </Link>
-      </main>
-    )
+  if (!collection) {
+    return { title: "Koleksiyon Bulunamadı", robots: { index: false, follow: true } }
   }
 
+  const customMetaTitle = collection.metaTitle?.trim()
+  const title = customMetaTitle || autoTitle(collection.name)
+  const description =
+    truncateDescription(collection.metaDescription) ||
+    truncateDescription(collection.description) ||
+    truncateDescription(`${collection.name} koleksiyonu: ${SITE_NAME} seçkisiyle modern erkek giyim ürünlerini keşfet.`)
+
+  const metadata = pageMetadata({
+    title,
+    description,
+    path: collectionPath(slug),
+    images: collection.image ? [{ url: collection.image, alt: collection.name }] : undefined,
+  })
+
+  const withTitle = customMetaTitle ? { ...metadata, title: customTitle(customMetaTitle) } : metadata
+  // Ürünsüz koleksiyon = zayıf içerik → indekslenmez (ürün eklenince otomatik açılır; sitemap'te de yok)
+  return products.length === 0 ? { ...withTitle, robots: { index: false, follow: true } } : withTitle
+}
+
+export default async function CollectionPage({ params }: Props) {
+  const { slug } = await params
+  const [collection, products] = await Promise.all([getCollectionRecord(slug), getCollectionProducts(slug)])
+
+  if (!collection) notFound()
+
+  const path = collectionPath(slug)
+
   return (
-    <main className="min-h-screen bg-white text-black">
-      {/* Başlık bandı */}
-      <section className="relative w-full bg-[#f7f7f5] border-b overflow-hidden">
-        {collection?.video ? (
-          <AutoplayVideo src={collection.video} />
-        ) : collection?.image ? (
-          <img
-            src={collection.image}
-            alt={collection.name ?? ""}
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
-          />
-        ) : null}
-        {(collection?.video || collection?.image) && <div className="absolute inset-0 bg-black/50" />}
-        <div className={`relative max-w-7xl mx-auto px-4 py-14 md:py-20 ${(collection?.video || collection?.image) ? "text-white" : "text-black"}`}>
-          <div className="text-sm mb-4 flex flex-wrap items-center gap-2 opacity-70">
-            <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
-            <span>/</span>
-            <span>Koleksiyon</span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${(collection?.video || collection?.image) ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
-                Koleksiyon
-              </p>
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                {loading ? <span className="opacity-30">Yükleniyor...</span> : collection?.name || slug}
-              </h1>
-              {collection?.description && (
-                <p className={`mt-3 text-lg max-w-xl ${(collection?.video || collection?.image) ? "text-white/80" : "text-gray-500"}`}>
-                  {collection.description}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Ürünler */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          {!loading && (
-            <p className="text-sm text-gray-500">{sorted.length} ürün</p>
-          )}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="border border-black/10 px-4 py-2.5 text-sm focus:outline-none ml-auto"
-          >
-            <option value="new">En Yeniler</option>
-            <option value="price-asc">Fiyat Artan</option>
-            <option value="price-desc">Fiyat Azalan</option>
-          </select>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-gray-200 aspect-3/4" />
-                <div className="mt-3 space-y-2">
-                  <div className="h-3 bg-gray-200 rounded w-2/3" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : sorted.length === 0 ? (
-          <div className="border border-dashed p-16 text-center">
-            <p className="text-gray-400 text-lg mb-4">Bu koleksiyonda henüz ürün yok.</p>
-            <Link href="/" className="inline-flex px-6 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
-              Anasayfaya Dön
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {sorted.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                oldPrice={product.oldPrice}
-                image={product.image}
-                href={`/product/${product.id}`}
-                collectionDiscount={collection?.discount ?? null}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <StoreFooter />
-    </main>
+    <>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Anasayfa", path: "/" },
+            { name: collection.name, path },
+          ]),
+          collectionPageJsonLd({
+            name: collection.name,
+            description: truncateDescription(collection.metaDescription || collection.description),
+            path,
+            items: sortListingProducts(products, "new").map((p) => ({ name: p.name, path: p.path, image: p.image })),
+          }),
+        ]}
+      />
+      <CollectionPageClient
+        collection={{
+          name: collection.name,
+          description: collection.description,
+          image: collection.image,
+          video: collection.video,
+        }}
+        products={products}
+      />
+    </>
   )
 }

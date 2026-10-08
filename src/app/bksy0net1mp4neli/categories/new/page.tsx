@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
 import { slugify } from "@/lib/slugify"
+import SeoMetaFields from "@/components/admin/SeoMetaFields"
 
 export default function NewCategoryPage() {
   const router = useRouter()
@@ -17,6 +18,10 @@ export default function NewCategoryPage() {
     isFeatured: false,
     isActive: true,
     displayOrder: "0",
+    description: "",
+    heading: "",
+    metaTitle: "",
+    metaDescription: "",
   })
 
   const [loading, setLoading] = useState(false)
@@ -144,6 +149,50 @@ export default function NewCategoryPage() {
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-sm text-gray-500">Henüz video seçilmedi.</div>
             )}
+          </div>
+
+          <div className="border-t pt-5 space-y-5">
+            <div>
+              <h2 className="text-lg font-semibold">SEO</h2>
+              <p className="text-sm text-gray-500">Kategori sayfasının Google ve diğer arama motorlarındaki görünümü.</p>
+            </div>
+
+            <div>
+              <label htmlFor="category-heading" className="block mb-2 font-medium">Sayfa başlığı (H1)</label>
+              <input
+                id="category-heading"
+                value={form.heading}
+                onChange={(e) => setForm((prev) => ({ ...prev, heading: e.target.value }))}
+                maxLength={120}
+                className="w-full border rounded px-4 py-3"
+                placeholder={form.name ? `Ör. Erkek ${form.name} Modelleri` : "Otomatik"}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Kategori sayfasındaki ana başlık. Boş bırakılırsa kategori adı kullanılır.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="category-description" className="block mb-2 font-medium">Kategori açıklaması (SEO metni)</label>
+              <textarea
+                id="category-description"
+                value={form.description}
+                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                rows={6}
+                className="w-full border rounded px-4 py-3 resize-y"
+                placeholder={`Ör. ${form.name || "Kategori"} modellerimiz sezonun öne çıkan kesim ve kumaşlarıyla...`}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Kategori sayfasında ürünlerin altında gösterilir (2–4 paragraf önerilir). Paragrafları boş satırla ayırın. Boş bırakılırsa metin bölümü gösterilmez.
+              </p>
+            </div>
+
+            <SeoMetaFields
+              values={form}
+              onChange={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
+              titlePlaceholder={form.name ? `${form.name} - Erkek ${form.name} Modelleri`.replace(/Erkek Erkek /i, "Erkek ") : "Otomatik"}
+              descriptionPlaceholder={form.name ? `${form.name} modelleri ve fiyatları. Bedir Kahveci Styling ${form.name} kategorisindeki erkek giyim ürünlerini keşfet...` : "Otomatik"}
+            />
           </div>
 
           <div>

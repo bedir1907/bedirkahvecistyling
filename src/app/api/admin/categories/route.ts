@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { slugify } from "@/lib/slugify"
+import { cleanSeoText } from "@/lib/seo"
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +24,10 @@ export async function POST(request: Request) {
         isFeatured: Boolean(body.isFeatured),
         isActive: Boolean(body.isActive),
         displayOrder: Number(body.displayOrder || 0),
+        description: body.description !== undefined ? cleanSeoText(body.description, 10000) : undefined,
+        heading: body.heading !== undefined ? cleanSeoText(body.heading, 120) : undefined,
+        metaTitle: body.metaTitle !== undefined ? cleanSeoText(body.metaTitle, 200) : undefined,
+        metaDescription: body.metaDescription !== undefined ? cleanSeoText(body.metaDescription, 500) : undefined,
       },
     })
 

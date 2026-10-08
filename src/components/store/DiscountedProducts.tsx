@@ -1,6 +1,7 @@
 import SectionHeader from "@/components/store/SectionHeader"
 import ProductSlider, { type SliderProduct } from "@/components/store/ProductSlider"
 import { prisma } from "@/lib/prisma"
+import { productPath } from "@/lib/product-url"
 
 type Props = {
   title?: string
@@ -18,10 +19,20 @@ export default async function DiscountedProducts({ title = "İndirimdekiler", vi
     where: { isActive: true, oldPrice: { not: null } },
     orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
     take: 12,
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      price: true,
+      oldPrice: true,
+      image: true,
+      color: true,
+      category: true,
+      groupCode: true,
       images: {
         orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
         take: 2,
+        select: { url: true },
       },
     },
   })
@@ -105,7 +116,7 @@ export default async function DiscountedProducts({ title = "İndirimdekiler", vi
             image: product.images?.[0]?.url || product.image,
             colorName: product.color || "",
             category: product.category,
-            href: `/product/${product.id}`,
+            href: productPath(product.slug, product.id),
             colors,
             collectionDiscount: discountMap.get(product.id) ?? null,
           }

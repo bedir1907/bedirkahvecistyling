@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
-import { slugify } from "@/lib/slugify"
+import ProductSeoFields from "@/components/admin/ProductSeoFields"
+import { buildProductSlug, normalizeSlugInput } from "@/lib/product-url"
 
 type Category = {
   id: number
@@ -18,6 +19,8 @@ export default function NewProductPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  // Slug elle değiştirilene kadar ad + renkten otomatik üretilir
+  const [slugTouched, setSlugTouched] = useState(false)
 
   const [form, setForm] = useState({
     productCode: "",
@@ -30,6 +33,8 @@ export default function NewProductPage() {
     image: "",
     category: "",
     description: "",
+    metaTitle: "",
+    metaDescription: "",
     featured: false,
     isNew: false,
     isActive: true,
@@ -54,13 +59,18 @@ export default function NewProductPage() {
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value
-    setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
+    setForm((prev) => ({ ...prev, name: value, slug: slugTouched ? prev.slug : buildProductSlug(value) }))
   }
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name, value, type } = e.target
+    if (name === "slug") {
+      setSlugTouched(value.trim() !== "")
+      setForm((prev) => ({ ...prev, slug: normalizeSlugInput(value) }))
+      return
+    }
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked
       setForm((prev) => ({ ...prev, [name]: checked }))
@@ -89,6 +99,8 @@ export default function NewProductPage() {
           image: form.image,
           category: form.category,
           description: form.description,
+          metaTitle: form.metaTitle,
+          metaDescription: form.metaDescription,
           featured: form.featured,
           isNew: form.isNew,
           isActive: form.isActive,
@@ -194,8 +206,10 @@ export default function NewProductPage() {
                 onChange={handleChange}
                 className={inputCls}
                 placeholder="otomatik oluşur"
-                required
               />
+              <p className="text-xs text-gray-400 mt-1 break-all">
+                Ürün adresi: /urun/{form.slug || "…"} — aynı adlı başka ürün varsa sonuna renk eklenir
+              </p>
             </div>
 
             <div>
@@ -240,6 +254,17 @@ export default function NewProductPage() {
               placeholder="Ürün açıklaması..."
             />
           </div>
+        </div>
+
+        {/* Arama motoru (SEO) */}
+        <div className="bg-white border rounded-2xl p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">Arama Motoru (SEO)</h2>
+          <ProductSeoFields
+            metaTitle={form.metaTitle}
+            metaDescription={form.metaDescription}
+            onChange={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
+            inputClassName={inputCls}
+          />
         </div>
 
         {/* Fiyat */}

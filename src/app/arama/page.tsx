@@ -8,6 +8,7 @@ import StoreFooter from "@/components/store/StoreFooter"
 
 type Product = {
   id: number
+  slug: string
   name: string
   price: number
   oldPrice: number | null
@@ -90,6 +91,7 @@ function SearchContent() {
               <ProductCard
                 key={product.id}
                 id={product.id}
+                slug={product.slug}
                 name={product.name}
                 price={product.price}
                 oldPrice={product.oldPrice}

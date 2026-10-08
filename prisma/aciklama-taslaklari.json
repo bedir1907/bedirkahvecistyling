@@ -1,0 +1,8 @@
+{
+  "_not": "Açıklaması boş ürünler için TASLAK. Kumaş/kalıp bilgisini kontrol edip düzeltin, sonra: npx tsx prisma/apply-descriptions.ts (yalnızca açıklaması hâlâ boş olan ürünlere yazar).",
+  "byGroupCode": {
+    "RESPİRE": "Rahat oversize kesimiyle günlük stilin vazgeçilmezi olan erkek tişört. Düşük omuz ve bol kalıbı sayesinde gün boyu ferah bir kullanım sunar. Baggy pantolon, eşofman altı ya da jean ile kolayca kombinlenir; tek başına ya da gömlek altında katmanlı kullanıma uygundur. Sade tasarımı ile her gardırobun temel parçalarından biridir.",
+    "RETRO1": "Modern ve rahat tarzı bir araya getiren baggy fit kumaş pantolon. Dökümlü kumaşı sayesinde gün boyu konfor sağlarken, geniş kesimi ile özgür bir hareket alanı sunar. Günlük kombinlerden özel davetlere kadar farklı stillere kolayca uyum sağlayan zamansız bir parçadır.",
+    "RTR10": "Müslim keten kumaştan üretilen çizgili erkek gömlek. Nefes alan keten dokusu sıcak günlerde ferah bir kullanım sağlarken, çizgili deseni kombinlere klasik ve şık bir hava katar. Kumaş pantolon ya da baggy kesimlerle, içine tişört alarak açık veya düğmeli şekilde rahatça kullanılabilir."
+  }
+}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
 
 type Category = {
@@ -251,6 +252,9 @@ export default function AdminCategoriesPage() {
                       <button type="button" onClick={() => startEdit(cat)} className="text-xs border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
                         Düzenle
                       </button>
+                      <Link href={`/bksy0net1mp4neli/categories/${cat.id}/edit`} title="Açıklama metni ve meta alanları" className="text-xs border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">
+                        SEO
+                      </Link>
                       <button type="button" onClick={() => deleteCategory(cat.id)} className="text-xs border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition">
                         Sil
                       </button>
@@ -360,6 +364,7 @@ export default function AdminCategoriesPage() {
                         ) : (
                           <>
                             <button type="button" onClick={() => startEdit(cat)} className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">Düzenle</button>
+                            <Link href={`/bksy0net1mp4neli/categories/${cat.id}/edit`} title="Açıklama metni ve meta alanları" className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-900 hover:text-white hover:border-gray-900 transition">SEO</Link>
                             <button type="button" onClick={() => deleteCategory(cat.id)} className="text-sm border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition">Sil</button>
                           </>
                         )}

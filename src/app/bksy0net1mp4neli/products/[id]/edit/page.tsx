@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
-import { slugify } from "@/lib/slugify"
+import ProductSeoFields from "@/components/admin/ProductSeoFields"
+import { buildProductSlug, normalizeSlugInput, productPath } from "@/lib/product-url"
 
 type Category = { id: number; name: string; slug: string }
 type ProductVariant = { id: number | string; size: string; stock: number; sku?: string | null }
@@ -57,6 +58,8 @@ export default function EditProductPage({ params }: Props) {
   const [siblings, setSiblings] = useState<SiblingProduct[]>([])
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [sizeType, setSizeType] = useState<"letter" | "number" | "custom">("letter")
+  // Kayıtlı slug — değiştirilirse eski ürün linki kırılacağı için uyarı gösterilir
+  const [savedSlug, setSavedSlug] = useState("")
 
   const [form, setForm] = useState({
     productCode: "",
@@ -69,6 +72,8 @@ export default function EditProductPage({ params }: Props) {
     image: "",
     category: "",
     description: "",
+    metaTitle: "",
+    metaDescription: "",
     featured: false,
     isNew: false,
     isActive: true,
@@ -91,6 +96,7 @@ export default function EditProductPage({ params }: Props) {
         const pvs = Array.isArray(product.productVariants) ? product.productVariants : []
         const st = detectSizeType(pvs)
         setSizeType(st)
+        setSavedSlug(product.slug ?? "")
         setVariants(sortVariants(pvs, st))
         setForm({
           productCode: product.productCode ?? "",
@@ -103,6 +109,8 @@ export default function EditProductPage({ params }: Props) {
           image: product.image ?? "",
           category: product.category ?? "",
           description: product.description ?? "",
+          metaTitle: product.metaTitle ?? "",
+          metaDescription: product.metaDescription ?? "",
           featured: Boolean(product.featured),
           isNew: Boolean(product.isNew),
           isActive: Boolean(product.isActive),
@@ -128,8 +136,9 @@ export default function EditProductPage({ params }: Props) {
       setForm((prev) => ({ ...prev, productCode: value.replace(/\D/g, "") }))
       return
     }
-    if (name === "name") {
-      setForm((prev) => ({ ...prev, name: value, slug: slugify(value) }))
+    // Ad değişince slug otomatik DEĞİŞMEZ (ürün adresi sabit kalsın); gerekirse "Ad + renkten üret" kullanılır.
+    if (name === "slug") {
+      setForm((prev) => ({ ...prev, slug: normalizeSlugInput(value) }))
       return
     }
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -218,6 +227,16 @@ export default function EditProductPage({ params }: Props) {
           <p className="text-sm text-gray-500 mt-0.5">{form.name || "—"}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {savedSlug && (
+            <a
+              href={productPath(savedSlug)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm border border-gray-300 px-3 py-2 rounded-xl hover:bg-gray-900 hover:text-white hover:border-gray-900 transition"
+            >
+              Sitede Gör
+            </a>
+          )}
           <Link
             href={`/bksy0net1mp4neli/products/${id}/images`}
             className="text-sm border border-gray-300 px-3 py-2 rounded-xl hover:bg-gray-900 hover:text-white hover:border-gray-900 transition"
@@ -262,9 +281,25 @@ export default function EditProductPage({ params }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-            <input name="slug" value={form.slug} onChange={handleChange} required
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Slug (ürün adresi)</label>
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, slug: buildProductSlug(prev.name, prev.color) }))}
+                className="text-xs text-gray-500 underline underline-offset-2 hover:text-black"
+              >
+                Ad + renkten üret
+              </button>
+            </div>
+            <input name="slug" value={form.slug} onChange={handleChange}
+              placeholder="boş bırakılırsa ad + renkten oluşturulur"
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
+            <p className="text-xs text-gray-400 mt-1 break-all">/urun/{form.slug || "…"}</p>
+            {savedSlug && form.slug.replace(/-+$/, "") !== savedSlug && (
+              <p className="text-xs text-orange-700 mt-1">
+                Dikkat: Slug değişirse eski adres (/urun/{savedSlug}) çalışmaz; Google&apos;daki ve paylaşılmış linkler 404 olur.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -305,6 +340,15 @@ export default function EditProductPage({ params }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
             <textarea name="description" value={form.description} onChange={handleChange}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 min-h-25 resize-none" />
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-semibold text-gray-800 mb-3">Arama Motoru (SEO)</h3>
+            <ProductSeoFields
+              metaTitle={form.metaTitle}
+              metaDescription={form.metaDescription}
+              onChange={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
+            />
           </div>
 
           <div className="flex flex-wrap gap-5 pt-1">

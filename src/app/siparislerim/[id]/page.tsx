@@ -9,6 +9,7 @@ import {
   getStatusLabel,
 } from "@/lib/order-status"
 import AccountShell from "@/components/account/AccountShell"
+import { productPath } from "@/lib/product-url"
 
 type Props = {
   params: Promise<{
@@ -68,6 +69,18 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const displayStatus = getDisplayStatus(order.status, order.createdAt)
 
+  const productIds = [...new Set(order.items.map((item) => item.productId))]
+  const productSlugs = new Map(
+    productIds.length > 0
+      ? (
+          await prisma.product.findMany({
+            where: { id: { in: productIds } },
+            select: { id: true, slug: true },
+          })
+        ).map((p) => [p.id, p.slug] as const)
+      : []
+  )
+
   return (
     <AccountShell current="orders">
       <div className="flex items-center justify-between gap-4">
@@ -122,7 +135,7 @@ export default async function OrderDetailPage({ params }: Props) {
               className="border border-black/10 bg-white p-4 flex items-start justify-between gap-4"
             >
               <div>
-                <Link href={`/product/${item.productId}`} className="font-medium hover:underline">{item.productName}</Link>
+                <Link href={productPath(productSlugs.get(item.productId), item.productId)} className="font-medium hover:underline">{item.productName}</Link>
                 <div className="text-sm text-gray-500 mt-1">
                   Renk: {item.color || "-"} • Beden: {item.size || "-"}
                 </div>

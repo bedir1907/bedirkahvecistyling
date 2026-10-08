@@ -1,6 +1,13 @@
+import type { Metadata } from "next"
 import { ReactNode } from "react"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import AdminSidebar from "@/components/admin/AdminSidebar"
+
+// Yönetim paneli asla indekslenmez (robots.txt'de yol ifşa edilmeden meta ile engellenir).
+export const metadata: Metadata = {
+  title: "Yönetim Paneli",
+  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
+}
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await getAdminUserFromCookie()

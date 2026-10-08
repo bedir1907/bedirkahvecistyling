@@ -2,7 +2,9 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { imageLoaderFor } from "@/lib/cloudinary-image"
 import { formatPrice } from "@/lib/format"
+import { productPath } from "@/lib/product-url"
 
 type CardColor = {
   id: number
@@ -12,6 +14,8 @@ type CardColor = {
 
 type Props = {
   id?: number
+  /** Ürün slug'ı — link `/urun/{slug}` olur. `href` verilirse o kullanılır. */
+  slug?: string | null
   name: string
   price: number
   oldPrice?: number | null
@@ -28,6 +32,7 @@ const FALLBACK_IMAGE =
 
 export default function ProductCard({
   id,
+  slug,
   name,
   price,
   oldPrice,
@@ -38,7 +43,7 @@ export default function ProductCard({
   colors = [],
   collectionDiscount,
 }: Props) {
-  const productHref = href || `/product/${id}`
+  const productHref = href || productPath(slug, id)
   const safeImage = image && image.trim().length > 0 ? image : FALLBACK_IMAGE
   const safeName = name && name.trim().length > 0 ? name : "Ürün"
 
@@ -55,6 +60,7 @@ export default function ProductCard({
         <div className="relative overflow-hidden bg-gray-100 aspect-3/4">
           <Image
             src={safeImage}
+            loader={imageLoaderFor(safeImage)}
             alt={safeName}
             fill
             sizes="(max-width: 640px) 73vw, (max-width: 768px) 46vw, 25vw"
@@ -103,12 +109,15 @@ export default function ProductCard({
                   className="relative w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden border-2 border-white bg-gray-100 shadow-sm"
                   title={item.color || "Renk"}
                 >
+                  {/* Sabit boyut: srcset yalnızca 1x/2x üretir (fill + sizes tüm genişlikleri basıp HTML'i şişiriyordu).
+                      Dekoratif — renk sayısı yanında metin olarak var. */}
                   <Image
                     src={item.image || FALLBACK_IMAGE}
-                    alt={item.color || "Renk"}
-                    fill
-                    className="object-cover"
-                    sizes="28px"
+                    loader={imageLoaderFor(item.image)}
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="w-full h-full object-cover"
                   />
                 </span>
               ))}

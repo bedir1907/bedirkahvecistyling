@@ -1,10 +1,14 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import StoreFooter from "@/components/store/StoreFooter"
+import { pageMetadata } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "KVKK Aydınlatma Metni",
-  description: "Bedir Kahveci Styling kişisel verilerin korunması aydınlatma metni.",
-}
+  description:
+    "Bedir Kahveci Styling KVKK aydınlatma metni: kişisel verilerinizin hangi amaçlarla işlendiği, kimlerle paylaşıldığı ve 6698 sayılı Kanun kapsamındaki haklarınız.",
+  path: "/kvkk",
+})
 
 export default function KvkkPage() {
   return (

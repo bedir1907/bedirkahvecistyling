@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { preload } from "react-dom"
+import { optimizedImageUrl } from "@/lib/cloudinary-image"
 
 type HomepageSettings = {
   heroEyebrow: string
@@ -26,6 +28,9 @@ type HeroCard = {
   image: string | null
   link: string | null
 }
+
+/** Hero kartı görsel genişliği (masaüstünde ~450px kart × 2x ekran) */
+const HERO_CARD_WIDTH = 900
 
 export default function HeroSection({ initialSettings }: { initialSettings: HomepageSettings | null }) {
   const [settings] = useState<HomepageSettings | null>(initialSettings)
@@ -135,6 +140,11 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
   }
 
   const activeCard = cards[safeCardIndex] || null
+
+  // Hero kartı genelde LCP öğesi: CSS arka planı geç keşfedilir → ilk HTML'de yüksek öncelikli preload
+  if (cards[0]?.image) {
+    preload(optimizedImageUrl(cards[0].image, HERO_CARD_WIDTH), { as: "image", fetchPriority: "high" })
+  }
   const heroButtonLink =
     settings?.heroButtonLink && settings.heroButtonLink.trim().length > 0
       ? settings.heroButtonLink
@@ -204,7 +214,7 @@ export default function HeroSection({ initialSettings }: { initialSettings: Home
                       className="aspect-[4/5] bg-gray-200 bg-cover bg-center relative overflow-hidden animate-[heroFadeIn_.35s_ease]"
                       style={
                         activeCard.image
-                          ? { backgroundImage: `url(${activeCard.image})` }
+                          ? { backgroundImage: `url(${optimizedImageUrl(activeCard.image, HERO_CARD_WIDTH)})` }
                           : undefined
                       }
                     >

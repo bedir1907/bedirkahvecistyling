@@ -1,10 +1,14 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import StoreFooter from "@/components/store/StoreFooter"
+import { pageMetadata } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Mesafeli Satış Ön Bilgilendirme Formu",
-  description: "Bedir Kahveci Styling mesafeli satış ön bilgilendirme formu.",
-}
+  description:
+    "Bedir Kahveci Styling mesafeli satış ön bilgilendirme formu: satıcı bilgileri, ürün ve ödeme koşulları, teslimat ve cayma hakkına ilişkin ön bilgiler.",
+  path: "/mesafeli-satis-on-bilgilendirme",
+})
 
 export default function OnBilgilendirmePage() {
   return (

@@ -139,3 +139,82 @@ body {
 .search-modal-panel {
   animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Logo loader */
+.bk-loader {
+  opacity: 0;
+  animation: bk-loader-in 0.4s ease-out 0.15s forwards;
+}
+
+.bk-loader-orbit {
+  transform-origin: 180px 180px;
+  animation: bk-loader-orbit 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.bk-loader-stroke {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bk-loader-draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.bk-loader-text {
+  animation: bk-loader-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes bk-loader-in {
+  to { opacity: 1; }
+}
+
+@keyframes bk-loader-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bk-loader-draw {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  45%, 75% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes bk-loader-breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bk-loader,
+  .bk-loader-orbit,
+  .bk-loader-stroke,
+  .bk-loader-text {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Giriş splash'ı (oturum başına bir kez; bkz. IntroSplash.tsx) */
+.bk-intro-splash {
+  display: none;
+}
+
+html.bk-intro .bk-intro-splash {
+  display: flex;
+  animation: bk-intro-out 0.45s ease 1.4s forwards;
+}
+
+/* Splash kısa sürdüğü için harfler daha hızlı çizilir (kaybolmadan önce tamamlansın) */
+.bk-intro-splash .bk-loader-stroke {
+  animation-duration: 1.8s;
+}
+
+@keyframes bk-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.bk-intro .bk-intro-splash {
+    animation-delay: 0.3s;
+  }
+}

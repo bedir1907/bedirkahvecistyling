@@ -6,6 +6,7 @@ import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
 import { useEffect, useMemo, useState } from "react"
 import { formatPrice } from "@/lib/format"
+import { productPath } from "@/lib/product-url"
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1200&q=80&auto=format&fit=crop"
@@ -100,7 +101,7 @@ export default function CartPage() {
               <Link href="/" className="inline-flex items-center justify-center px-8 py-3 bg-black text-white text-sm font-medium hover:opacity-90 transition">
                 Alışverişe Başla
               </Link>
-              <Link href="/kategoriler" className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-sm font-medium hover:bg-gray-50 transition">
+              <Link href="/category/new-season" className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-sm font-medium hover:bg-gray-50 transition">
                 Kategorilere Bak
               </Link>
             </div>
@@ -112,14 +113,14 @@ export default function CartPage() {
               {cart.map((item) => (
                 <div key={`${item.productId}-${item.variantId}`} className="border bg-white p-5 md:p-6">
                   <div className="flex flex-col sm:flex-row gap-5">
-                    <Link href={`/product/${item.productId}`} className="relative w-full sm:w-[130px] h-[160px] sm:h-[130px] shrink-0 overflow-hidden bg-gray-100 block">
+                    <Link href={productPath(item.slug, item.productId)} className="relative w-full sm:w-[130px] h-[160px] sm:h-[130px] shrink-0 overflow-hidden bg-gray-100 block">
                       <Image src={item.image || FALLBACK_IMAGE} alt={item.name} fill className="object-cover" />
                     </Link>
 
                     <div className="flex-1">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div>
-                          <Link href={`/product/${item.productId}`} className="text-lg font-semibold hover:underline">{item.name}</Link>
+                          <Link href={productPath(item.slug, item.productId)} className="text-lg font-semibold hover:underline">{item.name}</Link>
                           <p className="text-gray-600 mt-1">{formatPrice(item.price)}</p>
                           <p className="text-sm text-gray-500 mt-2">
                             Renk: {item.color} • Beden: {item.size}

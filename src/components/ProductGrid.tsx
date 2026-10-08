@@ -5,7 +5,8 @@ export default async function ProductGrid() {
   const products = await prisma.product.findMany({
     orderBy: {
       id: "asc",
-          },
+    },
+    select: { id: true, slug: true, name: true, price: true, image: true },
   })
 
   return (
@@ -14,6 +15,7 @@ export default async function ProductGrid() {
         <ProductCard
           key={product.id}
           id={product.id}
+          slug={product.slug}
           name={product.name}
           price={product.price}
           image={product.image}

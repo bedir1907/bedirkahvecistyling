@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { productPath } from "@/lib/product-url"
 
 export async function GET() {
   try {
@@ -11,10 +12,19 @@ export async function GET() {
         },
       },
       orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        price: true,
+        oldPrice: true,
+        image: true,
+        color: true,
+        category: true,
         images: {
           orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }],
           take: 2,
+          select: { url: true },
         },
       },
     })
@@ -30,7 +40,8 @@ export async function GET() {
         hoverImage: product.images?.[1]?.url || null,
         colorName: product.color || "",
         category: product.category,
-        href: `/product/${product.id}`,
+        slug: product.slug,
+        href: productPath(product.slug, product.id),
       }))
 
     return NextResponse.json(discounted)

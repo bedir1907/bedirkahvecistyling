@@ -9,7 +9,14 @@ export async function GET(_: Request, context: Context) {
 
     const collection = await prisma.collection.findUnique({
       where: { slug, isActive: true },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        image: true,
+        video: true,
+        discount: true,
         products: {
           include: {
             product: {

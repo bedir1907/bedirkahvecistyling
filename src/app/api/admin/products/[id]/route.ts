@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { productPath } from "@/lib/product-url"
+import { isMissingColumnError } from "@/lib/db-errors"
+import { findAvailableProductSlug, normalizeProductSlug, readSeoFields } from "@/lib/admin-product-seo"
 
 type Context = {
   params: Promise<{
@@ -81,6 +84,14 @@ export async function GET(_: Request, context: Context) {
       )
     }
 
+    // SEO alanları ayrı sorguda: kolonlar canlı DB'de yoksa (migration öncesi) form yine açılır.
+    const seoFields = await prisma.product
+      .findUnique({ where: { id: productId }, select: { metaTitle: true, metaDescription: true } })
+      .catch((error) => {
+        if (!isMissingColumnError(error)) throw error
+        return null
+      })
+
     const siblingProducts = product.groupCode
       ? await prisma.product.findMany({
           where: {
@@ -103,6 +114,8 @@ export async function GET(_: Request, context: Context) {
 
     return NextResponse.json({
       ...product,
+      metaTitle: seoFields?.metaTitle ?? null,
+      metaDescription: seoFields?.metaDescription ?? null,
       siblingProducts,
     })
   } catch (error) {
@@ -128,7 +141,7 @@ export async function PATCH(request: Request, context: Context) {
     const body = await request.json()
 
     const productCode = normalizeString(body.productCode)
-    const slug = normalizeString(body.slug)
+    const requestedSlug = normalizeProductSlug(body.slug)
     const name = normalizeString(body.name)
     const color = normalizeString(body.color)
     const groupCode = normalizeString(body.groupCode)
@@ -150,11 +163,9 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
-    if (!slug) {
-      return NextResponse.json(
-        { error: "Slug zorunlu" },
-        { status: 400 }
-      )
+    const seo = readSeoFields(body)
+    if ("error" in seo) {
+      return NextResponse.json({ error: seo.error }, { status: 400 })
     }
 
     if (!color) {
@@ -219,6 +230,26 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
+    const current = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { slug: true },
+    })
+
+    if (!current) {
+      return NextResponse.json({ error: "Ürün bulunamadı" }, { status: 404 })
+    }
+
+    // Slug boş bırakılırsa ad + renkten otomatik üretilir.
+    // NOT: Slug değişirse eski /urun/{eski-slug} linkleri 404 olur (yalnızca /product/{id} yönlenir).
+    const slug = requestedSlug || (await findAvailableProductSlug(name, color, productId))
+
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Slug oluşturulamadı — ürün adını kontrol edin" },
+        { status: 400 }
+      )
+    }
+
     const existingSlug = await prisma.product.findFirst({
       where: {
         slug,
@@ -238,11 +269,14 @@ export async function PATCH(request: Request, context: Context) {
       )
     }
 
-    const updated = await prisma.product.update({
+    const updateProduct = (withSeo: boolean) => prisma.product.update({
       where: {
         id: productId,
       },
       data: {
+        // Gövdede gönderilmeyen SEO alanlarına dokunulmaz (ör. ürün listesindeki hızlı düzenleme formu)
+        ...(withSeo && seo.hasTitle ? { metaTitle: seo.metaTitle } : {}),
+        ...(withSeo && seo.hasDescription ? { metaDescription: seo.metaDescription } : {}),
         productCode,
         name,
         slug,
@@ -277,7 +311,17 @@ export async function PATCH(request: Request, context: Context) {
       },
     })
 
-    revalidatePath(`/product/${productId}`)
+    let updated
+    try {
+      updated = await updateProduct(true)
+    } catch (error) {
+      // SEO kolonları canlı DB'ye henüz eklenmemişse meta alanları olmadan kaydet
+      if (!isMissingColumnError(error)) throw error
+      updated = await updateProduct(false)
+    }
+
+    revalidatePath(productPath(updated.slug))
+    if (current.slug !== updated.slug) revalidatePath(productPath(current.slug))
     revalidatePath("/")
     revalidatePath("/category/[slug]", "page")
 
@@ -301,13 +345,18 @@ export async function DELETE(_: Request, context: Context) {
 
     const { id } = await context.params
 
+    const deleted = await prisma.product.findUnique({
+      where: { id: Number(id) },
+      select: { slug: true },
+    })
+
     await prisma.product.delete({
       where: {
         id: Number(id),
       },
     })
 
-    revalidatePath(`/product/${id}`)
+    if (deleted?.slug) revalidatePath(productPath(deleted.slug))
     revalidatePath("/")
     revalidatePath("/category/[slug]", "page")
 

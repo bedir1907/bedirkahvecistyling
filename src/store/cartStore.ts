@@ -5,6 +5,8 @@ import { persist } from "zustand/middleware"
 
 export type CartItem = {
   productId: number
+  /** Ürün URL slug'ı (eski kayıtlarda yok → /product/{id} yönlendirmesiyle açılır) */
+  slug?: string
   variantId: number
   name: string
   color: string
@@ -104,6 +106,16 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "cart-storage",
+      version: 1,
+      // Eski/yabancı kayıtlar: yalnızca geçerli productId'li öğeleri koru
+      migrate: (persisted) => {
+        const items = (persisted as { cart?: unknown } | null)?.cart
+        return {
+          cart: Array.isArray(items)
+            ? items.filter((i): i is CartItem => typeof i?.productId === "number")
+            : [],
+        } as { cart: CartItem[] }
+      },
     }
   )
 )

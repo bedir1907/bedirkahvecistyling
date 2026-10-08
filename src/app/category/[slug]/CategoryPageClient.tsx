@@ -1,170 +1,68 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import StoreFooter from "@/components/store/StoreFooter"
 import AutoplayVideo from "@/components/store/AutoplayVideo"
-
-type Product = {
-  id: number
-  name: string
-  price: number
-  oldPrice: number | null
-  image: string
-  category: string
-}
-
-type Category = {
-  id: number
-  name: string
-  slug: string
-  image?: string | null
-  video?: string | null
-}
+import type { ListingProduct } from "@/lib/catalog"
+import { sortListingProducts, type ListingSort } from "@/lib/listing-sort"
 
 type Props = {
-  params: Promise<{ slug: string }>
-}
-
-const VIRTUAL_SLUGS: Record<string, { name: string; apiParam: string }> = {
-  "new-season": { name: "Yeni Sezon", apiParam: "isNew=true" },
-  "indirimdekiler": { name: "İndirimdekiler", apiParam: "discounted=true" },
-  "haftanin-urunleri": { name: "Haftanın Ürünleri", apiParam: "featured=true" },
-  "en-yeniler": { name: "En Yeniler", apiParam: "isNew=true" },
-}
-
-export default function CategoryPageClient({ params }: Props) {
-  const { slug } = use(params)
-
-  const [products, setProducts] = useState<Product[]>([])
-  const [category, setCategory] = useState<Category | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [sort, setSort] = useState("new")
-  const [discountMap, setDiscountMap] = useState<Record<number, number>>({})
-
-  const virtualSlug = VIRTUAL_SLUGS[slug]
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        if (virtualSlug) {
-          const [catRes, prodRes] = await Promise.all([
-            fetch(`/api/categories/${slug}`),
-            fetch(`/api/products?${virtualSlug.apiParam}`),
-          ])
-          const catData = catRes.ok ? await catRes.json() : null
-          setCategory({
-            id: catData?.id ?? -1,
-            name: virtualSlug.name,
-            slug,
-            image: catData?.image ?? null,
-            video: catData?.video ?? null,
-          })
-          const data = await prodRes.json()
-          const list = Array.isArray(data) ? data : []
-          setProducts(list)
-          setLoading(false)
-          if (list.length > 0) {
-            fetch("/api/collections/discount-map", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ productIds: list.map((p: Product) => p.id) }),
-            })
-              .then((r) => r.json())
-              .then((dmData) => setDiscountMap(dmData.discounts ?? {}))
-              .catch(() => {})
-          }
-          return
-        }
-
-        const [categoryRes, productsRes] = await Promise.all([
-          fetch(`/api/categories/${slug}`),
-          fetch(`/api/products?categorySlug=${encodeURIComponent(slug)}`),
-        ])
-
-        const categoryData = await categoryRes.json()
-        if (!categoryRes.ok) throw new Error(categoryData.error || "Kategori bulunamadı")
-
-        const productsData = await productsRes.json()
-        const allProducts = Array.isArray(productsData) ? productsData : []
-
-        setCategory(categoryData)
-        setProducts(allProducts)
-        setLoading(false)
-
-        if (allProducts.length > 0) {
-          fetch("/api/collections/discount-map", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productIds: allProducts.map((p: Product) => p.id) }),
-          })
-            .then((r) => r.json())
-            .then((dmData) => setDiscountMap(dmData.discounts ?? {}))
-            .catch(() => {})
-        }
-      } catch (error) {
-        console.error(error)
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [slug, virtualSlug])
-
-  const sortedProducts = [...products].sort((a, b) => {
-    if (sort === "price-asc") return a.price - b.price
-    if (sort === "price-desc") return b.price - a.price
-    return b.id - a.id
-  })
-
-  const hasBanner = !!(category?.video || category?.image)
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <img
-          src="/bk-logo.svg"
-          alt="Yükleniyor"
-          className="w-24 h-24 rounded-full animate-spin"
-          style={{ animationDuration: "1.5s" }}
-        />
-      </main>
-    )
+  slug: string
+  category: {
+    name: string
+    /** Sayfa H1'i (admin'den girilmediyse kategori adı) */
+    heading: string
+    image: string | null
+    video: string | null
   }
+  /** Sunucuda çekilen ürünler — ilk HTML'de ürün linkleri/adları/fiyatları hazır gelir. */
+  products: ListingProduct[]
+  /** Grid altındaki kategori açıklama (SEO) metni — sunucuda render edilir. */
+  seoText?: ReactNode
+}
+
+export default function CategoryPageClient({ slug, category, products, seoText }: Props) {
+  const [sort, setSort] = useState<ListingSort>("new")
+
+  const sortedProducts = useMemo(() => sortListingProducts(products, sort), [products, sort])
+
+  const hasBanner = !!(category.video || category.image)
 
   return (
     <main className="min-h-screen bg-white text-black">
 
       {/* Başlık bandı */}
       <section className={`relative w-full border-b ${hasBanner ? "bg-gray-900 min-h-70 md:min-h-90" : "bg-[#f7f7f5]"} overflow-hidden`}>
-        {category?.video ? (
+        {category.video ? (
           <AutoplayVideo src={category.video} />
-        ) : category?.image ? (
+        ) : category.image ? (
           <img
             src={category.image}
-            alt={category.name ?? ""}
+            alt={category.name}
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
           />
         ) : null}
         {hasBanner && <div className="absolute inset-0 bg-black/50" />}
         <div className={`relative max-w-7xl mx-auto px-4 py-12 md:py-16 ${hasBanner ? "text-white" : "text-black"}`}>
-          <div className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
+          <nav aria-label="Breadcrumb" className={`text-sm mb-4 flex flex-wrap items-center gap-2 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>
             <Link href="/" className="hover:opacity-100 transition">Anasayfa</Link>
             <span>/</span>
-            <span>{category?.name || slug}</span>
-          </div>
+            <span aria-current="page">{category.name}</span>
+          </nav>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <p className={`inline-flex items-center border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] mb-3 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10 bg-[#f3f1ec] text-gray-700"}`}>
                 Kategori
               </p>
-              <h1 className="text-3xl md:text-4xl font-bold">{category?.name || slug}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold">{category.heading}</h1>
               <p className={`text-sm mt-1 ${hasBanner ? "text-white/70" : "text-gray-500"}`}>{sortedProducts.length} ürün bulundu</p>
             </div>
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
+              onChange={(e) => setSort(e.target.value as ListingSort)}
+              aria-label="Sırala"
               className={`border px-4 py-2.5 text-sm focus:outline-none md:w-48 ${hasBanner ? "border-white/30 bg-white/10 text-white" : "border-black/10"}`}
             >
               <option value="new">En Yeniler</option>
@@ -194,13 +92,15 @@ export default function CategoryPageClient({ params }: Props) {
                 price={product.price}
                 oldPrice={product.oldPrice}
                 image={product.image}
-                href={`/product/${product.id}?from=${slug}`}
-                collectionDiscount={discountMap[product.id] ?? null}
+                href={`${product.path}?from=${encodeURIComponent(slug)}`}
+                collectionDiscount={product.collectionDiscount}
               />
             ))}
           </div>
         )}
       </section>
+
+      {seoText}
 
       <StoreFooter />
     </main>

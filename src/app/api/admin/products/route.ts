@@ -2,7 +2,9 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
-import { slugify } from "@/lib/slugify"
+import { productPath } from "@/lib/product-url"
+import { isMissingColumnError } from "@/lib/db-errors"
+import { findAvailableProductSlug, isAutoSlug, normalizeProductSlug, readSeoFields } from "@/lib/admin-product-seo"
 
 function isValidProductCode(value: string) {
   return /^\d{8,}$/.test(value)
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
 
     const productCode = normalizeString(body.productCode)
     const name = normalizeString(body.name)
-    const slug = slugify(normalizeString(body.slug) || normalizeString(body.name))
+    const requestedSlug = normalizeProductSlug(body.slug)
     const color = normalizeString(body.color)
     const groupCode = normalizeString(body.groupCode)
     const category = normalizeString(body.category)
@@ -45,11 +47,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!slug) {
-      return NextResponse.json(
-        { error: "Slug zorunlu" },
-        { status: 400 }
-      )
+    const seo = readSeoFields(body)
+    if ("error" in seo) {
+      return NextResponse.json({ error: seo.error }, { status: 400 })
     }
 
     if (!color) {
@@ -107,20 +107,37 @@ export async function POST(request: Request) {
       )
     }
 
-    const existingSlug = await prisma.product.findUnique({
-      where: { slug },
-      select: { id: true },
-    })
+    // Slug boşsa (veya formun addan önerdiği slug ise) otomatik üretilir: çakışırsa renk, sonra -2, -3 … eklenir.
+    // Elle girilen farklı bir slug başka üründe varsa hata verilir.
+    let slug: string
+    if (requestedSlug && !isAutoSlug(requestedSlug, name, color)) {
+      const existingSlug = await prisma.product.findUnique({
+        where: { slug: requestedSlug },
+        select: { id: true },
+      })
+      if (existingSlug) {
+        return NextResponse.json(
+          { error: "Bu slug zaten kullanılıyor" },
+          { status: 400 }
+        )
+      }
+      slug = requestedSlug
+    } else {
+      slug = await findAvailableProductSlug(name, color)
+    }
 
-    if (existingSlug) {
+    if (!slug) {
       return NextResponse.json(
-        { error: "Bu slug zaten kullanılıyor" },
+        { error: "Slug oluşturulamadı — ürün adını kontrol edin" },
         { status: 400 }
       )
     }
 
-    const created = await prisma.product.create({
+    const createProduct = (withSeo: boolean) => prisma.product.create({
   data: {
+    ...(withSeo && (seo.metaTitle || seo.metaDescription)
+      ? { metaTitle: seo.metaTitle, metaDescription: seo.metaDescription }
+      : {}),
     productCode,
     name,
     slug,
@@ -158,6 +175,16 @@ export async function POST(request: Request) {
   },
 })
 
+    let created
+    try {
+      created = await createProduct(true)
+    } catch (error) {
+      // SEO kolonları canlı DB'ye henüz eklenmemişse meta alanları olmadan kaydet
+      if (!isMissingColumnError(error)) throw error
+      created = await createProduct(false)
+    }
+
+    revalidatePath(productPath(created.slug))
     revalidatePath("/")
     revalidatePath("/category/[slug]", "page")
 

@@ -1,6 +1,7 @@
 import SectionHeader from "@/components/store/SectionHeader"
 import ProductSlider, { type SliderProduct } from "@/components/store/ProductSlider"
 import { prisma } from "@/lib/prisma"
+import { productPath } from "@/lib/product-url"
 
 type Props = {
   title: string
@@ -24,10 +25,21 @@ function getSectionDescription(featuredOnly: boolean, newOnly: boolean, weeklyMo
   return "Sezonun öne çıkan parçalarını keşfet."
 }
 
+// Yalnızca gereken alanlar (tüm kolonları çekmek yeni eklenen kolonlar DB'de yokken sorguyu patlatır)
 const imageInclude = {
+  id: true,
+  slug: true,
+  name: true,
+  price: true,
+  oldPrice: true,
+  image: true,
+  color: true,
+  category: true,
+  groupCode: true,
   images: {
     orderBy: [{ isCover: "desc" as const }, { sortOrder: "asc" as const }],
     take: 2,
+    select: { url: true },
   },
 }
 
@@ -48,7 +60,7 @@ export default async function ProductSection({
     const weeklyProducts = await prisma.product.findMany({
       where: { isActive: true, createdAt: { gte: oneWeekAgo } },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      include: imageInclude,
+      select: imageInclude,
     })
 
     if (weeklyProducts.length >= 20) {
@@ -64,7 +76,7 @@ export default async function ProductSection({
         },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: needed,
-        include: imageInclude,
+        select: imageInclude,
       })
       products = [...weeklyProducts, ...olderProducts]
     }
@@ -79,7 +91,7 @@ export default async function ProductSection({
         ? [{ createdAt: "desc" }, { id: "desc" }]
         : [{ displayOrder: "asc" }, { id: "desc" }],
       take: newOnly ? 30 : 12,
-      include: imageInclude,
+      select: imageInclude,
     })
   }
 
@@ -163,7 +175,7 @@ export default async function ProductSection({
             image: product.images?.[0]?.url || product.image,
             colorName: product.color || "",
             category: product.category,
-            href: `/product/${product.id}`,
+            href: productPath(product.slug, product.id),
             colors,
             collectionDiscount: discountMap.get(product.id) ?? null,
           }

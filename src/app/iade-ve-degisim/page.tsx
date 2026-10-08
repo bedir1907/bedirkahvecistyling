@@ -1,10 +1,14 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import StoreFooter from "@/components/store/StoreFooter"
+import { pageMetadata } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "İade ve Değişim",
-  description: "Bedir Kahveci Styling iade ve değişim koşulları.",
-}
+  description:
+    "Bedir Kahveci Styling iade ve değişim koşulları: 14 gün içinde iade hakkı, değişim süreci, iade kargosu ve ücret iadesi hakkında bilmeniz gerekenler.",
+  path: "/iade-ve-degisim",
+})
 
 export default function IadeVeDegisimPage() {
   return (

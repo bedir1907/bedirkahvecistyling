@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
+import { cleanSeoText } from "@/lib/seo"
 
 type Context = {
   params: Promise<{ id: string }>
@@ -53,6 +54,10 @@ export async function PATCH(request: Request, context: Context) {
         isFeatured: Boolean(body.isFeatured),
         isActive: Boolean(body.isActive),
         displayOrder: Number(body.displayOrder || 0),
+        description: body.description !== undefined ? cleanSeoText(body.description, 10000) : undefined,
+        heading: body.heading !== undefined ? cleanSeoText(body.heading, 120) : undefined,
+        metaTitle: body.metaTitle !== undefined ? cleanSeoText(body.metaTitle, 200) : undefined,
+        metaDescription: body.metaDescription !== undefined ? cleanSeoText(body.metaDescription, 500) : undefined,
       },
     })
 

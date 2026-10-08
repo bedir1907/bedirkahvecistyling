@@ -1,14 +1,16 @@
 "use client"
 
 import Image from "next/image"
+import { imageLoaderFor } from "@/lib/cloudinary-image"
 import Link from "next/link"
-import { use, useEffect, useMemo, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react"
 import StoreFooter from "@/components/store/StoreFooter"
 import { useCartStore } from "@/store/cartStore"
 import { useWishlistStore } from "@/store/wishlistStore"
 import { useRecentlyViewedStore } from "@/store/recentlyViewedStore"
 import { formatPrice } from "@/lib/format"
+import { productPath } from "@/lib/product-url"
+import type { ProductPageProduct, ProductPageVariant } from "@/lib/product-page"
 
 // ── Beden rehberi modalı ──────────────────────────────────────────────────────
 const SIZE_GUIDE_ROWS = [
@@ -82,59 +84,33 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
 }
 
 // ── Tipler ────────────────────────────────────────────────────────────────────
-type ProductImage = {
-  id: number
-  url: string
-  alt?: string | null
-  color?: string | null
-  sortOrder: number
-  isCover: boolean
-}
-
-type ProductVariant = {
-  id: number
-  size: string
-  stock: number
-  sku?: string | null
-}
-
-type SiblingProduct = {
-  id: number
-  name: string
-  slug: string
-  color: string | null
-  image: string
-  price: number
-  oldPrice: number | null
-}
-
-type Product = {
-  id: number
-  productCode: string
-  name: string
-  slug: string
-  color: string | null
-  groupCode: string | null
-  price: number
-  oldPrice: number | null
-  image: string
-  category: string
-  description: string
-  featured: boolean
-  isNew: boolean
-  isActive: boolean
-  images: ProductImage[]
-  productVariants: ProductVariant[]
-  siblingProducts: SiblingProduct[]
-  categorySlug: string | null
-}
+type ProductVariant = ProductPageVariant
+type Product = ProductPageProduct
 
 type Props = {
-  params: Promise<{ id: string }>
+  /** Sunucuda çekilen ürün verisi — ilk HTML bununla render edilir (SEO). */
+  initialProduct: Product
+  /** Aktif koleksiyondan "sepette %X" indirimi */
+  collectionDiscount: number | null
+  /** Açıklama boşsa gösterilecek otomatik açıklama */
+  autoDescription: string
+  /** Görsel alt metni için SEO adı (başlık düzeninde ad + renk) */
+  imageAlt: string
+  /** Sunucuda render edilen "Benzer Ürünler" bölümü */
+  related?: ReactNode
 }
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1200&q=80&auto=format&fit=crop"
+
+/**
+ * Tarayıcıda saklanan (localStorage) sepet/favori/son görüntülenen verileri sunucu HTML'inde yok.
+ * Hydration uyuşmazlığı olmasın diye bu verilere bağlı UI ancak istemci hydrate olduktan sonra gösterilir.
+ */
+const noopSubscribe = () => () => {}
+function useHydrated() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false)
+}
 
 // ── Yardımcı: beden sıralaması ────────────────────────────────────────────────
 function detectSizeType(variants: Array<{ size: string }>) {
@@ -170,115 +146,112 @@ function sortVariants(variants: ProductVariant[]) {
   return [...variants].sort((a, b) => order.indexOf(a.size) - order.indexOf(b.size))
 }
 
+/** Varsayılan beden: stokta olanlardan stoğu en az olan (mevcut davranış). */
+function defaultSize(variants: ProductVariant[]) {
+  const firstAvailable = [...variants].filter((v) => v.stock > 0).sort((a, b) => a.stock - b.stock)[0]
+  return firstAvailable?.size ?? ""
+}
+
+/** Adres çubuğundaki sorgu parametrelerini korur, yalnızca ?size'ı günceller (sayfa yeniden yüklenmez). */
+function replaceSizeInUrl(size?: string) {
+  const p = new URLSearchParams(window.location.search)
+  if (size) p.set("size", size)
+  else p.delete("size")
+  const query = p.toString()
+  window.history.replaceState(window.history.state, "", query ? `${window.location.pathname}?${query}` : window.location.pathname)
+}
+
 // ── Sayfa bileşeni ────────────────────────────────────────────────────────────
-export default function ProductPageClient({ params }: Props) {
-  const { id } = use(params)
-  const searchParams = useSearchParams()
-  const from = searchParams.get("from")
+export default function ProductPageClient({ initialProduct, collectionDiscount, autoDescription, imageAlt, related }: Props) {
+  const hydrated = useHydrated()
   const addToCart = useCartStore((state) => state.addToCart)
   const cart = useCartStore((state) => state.cart)
   const toggleWishlist = useWishlistStore((state) => state.toggleWishlist)
-  const isWishlisted = useWishlistStore((state) => state.isWishlisted)
+  const wishlist = useWishlistStore((state) => state.wishlist)
   const addRecentlyViewed = useRecentlyViewedStore((state) => state.addItem)
-  const getRecentOthers = useRecentlyViewedStore((state) => state.getOthers)
+  const recentItems = useRecentlyViewedStore((state) => state.items)
 
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedSize, setSelectedSize] = useState<string>("")
+  const [product, setProduct] = useState<Product>(() => ({
+    ...initialProduct,
+    productVariants: sortVariants(initialProduct.productVariants),
+  }))
+  // Kullanıcının seçtiği beden (null = henüz seçmedi → ?size veya varsayılan beden)
+  const [chosenSize, setChosenSize] = useState<string | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
   const [toastVisible, setToastVisible] = useState(false)
-  const [collectionDiscount, setCollectionDiscount] = useState<number | null>(null)
-  const [imageFading, setImageFading] = useState(false)
-  const [visibleImage, setVisibleImage] = useState<string>("")
+
+  // ?from / ?size sorgu parametreleri. useSearchParams kullanılmıyor — ISR sayfasında içeriği
+  // istemci render'ına düşürürdü. Sunucuda "" (varsayılan beden), hydrate sonrası gerçek değer.
+  const search = useSyncExternalStore(noopSubscribe, () => window.location.search, () => "")
+  const queryParams = useMemo(() => new URLSearchParams(search), [search])
+  const from = queryParams.get("from")
+  const querySize = queryParams.get("size")
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
 
+  // Geçerli beden: kullanıcı seçimi > ?size (stokta ise) > stoğu en az olan beden
+  const selectedSize = useMemo(() => {
+    const isAvailable = (size: string | null) =>
+      Boolean(size && product.productVariants.some((v) => v.size === size && v.stock > 0))
+    if (chosenSize && isAvailable(chosenSize)) return chosenSize
+    if (querySize && isAvailable(querySize)) return querySize
+    return defaultSize(product.productVariants)
+  }, [chosenSize, querySize, product.productVariants])
+
+  // Seçili beden adres çubuğunda ?size olarak tutulur (paylaşılan link aynı bedeni açar)
   useEffect(() => {
-    async function fetchProduct() {
-      try {
-        const [res, dmRes] = await Promise.all([
-          fetch(`/api/products/${id}`),
-          fetch("/api/collections/discount-map", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productIds: [Number(id)] }),
-          }),
-        ])
+    if (!hydrated) return
+    replaceSizeInUrl(selectedSize)
+  }, [hydrated, selectedSize])
 
-        const [data, dmData] = await Promise.all([res.json(), dmRes.json()])
-
-        if (!res.ok) throw new Error(data.error || "Ürün alınamadı")
-
-        const productData = { ...data, productVariants: sortVariants(data.productVariants || []) }
-        setProduct(productData)
-        setCollectionDiscount(dmData.discounts?.[Number(id)] ?? null)
-        addRecentlyViewed({
-          productId: productData.id,
-          name: productData.name,
-          price: productData.price,
-          oldPrice: productData.oldPrice,
-          image: productData.image || FALLBACK_IMAGE,
-          category: productData.category,
-        })
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProduct()
-  }, [id])
-
-  function updateUrl(size?: string) {
-    const p = new URLSearchParams(searchParams.toString())
-    if (size) p.set("size", size)
-    else p.delete("size")
-    const query = p.toString()
-    const url = query ? `/product/${id}?${query}` : `/product/${id}`
-    window.history.replaceState(null, "", url)
-  }
-
+  // İlk yüklemede: son görüntülenenler + güncel stok/fiyat
   useEffect(() => {
-    if (!product) return
-    const querySize = searchParams.get("size")
-    let initialSize = ""
-    if (querySize) {
-      const matched = product.productVariants.find((v) => v.size === querySize && v.stock > 0)
-      if (matched) initialSize = matched.size
-    }
-    if (!initialSize) {
-      const firstAvailable = [...product.productVariants]
-        .filter((v) => v.stock > 0)
-        .sort((a, b) => a.stock - b.stock)[0]
-      if (firstAvailable) initialSize = firstAvailable.size
-    }
-    setSelectedSize(initialSize)
-    setSelectedIndex(0)
-    updateUrl(initialSize)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product])
+    addRecentlyViewed({
+      productId: initialProduct.id,
+      slug: initialProduct.slug,
+      name: initialProduct.name,
+      price: initialProduct.price,
+      oldPrice: initialProduct.oldPrice,
+      image: initialProduct.image || FALLBACK_IMAGE,
+      category: initialProduct.category,
+    })
+
+    // Sayfa ISR ile ~60 sn önbellekte; stok/fiyatı arka planda tazele.
+    const controller = new AbortController()
+    fetch(`/api/products/${initialProduct.id}`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((fresh: Partial<Product> | null) => {
+        if (!fresh || !Array.isArray(fresh.productVariants)) return
+        const variants = sortVariants(fresh.productVariants)
+        // (Seçili beden bu arada tükendiyse selectedSize otomatik başka bedene geçer)
+        setProduct((prev) => ({
+          ...prev,
+          price: typeof fresh.price === "number" ? fresh.price : prev.price,
+          oldPrice: fresh.oldPrice === undefined ? prev.oldPrice : fresh.oldPrice,
+          productVariants: variants,
+        }))
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [initialProduct, addRecentlyViewed])
 
   const galleryImages = useMemo(() => {
-    if (!product) return [{ id: 0, url: FALLBACK_IMAGE, alt: "Ürün", color: null, sortOrder: 0, isCover: true }]
     if (product.images.length > 0) return product.images
-    return [{ id: 0, url: product.image || FALLBACK_IMAGE, alt: product.name, color: null, sortOrder: 0, isCover: true }]
+    return [{ id: 0, url: product.image || FALLBACK_IMAGE, alt: null, color: null, sortOrder: 0, isCover: true }]
   }, [product])
 
   const selectedImage = galleryImages[selectedIndex]?.url ?? galleryImages[0]?.url ?? FALLBACK_IMAGE
 
-  // Görsel değişince smooth fade geçişi
+  // Görsel değişince smooth fade geçişi: eski görsel 180 ms solar, sonra yenisi gelir
+  const [visibleImage, setVisibleImage] = useState<string>(selectedImage)
+  const imageFading = visibleImage !== selectedImage
   useEffect(() => {
-    if (!selectedImage || visibleImage === selectedImage) return
-    if (!visibleImage) { setVisibleImage(selectedImage); return }
-    setImageFading(true)
-    const t = setTimeout(() => {
-      setVisibleImage(selectedImage)
-      setImageFading(false)
-    }, 180)
+    if (visibleImage === selectedImage) return
+    const t = setTimeout(() => setVisibleImage(selectedImage), 180)
     return () => clearTimeout(t)
-  }, [selectedImage]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedImage, visibleImage])
 
   // ESC ile lightbox kapat, ok tuşlarıyla gezin
   useEffect(() => {
@@ -292,19 +265,16 @@ export default function ProductPageClient({ params }: Props) {
   }, [galleryImages.length])
 
   const selectedVariant = useMemo(() => {
-    if (!product || !selectedSize) return null
+    if (!selectedSize) return null
     return product.productVariants.find((v) => v.size === selectedSize) || null
   }, [product, selectedSize])
 
-  const hasAnyStock = useMemo(() => {
-    if (!product) return false
-    return product.productVariants.some((v) => v.stock > 0)
-  }, [product])
+  const hasAnyStock = useMemo(() => product.productVariants.some((v) => v.stock > 0), [product])
 
   const cartQuantityForSelectedVariant = useMemo(() => {
-    if (!product || !selectedVariant) return 0
+    if (!hydrated || !selectedVariant) return 0
     return cart.find((item) => item.productId === product.id && item.variantId === selectedVariant.id)?.quantity ?? 0
-  }, [cart, product, selectedVariant])
+  }, [hydrated, cart, product.id, selectedVariant])
 
   const isSelectedVariantMaxInCart = useMemo(() => {
     if (!selectedVariant) return false
@@ -312,24 +282,26 @@ export default function ProductPageClient({ params }: Props) {
   }, [cartQuantityForSelectedVariant, selectedVariant])
 
   const discountRate = useMemo(() => {
-    if (!product?.oldPrice || product.oldPrice <= product.price) return null
+    if (!product.oldPrice || product.oldPrice <= product.price) return null
     return Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
   }, [product])
 
+  const wishlisted = hydrated && wishlist.some((w) => w.productId === product.id)
+  const recent = hydrated ? recentItems.filter((i) => i.productId !== product.id).slice(0, 6) : []
+
   function handleSelectSize(size: string) {
-    if (!product) return
     const variant = product.productVariants.find((item) => item.size === size)
     if (!variant || variant.stock <= 0) return
-    setSelectedSize(size)
-    updateUrl(size)
+    setChosenSize(size)
   }
 
   function handleAddToCart() {
-    if (!product || !selectedVariant || selectedVariant.stock <= 0) return
+    if (!selectedVariant || selectedVariant.stock <= 0) return
     if (cartQuantityForSelectedVariant >= selectedVariant.stock) return
 
     addToCart({
       productId: product.id,
+      slug: product.slug,
       variantId: selectedVariant.id,
       name: product.name,
       color: product.color || "",
@@ -343,31 +315,6 @@ export default function ProductPageClient({ params }: Props) {
     // Toast göster
     setToastVisible(true)
     setTimeout(() => setToastVisible(false), 2500)
-  }
-
-  // ── Yükleniyor / bulunamadı ─────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <img
-          src="/bk-logo.svg"
-          alt="Yükleniyor"
-          className="w-24 h-24 rounded-full animate-spin"
-          style={{ animationDuration: "1.5s" }}
-        />
-      </main>
-    )
-  }
-
-  if (!product) {
-    return (
-      <main className="min-h-screen bg-white text-black">
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <p className="text-gray-500">Ürün bulunamadı.</p>
-        </section>
-        <StoreFooter />
-      </main>
-    )
   }
 
   // ── Ana render ──────────────────────────────────────────────────────────────
@@ -395,8 +342,8 @@ export default function ProductPageClient({ params }: Props) {
           </button>
           <div className="relative max-w-3xl w-full max-h-[90vh] aspect-4/5" onClick={(e) => e.stopPropagation()}>
             <Image
-              src={selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE}
-              alt={product.name}
+              src={selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE} loader={imageLoaderFor(selectedImage || galleryImages[0]?.url || FALLBACK_IMAGE)}
+              alt={galleryImages[selectedIndex]?.alt || imageAlt}
               fill
               className="object-contain"
               sizes="(max-width: 768px) 100vw, 768px"
@@ -415,7 +362,7 @@ export default function ProductPageClient({ params }: Props) {
           ) : from === "indirimdekiler" ? (
             <><Link href="/category/indirimdekiler" className="hover:text-black transition">İndirimdekiler</Link><span>/</span></>
           ) : from ? (
-            <><Link href={`/category/${from}`} className="hover:text-black transition">{product.category}</Link><span>/</span></>
+            <><Link href={`/category/${encodeURIComponent(from)}`} className="hover:text-black transition">{product.category}</Link><span>/</span></>
           ) : product.categorySlug ? (
             <><Link href={`/category/${product.categorySlug}`} className="hover:text-black transition">{product.category}</Link><span>/</span></>
           ) : (
@@ -438,7 +385,7 @@ export default function ProductPageClient({ params }: Props) {
                     selectedIndex === idx ? "border-black" : "border-gray-200"
                   }`}
                 >
-                  <Image src={img.url} alt={img.alt || product.name} fill className="object-cover" sizes="96px" />
+                  <Image src={img.url} loader={imageLoaderFor(img.url)} alt={img.alt || (idx === 0 ? imageAlt : `${imageAlt} - görsel ${idx + 1}`)} fill className="object-cover" sizes="96px" />
                 </button>
               ))}
             </div>
@@ -451,10 +398,10 @@ export default function ProductPageClient({ params }: Props) {
                 title="Büyütmek için tıkla"
               >
                 <Image
-                  src={visibleImage || selectedImage}
-                  alt={product.name}
+                  src={visibleImage || selectedImage} loader={imageLoaderFor(visibleImage || selectedImage)}
+                  alt={galleryImages[selectedIndex]?.alt || imageAlt}
                   fill
-                  priority
+                  preload
                   className={`object-cover transition-opacity duration-200 ${imageFading ? "opacity-0" : "opacity-100"}`}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
@@ -544,22 +491,22 @@ export default function ProductPageClient({ params }: Props) {
                   <div className="flex flex-wrap gap-2">
                     <div className="flex flex-col items-center gap-1">
                       <Link
-                        href={from ? `/product/${product.id}?from=${from}` : `/product/${product.id}`}
+                        href={productPath(product.slug, product.id, { from })}
                         className="relative w-14 h-14 overflow-hidden border-2 border-black bg-gray-100 shrink-0"
                         title={product.color || "Mevcut Renk"}
                       >
-                        <Image src={product.image || FALLBACK_IMAGE} alt={product.color || product.name} fill className="object-cover" sizes="56px" />
+                        <Image src={product.image || FALLBACK_IMAGE} loader={imageLoaderFor(product.image || FALLBACK_IMAGE)} alt={product.color || product.name} fill className="object-cover" sizes="56px" />
                       </Link>
                       <span className="text-[10px] text-center text-black font-medium leading-tight max-w-14 truncate">{product.color || "Renk"}</span>
                     </div>
                     {product.siblingProducts.map((item) => (
                       <div key={item.id} className="flex flex-col items-center gap-1">
                         <Link
-                          href={from ? `/product/${item.id}?from=${from}` : `/product/${item.id}`}
+                          href={productPath(item.slug, item.id, { from })}
                           className="relative w-14 h-14 overflow-hidden border-2 border-transparent hover:border-black transition bg-gray-100 shrink-0"
                           title={item.color || item.name}
                         >
-                          <Image src={item.image || FALLBACK_IMAGE} alt={item.color || item.name} fill className="object-cover" sizes="56px" />
+                          <Image src={item.image || FALLBACK_IMAGE} loader={imageLoaderFor(item.image || FALLBACK_IMAGE)} alt={item.color || item.name} fill className="object-cover" sizes="56px" />
                         </Link>
                         <span className="text-[10px] text-center text-gray-600 leading-tight max-w-14 truncate">{item.color || item.name}</span>
                       </div>
@@ -654,6 +601,7 @@ export default function ProductPageClient({ params }: Props) {
                   type="button"
                   onClick={() => toggleWishlist({
                     productId: product.id,
+                    slug: product.slug,
                     name: product.name,
                     price: product.price,
                     oldPrice: product.oldPrice,
@@ -661,13 +609,13 @@ export default function ProductPageClient({ params }: Props) {
                     category: product.category,
                   })}
                   className={`w-14 h-14 border flex items-center justify-center transition shrink-0 ${
-                    isWishlisted(product.id)
+                    wishlisted
                       ? "border-red-400 bg-red-50 text-red-500"
                       : "border-gray-200 text-gray-400 hover:border-black hover:text-black"
                   }`}
-                  title={isWishlisted(product.id) ? "Favorilerden çıkar" : "Favorilere ekle"}
+                  title={wishlisted ? "Favorilerden çıkar" : "Favorilere ekle"}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill={isWishlisted(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                   </svg>
                 </button>
@@ -683,28 +631,28 @@ export default function ProductPageClient({ params }: Props) {
 
             {/* Açıklama */}
             <div className="mt-10">
-              <h3 className="text-lg font-medium mb-3">Ürün Açıklaması</h3>
+              <h2 className="text-lg font-medium mb-3">Ürün Açıklaması</h2>
               <p className="text-gray-600 leading-7 whitespace-pre-line">
-                {product.description || "Açıklama bulunmuyor."}
+                {product.description?.trim() ? product.description : autoDescription}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Son görüntülenen ürünler */}
-      {(() => {
-        const recent = getRecentOthers(product.id)
-        if (recent.length === 0) return null
-        return (
+      {/* Benzer ürünler (sunucuda render edilir → ilk HTML'de iç linkler) */}
+      {related}
+
+      {/* Son görüntülenen ürünler (tarayıcı verisi → yalnızca hydrate sonrası) */}
+      {recent.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-16">
             <h2 className="text-xl font-semibold mb-6 tracking-tight">Son Görüntülenenler</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {recent.map((item) => (
-                <Link key={item.productId} href={`/product/${item.productId}`} className="group">
+                <Link key={item.productId} href={productPath(item.slug, item.productId)} className="group">
                   <div className="relative aspect-4/5 overflow-hidden bg-gray-100 border">
                     <Image
-                      src={item.image}
+                      src={item.image} loader={imageLoaderFor(item.image)}
                       alt={item.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -720,8 +668,7 @@ export default function ProductPageClient({ params }: Props) {
               ))}
             </div>
           </section>
-        )
-      })()}
+      )}
 
       <StoreFooter />
     </main>

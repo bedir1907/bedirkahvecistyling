@@ -1,5 +1,8 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import StoreFooter from "@/components/store/StoreFooter"
+import JsonLd from "@/components/seo/JsonLd"
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo"
 
 const SSS = [
   {
@@ -42,14 +45,37 @@ const SSS = [
   },
 ]
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Sık Sorulan Sorular",
-  description: "Bedir Kahveci Styling sık sorulan sorular.",
+  description:
+    "Sipariş takibi, ödeme yöntemleri, beden seçimi, iade ve değişim ile hesap işlemleri hakkında Bedir Kahveci Styling sık sorulan sorular ve cevapları.",
+  path: "/sikca-sorulan-sorular",
+})
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: SSS.flatMap((kategori) =>
+    kategori.sorular.map((item) => ({
+      "@type": "Question",
+      name: item.soru,
+      acceptedAnswer: { "@type": "Answer", text: item.cevap },
+    }))
+  ),
 }
 
 export default function SikcaSorulanSorularPage() {
   return (
     <main className="min-h-screen bg-white text-black">
+      <JsonLd
+        data={[
+          faqJsonLd,
+          breadcrumbJsonLd([
+            { name: "Anasayfa", path: "/" },
+            { name: "Sık Sorulan Sorular", path: "/sikca-sorulan-sorular" },
+          ]),
+        ]}
+      />
       <section className="max-w-4xl mx-auto px-4 py-10">
         <div className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
           <Link href="/" className="hover:text-black transition">Anasayfa</Link>

@@ -5,6 +5,8 @@ import { persist } from "zustand/middleware"
 
 export type RecentItem = {
   productId: number
+  /** Ürün URL slug'ı (eski kayıtlarda yok → /product/{id} yönlendirmesiyle açılır) */
+  slug?: string
   name: string
   price: number
   oldPrice: number | null
@@ -38,6 +40,16 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
     }),
     {
       name: "recently-viewed-storage",
+      version: 1,
+      // Eski/yabancı kayıtlar: yalnızca geçerli productId'li öğeleri koru
+      migrate: (persisted) => {
+        const items = (persisted as { items?: unknown } | null)?.items
+        return {
+          items: Array.isArray(items)
+            ? items.filter((i): i is RecentItem => typeof i?.productId === "number")
+            : [],
+        } as { items: RecentItem[] }
+      },
     }
   )
 )

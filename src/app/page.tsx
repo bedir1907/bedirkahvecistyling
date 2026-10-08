@@ -6,24 +6,22 @@ import ProductSection from "@/components/store/ProductSection"
 import DiscountedProducts from "@/components/store/DiscountedProducts"
 import StoreFooter from "@/components/store/StoreFooter"
 import { prisma } from "@/lib/prisma"
+import JsonLd from "@/components/seo/JsonLd"
+import { organizationJsonLd, pageMetadata, SITE_DESCRIPTION, SITE_NAME, websiteJsonLd } from "@/lib/seo"
 
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: {
-    absolute: "Bedir Kahveci Styling",
-  },
-  description:
-    "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi. Ücretsiz kargo, kolay iade.",
-  openGraph: {
-    title: "Bedir Kahveci Styling",
-    description:
-      "Modern erkek giyim için sade, güçlü ve güven veren bir alışveriş deneyimi. Ücretsiz kargo, kolay iade.",
-  },
+  ...pageMetadata({
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    path: "/",
+  }),
+  title: { absolute: `${SITE_NAME} | Modern Erkek Giyim` },
 }
 
 export default async function Home() {
-  const [settings, rawCollections] = await Promise.all([
+  const [settings, rawCollections, social] = await Promise.all([
     prisma.homepageSettings.findFirst({
       where: { isActive: true },
       orderBy: { id: "asc" },
@@ -31,17 +29,53 @@ export default async function Home() {
     prisma.collection.findMany({
       where: { isActive: true, showOnHome: true },
       orderBy: [{ displayOrder: "asc" }, { id: "desc" }],
-      include: {
+      // Açık select: yeni eklenen SEO kolonları (metaTitle/metaDescription) anasayfa için gerekmez.
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        eyebrow: true,
+        description: true,
+        image: true,
+        video: true,
+        buttonText: true,
+        buttonLink: true,
+        discount: true,
         products: {
-          include: {
-            product: {
-              select: { id: true, name: true, slug: true, image: true, price: true, oldPrice: true, category: true, isActive: true },
-            },
-          },
+          where: { product: { isActive: true } },
+          select: { productId: true },
         },
       },
     }),
+    prisma.socialSettings
+      .findFirst({
+        where: { isActive: true },
+        orderBy: { id: "asc" },
+        select: {
+          instagramEnabled: true,
+          instagramUrl: true,
+          tiktokEnabled: true,
+          tiktokUrl: true,
+          youtubeEnabled: true,
+          youtubeUrl: true,
+          twitterEnabled: true,
+          twitterUrl: true,
+          facebookEnabled: true,
+          facebookUrl: true,
+        },
+      })
+      .catch(() => null),
   ])
+
+  const sameAs = social
+    ? [
+        social.instagramEnabled && social.instagramUrl,
+        social.tiktokEnabled && social.tiktokUrl,
+        social.youtubeEnabled && social.youtubeUrl,
+        social.twitterEnabled && social.twitterUrl,
+        social.facebookEnabled && social.facebookUrl,
+      ].filter((url): url is string => typeof url === "string" && /^https?:\/\//i.test(url.trim()))
+    : []
 
   const collections = rawCollections.map((col) => ({
     id: col.id,
@@ -54,13 +88,12 @@ export default async function Home() {
     buttonText: col.buttonText,
     buttonLink: col.buttonLink,
     discount: col.discount,
-    products: col.products
-      .filter((cp: { product: { isActive: boolean } }) => cp.product.isActive)
-      .map((cp: { product: { id: number } }) => ({ id: cp.product.id })),
+    products: col.products.map((cp) => ({ id: cp.productId })),
   }))
 
   return (
     <main className="min-h-screen bg-white text-black">
+      <JsonLd data={[organizationJsonLd(sameAs), websiteJsonLd()]} />
       <HeroSection initialSettings={settings} />
 
       {(settings?.collectionsEnabled ?? true) && collections.length > 0 && (

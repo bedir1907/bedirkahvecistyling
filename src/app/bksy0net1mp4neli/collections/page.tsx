@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import CloudinaryUploadButton from "@/components/admin/CloudinaryUploadButton"
+import SeoMetaFields from "@/components/admin/SeoMetaFields"
 
 type Product = {
   id: number
@@ -25,6 +26,8 @@ type Collection = {
   isActive: boolean
   showOnHome: boolean
   displayOrder: number
+  metaTitle?: string | null
+  metaDescription?: string | null
   products: { product: Product }[]
 }
 
@@ -41,6 +44,8 @@ type FormState = {
   isActive: boolean
   showOnHome: boolean
   displayOrder: string
+  metaTitle: string
+  metaDescription: string
   productIds: number[]
 }
 
@@ -48,7 +53,7 @@ const emptyForm: FormState = {
   name: "", slug: "", eyebrow: "", description: "", image: "", video: "",
   buttonText: "", buttonLink: "",
   discount: "", isActive: true, showOnHome: false,
-  displayOrder: "0", productIds: [],
+  displayOrder: "0", metaTitle: "", metaDescription: "", productIds: [],
 }
 
 function nameToSlug(name: string) {
@@ -154,8 +159,22 @@ function CollectionForm({ form, setForm, allProducts, saving, onSave, onCancel }
           <div className="sm:col-span-2">
             <label className={labelCls}>Açıklama</label>
             <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className={inputCls + " resize-none"} placeholder="Koleksiyon hakkında kısa bir açıklama..." />
+            <p className="text-xs text-gray-400 mt-1">Koleksiyon sayfasının başlığı altında gösterilir; meta açıklama boşsa arama sonuçlarında da kullanılır.</p>
           </div>
         </div>
+      </div>
+
+      {/* SEO */}
+      <div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">SEO</p>
+        <SeoMetaFields
+          values={form}
+          onChange={(field, value) => setForm(p => ({ ...p, [field]: value }))}
+          inputClassName={inputCls}
+          labelClassName="text-xs font-medium text-gray-600"
+          titlePlaceholder={form.name ? (/koleksiyon/i.test(form.name) ? form.name : `${form.name} Koleksiyonu`) : "Otomatik"}
+          descriptionPlaceholder={form.description || "Otomatik (açıklamadan oluşturulur)"}
+        />
       </div>
 
       {/* Buton */}
@@ -286,6 +305,8 @@ export default function AdminCollectionsPage() {
       discount: col.discount != null ? String(col.discount) : "",
       isActive: col.isActive, showOnHome: col.showOnHome,
       displayOrder: String(col.displayOrder),
+      metaTitle: col.metaTitle || "",
+      metaDescription: col.metaDescription || "",
       productIds: col.products.map(cp => cp.product.id),
     })
   }

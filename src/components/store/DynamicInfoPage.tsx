@@ -1,68 +1,45 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import AnnouncementBar from "@/components/store/AnnouncementBar"
 import StoreFooter from "@/components/store/StoreFooter"
+import { prisma } from "@/lib/prisma"
 
 type Props = {
   pageKey: string
 }
 
-type PageData = {
-  key: string
-  title: string
-  content: string
+// Sunucuda render edilir: başlık (h1) ve içerik ilk HTML'de gelir (arama motorları için).
+async function getPage(key: string) {
+  try {
+    return await prisma.sitePage.findUnique({
+      where: { key },
+      select: { title: true, content: true },
+    })
+  } catch (error) {
+    console.error("Site sayfası getirilemedi:", error)
+    return null
+  }
 }
 
-export default function DynamicInfoPage({ pageKey }: Props) {
-  const [page, setPage] = useState<PageData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchPage() {
-      try {
-        const res = await fetch(`/api/site-pages/${pageKey}`, {
-          cache: "no-store",
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || "Sayfa getirilemedi")
-        }
-
-        setPage(data)
-      } catch (error) {
-        console.error(error)
-        setPage(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPage()
-  }, [pageKey])
+export default async function DynamicInfoPage({ pageKey }: Props) {
+  const page = await getPage(pageKey)
 
   return (
     <main className="min-h-screen bg-white text-black">
       <AnnouncementBar />
 
       <section className="max-w-4xl mx-auto px-4 py-10">
-        <div className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
+        <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
           <Link href="/" className="hover:text-black transition">
             Anasayfa
           </Link>
           <span>/</span>
-          <span className="text-black">
-            {loading ? "Yükleniyor..." : page?.title || "Sayfa"}
+          <span className="text-black" aria-current="page">
+            {page?.title || "Sayfa"}
           </span>
-        </div>
+        </nav>
 
         <div className="border border-black/10 bg-[#fcfcfb] px-6 py-8 md:px-10 md:py-10">
-          {loading ? (
-            <p className="text-gray-500">İçerik yükleniyor...</p>
-          ) : !page ? (
+          {!page ? (
             <p className="text-gray-500">Sayfa içeriği bulunamadı.</p>
           ) : (
             <>

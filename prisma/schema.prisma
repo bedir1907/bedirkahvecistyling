@@ -36,6 +36,9 @@ model Product {
   isActive     Boolean  @default(true)
   displayOrder Int      @default(0)
 
+  metaTitle       String?
+  metaDescription String?
+
   images          ProductImage[]
   colorGroups     ProductColorGroup[]
   productVariants ProductVariant[]
@@ -63,6 +66,9 @@ model Collection {
   isActive     Boolean  @default(true)
   showOnHome   Boolean  @default(false)
   displayOrder Int      @default(0)
+
+  metaTitle       String?
+  metaDescription String?
 
   products  CollectionProduct[]
 
@@ -163,6 +169,11 @@ model Category {
   isFeatured   Boolean @default(false)
   isActive     Boolean @default(true)
   displayOrder Int     @default(0)
+
+  description     String?
+  heading         String?
+  metaTitle       String?
+  metaDescription String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import ProductSpotlightSlider from "@/components/store/ProductSpotlightSlider"
 import Link from "next/link"
+import { productPath } from "@/lib/product-url"
 
 type Props = {
   title: string
@@ -22,6 +23,7 @@ export default async function ProductSpotlight({ title, viewAllHref, featured, i
     take: 12,
     select: {
       id: true,
+      slug: true,
       name: true,
       price: true,
       oldPrice: true,
@@ -44,7 +46,7 @@ export default async function ProductSpotlight({ title, viewAllHref, featured, i
     oldPrice: p.oldPrice ? Number(p.oldPrice) : null,
     image: p.images[0]?.url || p.image,
     category: p.category,
-    href: `/product/${p.id}`,
+    href: productPath(p.slug, p.id),
   }))
 
   return (
