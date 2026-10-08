@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
-import { refundPayment } from "@/lib/iyzico"
+import { refundOrderFully } from "@/lib/iyzico-refund"
+import { isPaidStatus } from "@/lib/order-stock"
 import { getClientIp } from "@/lib/rate-limit"
 import { sendShippedEmail } from "@/lib/customer-email"
 import { getCargoCompany } from "@/lib/cargo-companies"
@@ -189,30 +190,23 @@ export async function PATCH(request: Request, context: Context) {
       }
     }
 
-    // PAID sipariş CANCELLED yapılıyorsa otomatik refund dene
-    if (nextStatus === "CANCELLED" && order.status === "PAID") {
-      if (!order.paymentTransactionId) {
-        return NextResponse.json(
-          { error: "İade için paymentTransactionId bulunamadı" },
-          { status: 400 }
-        )
-      }
-
-      const refundResult = await refundPayment({
-        locale: "tr",
-        conversationId: `refund_${order.orderNumber}`,
-        paymentTransactionId: order.paymentTransactionId,
-        price: String(order.totalPrice),
-        currency: "TRY",
+    // Ödenmiş sipariş iptal/iade ediliyorsa: önce iyzico'dan tam iade, sonra stok tek seferlik
+    // geri yüklenir (APPROVED/SHIPPED/DELIVERED dahil — önceden sadece PAID için iade yapılıyordu).
+    if (
+      (nextStatus === "CANCELLED" || nextStatus === "REFUNDED") &&
+      isPaidStatus(order.status)
+    ) {
+      const outcome = await refundOrderFully({
+        orderId,
         ip: getClientIp(request),
+        targetStatus: nextStatus,
       })
 
-      if (refundResult.status !== "success") {
-        return NextResponse.json(
-          { error: refundResult.errorMessage || "İade başarısız" },
-          { status: 400 }
-        )
+      if (!outcome.ok) {
+        return NextResponse.json({ error: outcome.error }, { status: outcome.httpStatus })
       }
+
+      return NextResponse.json(outcome.order)
     }
 
     const updatedOrder = await prisma.$transaction(async (tx) => {
@@ -229,55 +223,30 @@ export async function PATCH(request: Request, context: Context) {
         })
       }
 
-      if (nextStatus === "CANCELLED" && !order.stockRestored) {
-        for (const item of order.items) {
-          const variant = await tx.productVariant.findFirst({
-            where: {
-              productId: item.productId,
-              size: item.size || undefined,
-            },
-            select: {
-              id: true,
-            },
-          })
+      // Ödenmiş siparişlerin iptali yukarıda iade akışında ele alınır. PENDING bir siparişin
+      // iptalinde stok hiç düşülmediği için geri yükleme yapılmaz (önceden yanlışlıkla artırılıyordu).
+      // Koşullu güncelleme: bu arada ödeme tamamlanıp sipariş PAID olduysa üzerine yazılmaz.
+      const changed = await tx.order.updateMany({
+        where: { id: orderId, status: order.status },
+        data: { status: nextStatus },
+      })
 
-          if (variant) {
-            await tx.productVariant.update({
-              where: { id: variant.id },
-              data: {
-                stock: {
-                  increment: item.quantity,
-                },
-              },
-            })
-          }
-        }
-
-        return await tx.order.update({
-          where: { id: orderId },
-          data: {
-            status: nextStatus,
-            stockRestored: true,
-            refundedAt: order.status === "PAID" ? new Date() : order.refundedAt,
-            refundAmount:
-              order.status === "PAID" ? order.totalPrice : order.refundAmount,
-          },
-          include: {
-            items: true,
-          },
-        })
+      if (changed.count === 0) {
+        return null
       }
 
-      return await tx.order.update({
+      return await tx.order.findUnique({
         where: { id: orderId },
-        data: {
-          status: nextStatus,
-        },
-        include: {
-          items: true,
-        },
+        include: { items: true },
       })
     })
+
+    if (!updatedOrder) {
+      return NextResponse.json(
+        { error: "Sipariş bu sırada güncellendi, sayfayı yenileyip tekrar deneyin" },
+        { status: 409 }
+      )
+    }
 
     if (nextStatus === "SHIPPED") {
       const company = getCargoCompany(cargoCompany)!
@@ -298,9 +267,8 @@ export async function PATCH(request: Request, context: Context) {
     return NextResponse.json(updatedOrder)
   } catch (error) {
     console.error("Admin sipariş güncelleme hatası:", error)
-    const message = error instanceof Error ? error.message : "Sipariş güncellenemedi"
     return NextResponse.json(
-      { error: message },
+      { error: "Sipariş güncellenemedi" },
       { status: 500 }
     )
   }

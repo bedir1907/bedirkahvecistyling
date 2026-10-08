@@ -4,15 +4,28 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
 function getErrorMessage(reason: string | null): string {
+  // reason değerleri /api/payment/iyzico/callback'ten gelir (verifyOrderPayment state'leri)
   switch (reason) {
+    case "FAILED":
     case "FAILURE":
       return "Ödeme işlemi başarısız oldu. Kart bilgilerinizi kontrol edip tekrar deneyin."
+    case "PENDING":
+      return "Ödeme tamamlanmadı. Kartınızdan çekim yapıldıysa sipariş durumunuz kısa süre içinde güncellenecektir; aksi halde tekrar deneyebilirsiniz."
+    case "REVIEW":
+      return "Ödemeniz güvenlik incelemesinde. Onaylandığında siparişiniz işleme alınacak ve size e-posta ile bilgi verilecek."
+    case "MISMATCH":
+      return "Ödeme bilgileri siparişle eşleşmedi. Lütfen tekrar ödeme yapmadan önce bizimle iletişime geçin."
+    case "NOT_FOUND":
+    case "NO_TOKEN":
     case "no-token":
       return "Geçersiz ödeme oturumu. Lütfen checkout sayfasına dönüp tekrar deneyin."
-    case "callback-error":
-      return "Ödeme doğrulanırken bir hata oluştu. Sipariş durumunuzu kontrol edin veya bize ulaşın."
+    case "CANCELLED":
     case "CANCEL":
-      return "Ödeme iptal edildi. İstediğiniz zaman tekrar deneyebilirsiniz."
+      return "Bu sipariş iptal edilmiş. İstediğiniz zaman yeni bir sipariş oluşturabilirsiniz."
+    case "REFUNDED":
+      return "Bu sipariş iade edilmiş."
+    case "callback-error":
+      return "Ödeme doğrulanırken bir hata oluştu. Kartınızdan çekim yapıldıysa tekrar ödeme yapmadan önce sipariş durumunuzu kontrol edin veya bize ulaşın."
     case "ERROR":
       return "Ödeme sisteminde bir hata oluştu. Lütfen birkaç dakika sonra tekrar deneyin."
     default:

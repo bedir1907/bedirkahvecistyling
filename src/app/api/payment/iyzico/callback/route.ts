@@ -1,79 +1,65 @@
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
-import { prisma } from "@/lib/prisma"
-import { sendOrderEmail } from "@/lib/customer-email"
 import { getTrustedBaseUrl } from "@/lib/base-url"
+
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
-// Iyzico POST ile yönlendirdiği için 302 redirect 405 hatasına yol açıyor.
-// Bunun yerine HTML döndürüp browser'ın GET ile gitmesini sağlıyoruz.
-function htmlRedirect(url: string): Response {
-  const html = `<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=${url}">
-  <title>Yönlendiriliyor...</title>
-  <script>
-    try { window.location.replace(${JSON.stringify(url)}) } catch(e) {}
-  </script>
-</head>
-<body>
-  <p>Yönlendiriliyor, lütfen bekleyin...</p>
-  <a href="${url}">Tıkla</a>
-</body>
-</html>`
-
-  return new Response(html, {
-    status: 200,
-    headers: { "Content-Type": "text/html; charset=utf-8" },
+// iyzico ödeme sonrası tarayıcıyı callbackUrl'e form POST (x-www-form-urlencoded, `token`) ile gönderir.
+// 303 See Other tarayıcının hedef sayfaya GET ile gitmesini garanti eder (307/308 POST'u korur → 405).
+function redirectTo(url: string) {
+  return new Response(null, {
+    status: 303,
+    headers: { Location: url, "Cache-Control": "no-store" },
   })
 }
 
-export async function POST(request: Request) {
+async function handleToken(token: string) {
   const baseUrl = getTrustedBaseUrl()
 
+  if (!token) {
+    return redirectTo(`${baseUrl}/checkout/fail?reason=no-token`)
+  }
+
   try {
-    const formData = await request.formData()
-    const token = String(formData.get("token") || "").trim()
-
-    if (!token) {
-      return htmlRedirect(`${baseUrl}/checkout/fail?reason=no-token`)
-    }
-
+    // Token yalnızca anahtar olarak kullanılır; ödeme sonucu iyzico'dan tekrar sorgulanır.
     const verification = await verifyOrderPayment({ token })
 
     if (verification.state === "PAID") {
-      if (verification.justPaidNow) {
-        const order = await prisma.order.findFirst({
-          where: { orderNumber: verification.orderNumber },
-          include: { items: true },
-        })
-
-        if (order) {
-          try {
-            await sendOrderEmail({
-              to: order.email,
-              name: order.name,
-              orderNumber: order.orderNumber,
-              total: order.totalPrice,
-              items: order.items,
-            })
-          } catch (mailError) {
-            console.error("Sipariş maili gönderilemedi:", mailError)
-          }
-        }
-      }
-
-      return htmlRedirect(
+      return redirectTo(
         `${baseUrl}/checkout/success?orderNumber=${encodeURIComponent(verification.orderNumber || "")}`
       )
     }
 
-    return htmlRedirect(
+    return redirectTo(
       `${baseUrl}/checkout/fail?orderNumber=${encodeURIComponent(verification.orderNumber || "")}&reason=${encodeURIComponent(verification.state)}`
     )
   } catch (error) {
     console.error("Iyzico callback hatası:", error)
-    return htmlRedirect(`${baseUrl}/checkout/fail?reason=callback-error`)
+    return redirectTo(`${baseUrl}/checkout/fail?reason=callback-error`)
   }
+}
+
+export async function POST(request: Request) {
+  let token = ""
+
+  try {
+    const contentType = request.headers.get("content-type") || ""
+
+    if (contentType.includes("application/json")) {
+      const body = await request.json()
+      token = String(body?.token || "").trim()
+    } else {
+      const formData = await request.formData()
+      token = String(formData.get("token") || "").trim()
+    }
+  } catch (error) {
+    console.error("Iyzico callback body okunamadı:", error)
+  }
+
+  return handleToken(token)
+}
+
+export async function GET(request: Request) {
+  const token = new URL(request.url).searchParams.get("token")?.trim() || ""
+  return handleToken(token)
 }

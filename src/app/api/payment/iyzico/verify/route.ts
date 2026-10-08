@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
+
 export const runtime = "nodejs"
+
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
@@ -17,9 +19,9 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
 
-    const token = typeof body.token === "string" ? body.token.trim() : ""
+    const token = typeof body?.token === "string" ? body.token.trim() : ""
 
     if (!token) {
       return NextResponse.json(
@@ -32,12 +34,18 @@ export async function POST(request: Request) {
       token,
     })
 
-    return NextResponse.json(verification)
-  } catch (error: any) {
+    // Sadece müşteriye gerekli alanlar döndürülür (iç id'ler değil).
+    return NextResponse.json({
+      ok: verification.ok,
+      state: verification.state,
+      orderNumber: verification.orderNumber,
+      message: verification.message,
+    })
+  } catch (error) {
     console.error("Iyzico verify hatası:", error)
 
     return NextResponse.json(
-      { error: error.message || "Ödeme doğrulanamadı" },
+      { error: "Ödeme doğrulanamadı" },
       { status: 500 }
     )
   }

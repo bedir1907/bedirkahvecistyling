@@ -12,15 +12,18 @@ export default function CheckoutSuccessClient() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    // Sepeti temizle
-    clearCart()
-    // localStorage'ı temizle
-    try {
-      localStorage.removeItem("pendingOrderNumber")
-    } catch {}
+    // Bu sayfaya yalnızca callback, ödeme iyzico'dan doğrulandıktan (PAID) sonra
+    // orderNumber ile yönlendirir. Parametresiz ziyarette sepet silinmez.
+    if (orderNumber) {
+      clearCart()
+      try {
+        localStorage.removeItem("pendingOrderNumber")
+      } catch {}
+    }
     // Animasyon için kısa gecikme
-    setTimeout(() => setShow(true), 100)
-  }, [clearCart])
+    const timer = setTimeout(() => setShow(true), 100)
+    return () => clearTimeout(timer)
+  }, [clearCart, orderNumber])
 
   return (
     <main className="min-h-screen bg-[#fafaf8] text-black flex items-center justify-center px-4 py-16">

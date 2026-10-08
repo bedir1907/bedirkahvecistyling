@@ -1,15 +1,26 @@
 import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
-import { initializeCheckoutForm } from "@/lib/iyzico"
+import { formatIyzicoPrice, initializeCheckoutForm } from "@/lib/iyzico"
 import { getCustomerUserFromCookie } from "@/lib/customer-auth"
 import { getTrustedBaseUrl } from "@/lib/base-url"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 
-function normalizeString(value: unknown) {
-  return String(value || "").trim()
+function normalizeString(value: unknown, maxLength = 500) {
+  return String(value || "").trim().slice(0, maxLength)
+}
+
+const MAX_QUANTITY_PER_LINE = 20
+const MAX_CART_LINES = 50
+
+function splitName(fullName: string) {
+  const parts = fullName.split(/\s+/).filter(Boolean)
+  if (parts.length <= 1) {
+    return { first: fullName, last: fullName }
+  }
+  return { first: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] }
 }
 
 function generateOrderNumber() {
@@ -22,7 +33,6 @@ type CartItem = {
   name: string
   color?: string | null
   size?: string | null
-  price: number
   quantity: number
 }
 
@@ -51,26 +61,31 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 })
+    }
+
     const baseUrl = getTrustedBaseUrl()
     const customer = await getCustomerUserFromCookie()
     const addressId = Number(body.addressId)
     const billingSameAsShipping = Boolean(body.billingSameAsShipping)
 
-    let name = normalizeString(body.name)
-    let email = normalizeString(body.email).toLowerCase()
-    let phone = normalizeString(body.phone)
-    let city = normalizeString(body.city)
-    let district = normalizeString(body.district)
-    let address = normalizeString(body.address)
-    let note = normalizeString(body.note)
+    let name = normalizeString(body.name, 100)
+    let email = normalizeString(body.email, 150).toLowerCase()
+    let phone = normalizeString(body.phone, 30)
+    let city = normalizeString(body.city, 60)
+    let district = normalizeString(body.district, 60)
+    let address = normalizeString(body.address, 400)
+    let note = normalizeString(body.note, 500)
 
-    let billingName = normalizeString(body.billingName)
-    let billingPhone = normalizeString(body.billingPhone)
-    let billingCity = normalizeString(body.billingCity)
-    let billingDistrict = normalizeString(body.billingDistrict)
-    let billingAddress = normalizeString(body.billingAddress)
-    let billingNote = normalizeString(body.billingNote)
+    let billingName = normalizeString(body.billingName, 100)
+    let billingPhone = normalizeString(body.billingPhone, 30)
+    let billingCity = normalizeString(body.billingCity, 60)
+    let billingDistrict = normalizeString(body.billingDistrict, 60)
+    let billingAddress = normalizeString(body.billingAddress, 400)
+    let billingNote = normalizeString(body.billingNote, 500)
 
     const cart = Array.isArray(body.cart) ? body.cart : []
 
@@ -113,6 +128,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Eksik bilgi var" }, { status: 400 })
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Geçersiz e-posta adresi" }, { status: 400 })
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10)
+
+    if (cleanPhone.length < 10) {
+      return NextResponse.json(
+        { error: "Geçersiz telefon numarası" },
+        { status: 400 }
+      )
+    }
+
     if (billingSameAsShipping) {
       billingName = name
       billingPhone = phone
@@ -140,15 +168,56 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sepet boş" }, { status: 400 })
     }
 
-    const normalizedCart: CartItem[] = cart.map((item: Record<string, unknown>) => ({
-      productId: Number(item.productId),
-      variantId: Number(item.variantId),
-      name: normalizeString(item.name),
-      color: normalizeString(item.color) || null,
-      size: normalizeString(item.size) || null,
-      price: Number(item.price),
-      quantity: Number(item.quantity),
-    }))
+    if (cart.length > MAX_CART_LINES) {
+      return NextResponse.json({ error: "Sepette çok fazla ürün var" }, { status: 400 })
+    }
+
+    // Client'tan yalnızca ürün/varyant id ve adet kullanılır; fiyat DB'den okunur.
+    // Aynı varyant birden fazla satırda gelirse adetler birleştirilir.
+    const mergedCart = new Map<number, CartItem>()
+
+    for (const raw of cart as Array<Record<string, unknown>>) {
+      const item: CartItem = {
+        productId: Number(raw?.productId),
+        variantId: Number(raw?.variantId),
+        name: normalizeString(raw?.name, 150) || "Ürün",
+        color: normalizeString(raw?.color, 60) || null,
+        size: normalizeString(raw?.size, 30) || null,
+        quantity: Number(raw?.quantity),
+      }
+
+      if (
+        !Number.isInteger(item.productId) || item.productId <= 0 ||
+        !Number.isInteger(item.variantId) || item.variantId <= 0
+      ) {
+        return NextResponse.json({ error: "Sepette geçersiz ürün var" }, { status: 400 })
+      }
+
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        return NextResponse.json(
+          { error: `${item.name} için geçersiz adet` },
+          { status: 400 }
+        )
+      }
+
+      const existing = mergedCart.get(item.variantId)
+      if (existing) {
+        existing.quantity += item.quantity
+      } else {
+        mergedCart.set(item.variantId, item)
+      }
+    }
+
+    const normalizedCart = [...mergedCart.values()]
+
+    for (const item of normalizedCart) {
+      if (item.quantity > MAX_QUANTITY_PER_LINE) {
+        return NextResponse.json(
+          { error: `${item.name} için en fazla ${MAX_QUANTITY_PER_LINE} adet sipariş verilebilir` },
+          { status: 400 }
+        )
+      }
+    }
 
     const validatedItems: Array<{
       productId: number
@@ -160,27 +229,28 @@ export async function POST(request: Request) {
       quantity: number
     }> = []
 
-    let totalPrice = 0
-
-    for (const item of normalizedCart) {
-      const variant = await prisma.productVariant.findUnique({
-        where: { id: item.variantId },
-        select: {
-          id: true,
-          productId: true,
-          size: true,
-          stock: true,
-          product: {
-            select: {
-              id: true,
-              name: true,
-              price: true,
-              color: true,
-              isActive: true,
-            },
+    const variants = await prisma.productVariant.findMany({
+      where: { id: { in: normalizedCart.map((item) => item.variantId) } },
+      select: {
+        id: true,
+        productId: true,
+        size: true,
+        stock: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            color: true,
+            isActive: true,
           },
         },
-      })
+      },
+    })
+    const variantMap = new Map(variants.map((variant) => [variant.id, variant]))
+
+    for (const item of normalizedCart) {
+      const variant = variantMap.get(item.variantId)
 
       if (!variant || !variant.product || !variant.product.isActive) {
         return NextResponse.json(
@@ -204,7 +274,13 @@ export async function POST(request: Request) {
       }
 
       const unitPrice = Number(variant.product.price)
-      totalPrice += unitPrice * item.quantity
+
+      if (!Number.isInteger(unitPrice) || unitPrice <= 0) {
+        return NextResponse.json(
+          { error: `${item.name} şu anda satın alınamıyor` },
+          { status: 400 }
+        )
+      }
 
       validatedItems.push({
         productId: variant.product.id,
@@ -243,12 +319,17 @@ export async function POST(request: Request) {
       }
     }
 
-    let discountAmount = 0
-    for (const item of validatedItems) {
-      const d = productDiscountMap.get(item.productId) ?? 0
-      if (d > 0) discountAmount += Math.round(item.price * item.quantity * d / 100)
+    // Satır bazında indirimli tutar (TL, tam sayı). iyzico sepet kalemleri bu tutarlarla
+    // gönderilir; böylece price == sum(basketItems.price) == paidPrice olur ve
+    // iade tutarları doğru dağılır. Hesap checkout sayfasıyla birebir aynıdır.
+    const lineTotalFor = (item: { productId: number; price: number; quantity: number }) => {
+      const rawDiscount = productDiscountMap.get(item.productId) ?? 0
+      const d = Math.min(100, Math.max(0, rawDiscount))
+      const gross = item.price * item.quantity
+      const discount = d > 0 ? Math.round(gross * d / 100) : 0
+      return gross - discount
     }
-    const discountedPrice = totalPrice - discountAmount
+    const discountedPrice = validatedItems.reduce((sum, item) => sum + lineTotalFor(item), 0)
 
     // Kargo maliyetini server-side hesapla (indirim sonrası tutar üzerinden)
     const shippingFee = shippingSettings?.fee ?? 0
@@ -258,8 +339,16 @@ export async function POST(request: Request) {
       : 0
     const grandTotal = discountedPrice + shippingCost
 
-    const conversationId = `conv_${Date.now()}`
+    if (discountedPrice <= 0 || grandTotal <= 0) {
+      return NextResponse.json(
+        { error: "Sipariş tutarı geçersiz" },
+        { status: 400 }
+      )
+    }
+
     const orderNumber = generateOrderNumber()
+    // Benzersiz conversationId (aynı milisaniyede gelen siparişler çakışmasın)
+    const conversationId = orderNumber
 
     const order = await prisma.order.create({
       data: {
@@ -304,52 +393,51 @@ export async function POST(request: Request) {
 
     const callbackUrl = `${baseUrl}/api/payment/iyzico/callback`
 
+    // iyzico 0 TL'lik kalem kabul etmez → %100 indirimli satırlar sepete eklenmez.
     const basketItems = [
-      ...order.items.map((item) => ({
-        id: String(item.productId),
-        name: item.productName,
-        category1: "Genel",
-        itemType: "PHYSICAL",
-        price: String(item.price * item.quantity),
-      })),
+      ...order.items
+        .map((item) => ({
+          id: `${item.productId}-${item.id}`,
+          name: `${item.productName}${item.size ? ` (${item.size})` : ""}`.slice(0, 200),
+          category1: "Giyim",
+          itemType: "PHYSICAL",
+          amount: lineTotalFor(item),
+        }))
+        .filter((item) => item.amount > 0)
+        .map(({ amount, ...item }) => ({ ...item, price: formatIyzicoPrice(amount) })),
       ...(shippingCost > 0 ? [{
         id: "shipping",
         name: "Kargo Ücreti",
         category1: "Kargo",
         itemType: "PHYSICAL",
-        price: String(shippingCost),
+        price: formatIyzicoPrice(shippingCost),
       }] : []),
     ]
 
-    const forwardedFor =
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("x-real-ip") ||
-      ""
-    const buyerIp = forwardedFor.split(",")[0]?.trim() || "127.0.0.1"
-
-    const cleanPhone = phone.replace(/\D/g, "").slice(-10)
-
-    if (cleanPhone.length < 10) {
-      return NextResponse.json(
-        { error: "Geçersiz telefon numarası" },
-        { status: 400 }
-      )
+    // iyzico kuralı: price == sum(basketItems.price)
+    const basketSum = basketItems.reduce((sum, item) => sum + Number(item.price), 0)
+    if (Math.abs(basketSum - grandTotal) > 0.001) {
+      throw new Error(`Sepet toplamı uyuşmuyor (${basketSum} != ${grandTotal})`)
     }
+
+    const clientIp = getClientIp(request)
+    const buyerIp = clientIp === "unknown" ? "127.0.0.1" : clientIp
+    const buyerName = splitName(name)
 
     const initializeRequest = {
       locale: "tr",
       conversationId,
-      price: String(totalPrice + shippingCost),
-      paidPrice: String(grandTotal),
+      price: formatIyzicoPrice(grandTotal),
+      paidPrice: formatIyzicoPrice(grandTotal),
       currency: "TRY",
       basketId: order.orderNumber,
       paymentGroup: "PRODUCT",
       callbackUrl,
       enabledInstallments: [1, 2, 3, 6, 9],
       buyer: {
-        id: String(order.id),
-        name,
-        surname: name.split(" ").slice(1).join(" ") || name,
+        id: customer ? `C${customer.id}` : `G${order.id}`,
+        name: buyerName.first,
+        surname: buyerName.last,
         gsmNumber: "+90" + cleanPhone,
         email,
         identityNumber: "11111111111",
@@ -378,7 +466,12 @@ export async function POST(request: Request) {
       basketItems,
     }
 
-   const result = await initializeCheckoutForm(initializeRequest)
+    let result: Awaited<ReturnType<typeof initializeCheckoutForm>> | null = null
+    try {
+      result = await initializeCheckoutForm(initializeRequest)
+    } catch (initError) {
+      console.error("Iyzico initialize isteği başarısız:", initError)
+    }
 
     if (
       !result ||
@@ -386,8 +479,20 @@ export async function POST(request: Request) {
       !result.paymentPageUrl ||
       !result.token
     ) {
+      console.error("Iyzico initialize reddedildi:", {
+        orderNumber,
+        errorCode: result?.errorCode,
+        errorMessage: result?.errorMessage,
+      })
+
+      // Ödeme hiç başlamadı → sipariş "beklemede" kalmasın
+      await prisma.order.updateMany({
+        where: { id: order.id, status: "PENDING" },
+        data: { status: "FAILED" },
+      })
+
       return NextResponse.json(
-        { error: result?.errorMessage || "Ödeme başlatılamadı" },
+        { error: result?.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin." },
         { status: 400 }
       )
     }
@@ -408,7 +513,9 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error("Iyzico initialize hatası:", error)
-    const message = error instanceof Error ? error.message : "Ödeme başlatılamadı"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(
+      { error: "Ödeme başlatılamadı. Lütfen tekrar deneyin." },
+      { status: 500 }
+    )
   }
 }

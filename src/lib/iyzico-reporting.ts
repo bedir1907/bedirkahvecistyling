@@ -1,4 +1,4 @@
-import crypto from "crypto"
+import { createIyzicoAuthorization, getIyzicoConfig } from "@/lib/iyzico"
 
 type IyzicoReportingPayment = {
   paymentId?: number | string
@@ -17,43 +17,6 @@ type IyzicoReportingPayment = {
       refundStatus?: number
     }>
   }>
-}
-
-function getIyzicoApiBaseUrl() {
-  const raw =
-    process.env.IYZICO_BASE_URL ||
-    process.env.IYZIPAY_BASE_URL ||
-    "https://sandbox-api.iyzipay.com"
-
-  return raw.replace(/\/$/, "")
-}
-
-function buildIyzicoAuthHeader(uriPath: string, body = "") {
-  const apiKey = process.env.IYZICO_API_KEY
-  const secretKey = process.env.IYZICO_SECRET_KEY
-
-  if (!apiKey || !secretKey) {
-    throw new Error("IYZICO_API_KEY veya IYZICO_SECRET_KEY eksik")
-  }
-
-  const randomKey = `${Date.now()}${Math.floor(Math.random() * 100000)}`
-  const payload = `${randomKey}${uriPath}${body}`
-
-  const signature = crypto
-    .createHmac("sha256", secretKey)
-    .update(payload)
-    .digest("hex")
-
-  const authorizationString =
-    `apiKey:${apiKey}&randomKey:${randomKey}&signature:${signature}`
-
-  const authorization =
-    `IYZWSv2 ${Buffer.from(authorizationString).toString("base64")}`
-
-  return {
-    authorization,
-    randomKey,
-  }
 }
 
 export async function getIyzicoPaymentDetails(params: {
@@ -87,8 +50,9 @@ export async function getIyzicoPaymentDetails(params: {
     query.set("paymentConversationId", paymentConversationId)
   }
 
-  const { authorization, randomKey } = buildIyzicoAuthHeader(uriPath, "")
-  const baseUrl = getIyzicoApiBaseUrl()
+  // GET isteklerinde imza: randomKey + path (query string hariç) + boş body
+  const { authorization, randomKey } = createIyzicoAuthorization(uriPath, "")
+  const { baseUrl } = getIyzicoConfig()
 
   const res = await fetch(`${baseUrl}${uriPath}?${query.toString()}`, {
     method: "GET",
@@ -100,7 +64,7 @@ export async function getIyzicoPaymentDetails(params: {
     cache: "no-store",
   })
 
-  const data = await res.json()
+  const data = await res.json().catch(() => null)
 
   if (!res.ok || data?.status !== "success") {
     throw new Error(data?.errorMessage || "iyzico reporting sorgusu başarısız")

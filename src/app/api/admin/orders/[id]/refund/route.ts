@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
 import { getAdminUserFromCookie } from "@/lib/get-admin-user"
-import { refundPayment } from "@/lib/iyzico"
+import { refundOrderFully } from "@/lib/iyzico-refund"
 import { getClientIp } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
@@ -20,89 +19,29 @@ export async function POST(
     const { id } = await context.params
     const orderId = Number(id)
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: { items: true },
-    })
-
-    if (!order) {
-      return NextResponse.json({ error: "Sipariş bulunamadı" }, { status: 404 })
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return NextResponse.json({ error: "Geçersiz sipariş id" }, { status: 400 })
     }
 
-    if (!["PAID", "APPROVED", "SHIPPED", "DELIVERED"].includes(order.status)) {
-      return NextResponse.json(
-        { error: "Bu sipariş durumu için iade yapılamaz" },
-        { status: 400 }
-      )
-    }
-
-    if (!order.paymentTransactionId) {
-      return NextResponse.json(
-        { error: "İade için paymentTransactionId bulunamadı" },
-        { status: 400 }
-      )
-    }
-
-    const result = await refundPayment({
-      locale: "tr",
-      conversationId: `refund_${order.orderNumber}`,
-      paymentTransactionId: order.paymentTransactionId,
-      price: String(order.totalPrice),
-      currency: "TRY",
+    const outcome = await refundOrderFully({
+      orderId,
       ip: getClientIp(request),
+      targetStatus: "REFUNDED",
     })
 
-    if (result.status !== "success") {
-      return NextResponse.json(
-        { error: result.errorMessage || "İade başarısız" },
-        { status: 400 }
-      )
+    if (!outcome.ok) {
+      return NextResponse.json({ error: outcome.error }, { status: outcome.httpStatus })
     }
-
-    const updatedOrder = await prisma.$transaction(async (tx) => {
-      for (const item of order.items) {
-        const variant = await tx.productVariant.findFirst({
-          where: {
-            productId: item.productId,
-            size: item.size || undefined,
-          },
-          select: {
-            id: true,
-          },
-        })
-
-        if (variant) {
-          await tx.productVariant.update({
-            where: { id: variant.id },
-            data: {
-              stock: {
-                increment: item.quantity,
-              },
-            },
-          })
-        }
-      }
-
-      return await tx.order.update({
-        where: { id: order.id },
-        data: {
-          status: "REFUNDED",
-          refundedAt: new Date(),
-          refundAmount: order.totalPrice,
-          stockRestored: true,
-        },
-      })
-    })
 
     return NextResponse.json({
       success: true,
-      order: updatedOrder,
+      order: outcome.order,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Refund hatası:", error)
 
     return NextResponse.json(
-      { error: error.message || "İade yapılamadı" },
+      { error: "İade yapılamadı" },
       { status: 500 }
     )
   }

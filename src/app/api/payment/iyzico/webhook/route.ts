@@ -3,19 +3,22 @@ import { prisma } from "@/lib/prisma"
 import { verifyIyzicoWebhookSignature } from "@/lib/iyzico-webhook"
 import { verifyOrderPayment } from "@/lib/iyzico-payment"
 import { syncOrderRefundFromIyzico } from "@/lib/sync-order-refund"
-import { sendOrderEmail } from "@/lib/customer-email"
+import { isPaidStatus } from "@/lib/order-stock"
+
 export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 export async function POST(request: Request) {
   try {
-    const signature =
-      request.headers.get("x-iyz-signature-v3") ||
-      request.headers.get("X-IYZ-SIGNATURE-V3")
+    const signature = request.headers.get("x-iyz-signature-v3")
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
 
-    const isValid = verifyIyzicoWebhookSignature(body, signature)
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 })
+    }
 
-    if (!isValid) {
+    if (!verifyIyzicoWebhookSignature(body, signature)) {
       return NextResponse.json(
         { error: "Geçersiz webhook imzası" },
         { status: 401 }
@@ -25,74 +28,44 @@ export async function POST(request: Request) {
     const paymentConversationId = String(
       body.paymentConversationId || body.paymentConversationID || ""
     ).trim()
-
     const token = String(body.token || "").trim()
     const iyziPaymentId = String(body.iyziPaymentId || body.paymentId || "").trim()
-    const status = String(body.status || "").trim().toUpperCase()
 
-    const order = await prisma.order.findFirst({
-      where: paymentConversationId
+    const where = token
+      ? { paymentToken: token }
+      : paymentConversationId
         ? { paymentConversationId }
         : iyziPaymentId
           ? { paymentId: iyziPaymentId }
-          : token
-            ? { paymentToken: token }
-            : undefined,
-      include: { items: true },
-    })
+          : null
+
+    if (!where) {
+      return NextResponse.json({ ok: true, ignored: true })
+    }
+
+    const order = await prisma.order.findFirst({ where })
 
     if (!order) {
       return NextResponse.json({ ok: true, ignored: true })
     }
 
-    if (status === "SUCCESS") {
-      const verification = await verifyOrderPayment({
-        orderNumber: order.orderNumber,
-      })
-
-      if (verification.state === "PAID" && verification.justPaidNow) {
-        try {
-          await sendOrderEmail({
-            to: order.email,
-            name: order.name,
-            orderNumber: order.orderNumber,
-            total: order.totalPrice,
-            items: order.items,
-          })
-        } catch (mailError) {
-          console.error("Webhook sipariş maili gönderilemedi:", mailError)
-        }
+    // Webhook'taki status bilgisine güvenilmez: iyzico'dan token ile tekrar sorgulanır.
+    // verifyOrderPayment idempotent'tir (stok/mail yalnızca bir kez).
+    if (order.status === "PENDING" || order.status === "FAILED") {
+      await verifyOrderPayment({ orderNumber: order.orderNumber })
+    } else if (isPaidStatus(order.status)) {
+      try {
+        await syncOrderRefundFromIyzico(order.id)
+      } catch (syncError) {
+        console.error("Webhook refund sync hatası:", syncError)
       }
-    }
-
-    if (status === "FAILURE") {
-      const fresh = await prisma.order.findUnique({
-        where: { id: order.id },
-      })
-
-      if (fresh && fresh.status === "PENDING") {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            status: "FAILED",
-          },
-        })
-      }
-    }
-
-    try {
-      await syncOrderRefundFromIyzico(order.id)
-    } catch (syncError) {
-      console.error("Webhook refund sync hatası:", syncError)
     }
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Iyzico webhook hatası:", error)
 
-    return NextResponse.json(
-      { error: error.message || "Webhook işlenemedi" },
-      { status: 500 }
-    )
+    // 5xx → iyzico webhook'u tekrar dener.
+    return NextResponse.json({ error: "Webhook işlenemedi" }, { status: 500 })
   }
 }
